@@ -32,6 +32,7 @@ variables:
  GIT_DEPTH: 0
  # Also needs: privileged: true, volumes = ["/certs/client", "/cache"] in /etc/gitlab-runner/config.toml
  DOCKER_TLS_CERTDIR: "/certs"
+ GIT_SUBMODULE_STRATEGY: normal
 
 build-image:
   image: docker:stable

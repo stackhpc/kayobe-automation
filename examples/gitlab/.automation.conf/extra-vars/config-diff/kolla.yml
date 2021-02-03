@@ -1,0 +1,15 @@
+---
+ansible_connection: local
+kolla_ansible_target_venv: "{{ lookup('env', 'KAYOBE_CONFIG_PATH') }}/../../../../venvs/kolla-ansible/"
+ansible_python_interpreter: "{{ kolla_ansible_target_venv | realpath }}/bin/python3"
+
+ansible_brens1f1.605:
+  ipv4:
+    address: dummy
+
+ansible_brens1f1.617:
+  ipv4:
+    address: dummy
+
+fluentd_binary: td-agent
+fluentd_version: 0.14

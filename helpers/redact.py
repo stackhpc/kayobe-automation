@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+
+import yaml
+import hashlib
+import base64
+import sys
+
+def annotate(ctx, value):
+  if not isinstance(value, str):
+    return value
+  path_str = map(str, ctx['path'])
+  return f"{'.'.join(path_str)}.{ value }"
+
+def redact_int(ctx, x):
+    # For numbers we can't indicate change with a string, so use sentinal values
+    if is_changed(ctx, x):
+        return 6666
+    else:
+        return 1234
+
+def redact_float(ctx, x):
+    if is_changed(ctx, x):
+        return 6.666
+    else:
+        return 1.234
+
+def is_changed(ctx, value):
+    # Looks up path in `reference` to determine if value has changed
+    if "reference" not in ctx or not ctx["reference"]:
+        return False
+    reference = ctx["reference"]
+    path = ctx["path"]
+    current = reference
+    for x in path:
+        if isinstance(current, list) and not isinstance(x, int):
+            return True
+        elif isinstance(current, list) and not 0 <= x < len(current):
+            return True
+        elif isinstance(current, dict) and x not in current:
+            return True
+        current = current[x]
+    if current != value:
+        return True
+    return False
+
+def redact_str(ctx, string):
+    if is_changed(ctx, string):
+        return "changed"
+    else:
+        return "original"
+
+def redact_list(ctx, xs):
+    result = []
+    for i, value in enumerate(xs):
+        ctx["path"].append(i)
+        result.append(annotate(ctx, redact(ctx, value)))
+        ctx["path"].pop()
+    return result
+
+def redact_dict(ctx, x):
+    # keys are assumed to not be secret
+    result = {}
+    for key, value in x.items():
+        ctx["path"].append(key)
+        result[key] = annotate(ctx, redact(ctx, value))
+        ctx["path"].pop()
+    return result
+
+def redact_NoneType(ctx, x):
+    return None
+
+def redact(ctx, x):
+    type_ = type(x).__name__
+    return globals()["redact_%s" % type_](ctx, x)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(f"Error: You haven't provided a yaml file to redact to ...", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} [reference]", file=sys.stderr)
+        sys.exit(-1)
+
+    reference = None
+    data = None
+
+    with open(sys.argv[1]) as f:
+        data = yaml.safe_load(f)
+
+    if len(sys.argv) >= 3:
+        with open(sys.argv[2]) as f:
+            reference = yaml.safe_load(f)
+
+    context = {
+        "path" : [],
+        "reference": reference
+    }
+    print("---\n" + yaml.dump(redact(context, data), default_flow_style=False), file=sys.stdout)

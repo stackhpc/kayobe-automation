@@ -1,0 +1,228 @@
+#!/bin/bash
+
+set -eu
+set -o pipefail
+
+# Library of functions for the kayobe development environment.
+
+FUNCTIONS_PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export KAYOBE_HELPERS_PATH="$FUNCTIONS_PARENT/helpers"
+export KAYOBE_REPO_ROOT="$FUNCTIONS_PARENT/.."
+export KAYOBE_AUTOMATION_DIR="${KAYOBE_AUTOMATION_DIR:-$KAYOBE_REPO_ROOT/.automation.conf}"
+export KAYOBE_EXTRA_VARS_PATH="$KAYOBE_AUTOMATION_DIR/extra-vars"
+
+# Utility functions
+
+# Prints backtrace info
+# filename:lineno:function
+# backtrace level
+function backtrace {
+    local level=$1
+    local deep
+    deep=$((${#BASH_SOURCE[@]} - 1))
+    echo "[Call Trace]"
+    while [ $level -le $deep ]; do
+        echo "${BASH_SOURCE[$deep]}:${BASH_LINENO[$deep-1]}:${FUNCNAME[$deep-1]}"
+        deep=$((deep - 1))
+    done
+}
+
+# Prints line number and "message" then exits
+# die $LINENO "message"
+function die {
+    local exitcode=$?
+    set +o xtrace
+    local line=$1; shift
+    if [ $exitcode == 0 ]; then
+        exitcode=1
+    fi
+    backtrace 2
+    err $line "$*"
+    # Give buffers a second to flush
+    sleep 1
+    exit $exitcode
+}
+
+
+# Prints line number and "message" in error format
+# err $LINENO "message"
+function err {
+    local exitcode=$?
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
+    set +o xtrace
+    local msg="[ERROR] ${BASH_SOURCE[2]}:$1 $2"
+    echo "$msg" 1>&2;
+    if [[ -n ${LOGDIR} ]]; then
+        echo "$msg" >> "${LOGDIR}/error.log"
+    fi
+    $xtrace
+    return $exitcode
+}
+
+function environment_diagnostics {
+    set -x
+    whoami
+    set +x
+}
+
+# Configuration
+
+function config_defaults {
+    # Set default values for kayobe development configuration.
+
+    export KAYOBE_BRANCH="${KAYOBE_BRANCH:-stable/ussuri}"
+    OPENSTACK_SERIES_DEFAULT="$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')"
+    export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$OPENSTACK_SERIES_DEFAULT}"
+    export KAYOBE_URL="https://github.com/openstack/kayobe"
+    export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
+    export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE} git+$KAYOBE_URL@${KAYOBE_BRANCH}#egg=kayobe"
+
+    export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
+
+    # Path to the kayobe virtual environment.
+    export KAYOBE_VENV_PATH="${KAYOBE_VENV_PATH:-${HOME}/kayobe-venv}"
+
+   # Additional arguments to pass to kayobe commands.
+    export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
+
+    # Log directory in case of errors
+    export LOGDIR=${LOGDIR:-/tmp/logs}
+
+    # Ansible defaults
+    export ANSIBLE_FORCE_COLOR=${ANSIBLE_FORCE_COLOR:-True}
+}
+
+function config_set {
+    # Source the configuration file, config.sh
+    source "${KAYOBE_AUTOMATION_DIR}/config.sh"
+}
+
+function config_check {
+    # Check the configuration environment variables.
+    set +u
+    if [[ -z "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
+        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
+            die $LINENO "KAYOBE_CONFIG_SOURCE_PATH must be set"
+        fi
+    fi
+    if [[ ! -e "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
+        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
+            die $LINENO "Kayobe configuration path $KAYOBE_CONFIG_SOURCE_PATH does not exist"
+        fi
+    fi
+    set -u
+}
+
+function config_init {
+    config_defaults
+    config_set
+    config_check
+    mkdir -p "$LOGDIR"
+}
+
+# Installation
+
+function is_dnf {
+    test -e /usr/bin/dnf
+}
+
+function workaround_start_sshd {
+    # Kayobe will try and keyscan localhost which will fail if sshd not running
+    # See: https://github.com/openstack/kayobe/blob/869185ea7be5d6b5b21c964a620839d5475196fd/ansible/roles/bootstrap/tasks/main.yml#L31
+    if ! pgrep -x "sshd" > /dev/null
+    then
+        sudo_if_available /usr/bin/ssh-keygen -A
+        sudo_if_available /usr/sbin/sshd &
+    fi
+}
+
+function sudo_if_available {
+    if [[ -e "/usr/bin/sudo" ]]; then
+        sudo "$@"
+        return
+    fi
+    "$@"
+}
+
+function install_dependencies {
+    echo "Installing package dependencies for kayobe"
+    if is_dnf; then
+        sudo_if_available dnf -y install gcc git vim python3-pyyaml python3-virtualenv libffi-devel
+    else
+        sudo_if_available apt install -y python-dev python3-virtualenv gcc git libffi-dev
+    fi
+}
+
+function install_venv {
+    # Install a virtualenv at $1. The rest of the arguments are passed
+    # directly to pip.
+    venv_path="$1"
+    shift
+    pip_paths="$@"
+    local venv_parent="$(dirname ${venv_path})"
+    if [[ ! -d "$venv_parent" ]]; then
+        mkdir -p "$venv_parent"
+    fi
+    if [[ ! -f "${venv_path}/bin/activate" ]]; then
+        echo "Creating virtual environment in ${venv_path}"
+        virtualenv -p python3 "${venv_path}"
+        # NOTE: Virtualenv's activate and deactivate scripts reference an
+        # unbound variable.
+        set +u
+        source "${venv_path}/bin/activate"
+        pip install -U pip
+        pip install $pip_paths
+        deactivate
+        set -u
+    else
+        echo "Using existing virtual environment in ${venv_path}"
+    fi
+}
+
+function install_kayobe_venv {
+    # Install the Kayobe venv.
+    install_venv "${KAYOBE_VENV_PATH}" "${KAYOBE_PIP_INSTALL_ARGS}"
+}
+
+# Runtime
+
+function environment_setup {
+    # NOTE: Virtualenv's activate script references an unbound variable.
+    set +u
+    source "${KAYOBE_VENV_PATH}/bin/activate"
+    set -u
+    source "${KAYOBE_CONFIG_SOURCE_PATH}/kayobe-env"
+}
+
+function run_kayobe {
+    # Run a kayobe command, including extra arguments provided via
+    # $KAYOBE_EXTRA_ARGS.
+    echo kayobe "${@}" ${KAYOBE_EXTRA_ARGS}
+}
+
+function control_host_bootstrap {
+    echo "Bootstrapping the Ansible control host"
+    for i in $(seq 1 3); do
+        if run_kayobe control host bootstrap; then
+            chb_success=1
+            break
+        fi
+        echo "Control host bootstrap failed - likely Ansible Galaxy flakiness. Retrying"
+    done
+    if [[ -z ${chb_success+x} ]]; then
+        die $LINENO "Failed to bootstrap control host"
+    fi
+    echo "Bootstrapped control host after $i attempts"
+}
+
+function kayobe_init {
+    config_init
+    environment_diagnostics
+    install_dependencies
+    workaround_start_sshd
+    install_kayobe_venv
+    environment_setup
+    control_host_bootstrap
+}
+

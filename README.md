@@ -1,2 +1,3 @@
 # kayobe-automation
-kayobe-automation
+
+Scripts for automating kayobe.

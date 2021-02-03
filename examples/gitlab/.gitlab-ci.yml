@@ -1,0 +1,79 @@
+stages:
+  - build
+  - run
+
+before_script:
+  ##
+  ## Install ssh-agent if not already installed, it is required by Docker.
+  ## (change apt-get to yum if you use an RPM-based image)
+  ##
+  - 'command -v ssh-agent >/dev/null || ( dnf install -y openssh-clients )'
+
+  ##
+  ## Run ssh-agent (inside the build environment)
+  ##
+  - eval $(ssh-agent -s)
+
+  ##
+  ## Add the SSH key stored in SSH_PRIVATE_KEY variable to the agent store
+  ## We're using tr to fix line endings which makes ed25519 keys work
+  ## without extra base64 encoding.
+  ## https://gitlab.com/gitlab-examples/ssh-private-key/issues/1#note_48526556
+  ##
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+
+  ##
+  ## Create the SSH directory and give it the right permissions
+  ##
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+
+variables:
+ GIT_DEPTH: 0
+ # Also needs: privileged: true, volumes = ["/certs/client", "/cache"] in /etc/gitlab-runner/config.toml
+ DOCKER_TLS_CERTDIR: "/certs"
+
+build-image:
+  image: docker:stable
+  rules:
+    - when: always
+  services:
+    - name: docker:dind
+      command: ["--mtu=1450"]
+  stage: build
+  script:
+    - cd .automation/docker/
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+overcloud service deploy:
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  stage: run
+  rules:
+    - when: manual
+  script:
+    - .automation/cd/overcloud-service-deploy.sh
+
+overcloud host configure:
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  stage: run
+  rules:
+    - when: manual
+  script:
+    - .automation/cd/overcloud-host-configure.sh
+
+kolla diff:
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  stage: run
+  rules:
+    - if: $CI_MERGE_REQUEST_ID
+  script:
+    - .automation/ci/config-diff.sh origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - cp /tmp/kayobe-config-diff ${CI_PROJECT_DIR}/kayobe-config-diff.txt
+  artifacts:
+    expose_as: 'kayobe config diff'
+    paths: ['./kayobe-config-diff.txt']
+

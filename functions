@@ -190,7 +190,7 @@ function install_kayobe_venv {
     install_venv "${KAYOBE_VENV_PATH}" "${KAYOBE_PIP_INSTALL_ARGS}"
     # We need access to group_vars and plugins and if this venv can move it means that we can't
     # create a symlink to a known location. Plugins could be set with an environment variable.
-    cp -rfp "$FUNCTIONS_PARENT"/ansible/ "$KAYOBE_ANSIBLE_PATH"
+    cp -rfp "$FUNCTIONS_PARENT"/ansible/ "$KAYOBE_ANSIBLE_PATH/.."
 }
 
 # Runtime

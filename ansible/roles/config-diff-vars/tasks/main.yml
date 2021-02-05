@@ -14,7 +14,3 @@
   vars:
     ip_mappings: "{{ groups['overcloud'] | ip_mappings }}"
 
-- name: template kolla-vars
-  template:
-    src: "{{ config_diff_vars_kolla_output_path }}"
-    dest: /tmp/t2

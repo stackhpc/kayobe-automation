@@ -1,0 +1,20 @@
+---
+
+- name: Template kayobe vars
+  template:
+    src: templates/kayobe-extra-vars.yml.j2
+    dest: "{{ config_diff_vars_kayobe_output_path }}"
+  vars:
+    ip_mappings: "{{ groups['overcloud'] | ip_mappings }}"
+
+- name: Template kolla vars
+  template:
+    src: templates/kolla-extra-vars.yml.j2
+    dest: "{{ config_diff_vars_kolla_output_path }}"
+  vars:
+    ip_mappings: "{{ groups['overcloud'] | ip_mappings }}"
+
+- name: template kolla-vars
+  template:
+    src: "{{ config_diff_vars_kolla_output_path }}"
+    dest: /tmp/t2

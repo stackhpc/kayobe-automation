@@ -9,7 +9,6 @@ FUNCTIONS_PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export KAYOBE_HELPERS_PATH="$FUNCTIONS_PARENT/helpers"
 export KAYOBE_REPO_ROOT="$FUNCTIONS_PARENT/.."
 export KAYOBE_AUTOMATION_DIR="${KAYOBE_AUTOMATION_DIR:-$KAYOBE_REPO_ROOT/.automation.conf}"
-export KAYOBE_EXTRA_VARS_PATH="$KAYOBE_AUTOMATION_DIR/extra-vars"
 
 # Utility functions
 
@@ -80,8 +79,14 @@ function config_defaults {
 
     export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
 
+    # Unstable: DO NOT USE - We need to create canonical environments so that we can run custom playbooks as
+    # they require symlinks to group_vars and filter plugins from kayobe. We thereforce might need to enforce
+    # a structure. If we fix a venv path, we could create symlinks to a known location from the automation
+    # directory. This would allow us to run custom playbooks that were internal to the automation "module"
+    # without resorting to dirty hacks. The same is true for hooks.
     # Path to the kayobe virtual environment.
     export KAYOBE_VENV_PATH="${KAYOBE_VENV_PATH:-${HOME}/kayobe-venv}"
+    export KAYOBE_CONFIG_GEN_PATH="$KAYOBE_VENV_PATH"/share/kayobe/ansible/generate-config-diff-extra-vars.yml
 
    # Additional arguments to pass to kayobe commands.
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
@@ -183,6 +188,9 @@ function install_venv {
 function install_kayobe_venv {
     # Install the Kayobe venv.
     install_venv "${KAYOBE_VENV_PATH}" "${KAYOBE_PIP_INSTALL_ARGS}"
+    # We need access to group_vars and plugins and if this venv can move it means that we can't
+    # create a symlink to a known location. Plugins could be set with an environment variable.
+    ln -s "$FUNCTIONS_PARENT"/ansible/generate-config-diff-extra-vars.yml "$KAYOBE_CONFIG_GEN_PATH"
 }
 
 # Runtime

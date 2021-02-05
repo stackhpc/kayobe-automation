@@ -1,0 +1,9 @@
+{% macro mappings() -%}
+{% for host, mappings in ip_mappings.items() %}
+{% for interface in mappings %}
+{{ host | replace('-', '_') }}_{{ interface.interface }}:
+    ipv4:
+        address: {{ interface.ip }}
+{% endfor %}
+{% endfor %}
+{%- endmacro %}

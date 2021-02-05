@@ -1,0 +1,4 @@
+---
+
+config_diff_vars_kayobe_output_path: "{{ lookup('env', 'KAYOBE_CONFIG_PATH') }}/../../../kayobe-extra-vars"
+config_diff_vars_kolla_output_path: "{{ lookup('env', 'KAYOBE_CONFIG_PATH') }}/../../../kolla-extra-vars"

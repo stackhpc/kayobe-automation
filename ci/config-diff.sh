@@ -12,6 +12,7 @@ source "${PARENT}/../functions"
 
 function validate {
     # Does nothing at the moment, but we want to do something in here a later date.
+    true
 }
 
 function config_extras {

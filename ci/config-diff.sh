@@ -97,7 +97,7 @@ function generate_config {
     kayobe control host bootstrap
     output_dir=$1/output
     echo "Generating config to $output_dir"
-    kayobe playbook run "$KAYOBE_CONFIG_GEN_PATH"
+    kayobe playbook run "$KAYOBE_ANSIBLE_PATH/kayobe-automation-prepare-config-diff.yml"
     kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_CONFIG_PATH/../../../kayobe-extra-vars.yml" --kolla-extra-vars "@$KAYOBE_CONFIG_PATH/../../../kolla-extra-vars.yml" ${KAYOBE_EXTRA_ARGS}
     export KAYOBE_VAULT_PASSWORD=$KAYOBE_VAULT_PASSWORD_OLD
 }

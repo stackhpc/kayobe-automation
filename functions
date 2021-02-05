@@ -85,8 +85,7 @@ function config_defaults {
     # directory. This would allow us to run custom playbooks that were internal to the automation "module"
     # without resorting to dirty hacks. The same is true for hooks.
     # Path to the kayobe virtual environment.
-    export KAYOBE_VENV_PATH="${KAYOBE_VENV_PATH:-${HOME}/kayobe-venv}"
-    export KAYOBE_CONFIG_GEN_PATH="$KAYOBE_VENV_PATH"/share/kayobe/ansible/generate-config-diff-extra-vars.yml
+    export KAYOBE_ANSIBLE_PATH="${KAYOBE_ANSIBLE_PATH:-$KAYOBE_VENV_PATH/share/kayobe/ansible/}"
 
    # Additional arguments to pass to kayobe commands.
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
@@ -190,7 +189,7 @@ function install_kayobe_venv {
     install_venv "${KAYOBE_VENV_PATH}" "${KAYOBE_PIP_INSTALL_ARGS}"
     # We need access to group_vars and plugins and if this venv can move it means that we can't
     # create a symlink to a known location. Plugins could be set with an environment variable.
-    ln -s "$FUNCTIONS_PARENT"/ansible/generate-config-diff-extra-vars.yml "$KAYOBE_CONFIG_GEN_PATH"
+    cp -rfp "$FUNCTIONS_PARENT"/ansible/ "$KAYOBE_ANSIBLE_PATH"
 }
 
 # Runtime

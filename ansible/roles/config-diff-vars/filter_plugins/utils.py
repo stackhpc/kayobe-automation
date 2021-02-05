@@ -31,13 +31,7 @@ def mappings2interfaces(ip_mappings):
             result.add(desc["interface"])
     return result
 
-def _wrap_raw(str):
-    return "{% raw %}" + str + "{% endraw %}"
-
-def kolla_interface_string(interface):
-    return _wrap_raw(kayobe_interface_string(interface))
-
-def kayobe_interface_string(interface):
+def interface_string(interface):
     return "\"{{ hostvars[inventory_hostname][inventory_hostname | replace('-', '_') ~ '_' ~ '" + interface + "'] }}\""
 
 @jinja2.contextfilter
@@ -65,6 +59,5 @@ class FilterModule(object):
         return {
             'ip_mappings': ip_mappings,
             'mappings2interfaces': mappings2interfaces,
-            'kolla_interface_string': kolla_interface_string,
-            'kayobe_interface_string': kayobe_interface_string,
+            'interface_string': interface_string
         }

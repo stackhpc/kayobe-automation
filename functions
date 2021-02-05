@@ -86,7 +86,7 @@ function config_defaults {
     # without resorting to dirty hacks. The same is true for hooks.
     # Path to the kayobe virtual environment.
     export KAYOBE_VENV_PATH="${KAYOBE_VENV_PATH:-${HOME}/kayobe-venv}"
-    export KAYOBE_ANSIBLE_PATH="${KAYOBE_ANSIBLE_PATH:-$KAYOBE_VENV_PATH/share/kayobe/ansible/}"
+    export KAYOBE_ANSIBLE_PATH="${KAYOBE_ANSIBLE_PATH:-$KAYOBE_VENV_PATH/share/kayobe/ansible}"
 
    # Additional arguments to pass to kayobe commands.
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}

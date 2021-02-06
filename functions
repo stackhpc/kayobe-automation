@@ -65,6 +65,11 @@ function environment_diagnostics {
     set +x
 }
 
+function pause(){
+   echo "Press [Enter] to continue..."
+   read -p "$*"
+}
+
 # Configuration
 
 function config_defaults {

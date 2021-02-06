@@ -32,7 +32,7 @@ def mappings2interfaces(ip_mappings):
     return result
 
 def interface_string(interface):
-    return "\"{{ hostvars[inventory_hostname][inventory_hostname | replace('-', '_') ~ '_' ~ '" + interface + "'] }}\""
+    return "\"{{ lookup('vars', inventory_hostname | replace('-', '_') ~ '_' ~ '" + interface + "') }}\""
 
 @jinja2.contextfilter
 def ip_mappings(context, hosts):

@@ -11,13 +11,8 @@ source "${PARENT}/../functions"
 
 
 function validate {
-    # This pipeline requires some environment specific overrides
-    if [ ! -f "$KAYOBE_EXTRA_VARS_PATH/config-diff/kayobe.yml" ]; then
-        die $LINENO "Please create $KAYOBE_EXTRA_VARS_PATH/config-diff/kayobe.yml"
-    fi
-    if [ ! -f "$KAYOBE_EXTRA_VARS_PATH/config-diff/kolla.yml" ]; then
-        die $LINENO "Please create $KAYOBE_EXTRA_VARS_PATH/config-diff/kolla.yml"
-    fi
+    # Does nothing at the moment, but we want to do something in here a later date.
+    true
 }
 
 function config_extras {
@@ -90,6 +85,9 @@ function workarounds {
 }
 
 function generate_config {
+    # TODO: Support different kayobe versions for source and target? Need to think about
+    # whether to always use latest automation code or whether to use version commited on
+    # on branch.
     # These override the kayobe-env defautlts if set:
     unset KOLLA_VENV_PATH
     unset KOLLA_SOURCE_PATH
@@ -99,8 +97,9 @@ function generate_config {
     kayobe control host bootstrap
     output_dir=$1/output
     echo "Generating config to $output_dir"
-    kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_EXTRA_VARS_PATH/config-diff/kayobe.yml" --kolla-extra-vars "@$KAYOBE_EXTRA_VARS_PATH/config-diff/kolla.yml" ${KAYOBE_EXTRA_ARGS}
-   export KAYOBE_VAULT_PASSWORD=$KAYOBE_VAULT_PASSWORD_OLD
+    kayobe playbook run "$KAYOBE_ANSIBLE_PATH/kayobe-automation-prepare-config-diff.yml"
+    kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_CONFIG_PATH/../../../kayobe-extra-vars.yml" --kolla-extra-vars "@$KAYOBE_CONFIG_PATH/../../../kolla-extra-vars.yml" ${KAYOBE_EXTRA_ARGS}
+    export KAYOBE_VAULT_PASSWORD=$KAYOBE_VAULT_PASSWORD_OLD
 }
 
 function main {

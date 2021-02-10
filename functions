@@ -211,7 +211,7 @@ function environment_setup {
 function run_kayobe {
     # Run a kayobe command, including extra arguments provided via
     # $KAYOBE_EXTRA_ARGS.
-    echo kayobe "${@}" ${KAYOBE_EXTRA_ARGS}
+    kayobe "${@}" ${KAYOBE_EXTRA_ARGS}
 }
 
 function control_host_bootstrap {

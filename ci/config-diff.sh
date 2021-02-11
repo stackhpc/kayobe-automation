@@ -71,10 +71,16 @@ function prepare_config_dir {
     # $2: ref to checkout
     mkdir -p $1/src/kayobe-config
     cp -rf "$KAYOBE_REPO_ROOT" "$1/src/kayobe-config"
-    if [ "$2" != "" ]; then
-      cd $1/src/kayobe-config
-      git checkout $2
-    fi
+}
+
+function checkout {
+    cd $1/src/kayobe-config
+    git checkout $2
+}
+
+function merge {
+    cd $1/src/kayobe-config
+    git merge $2
 }
 
 function workarounds {
@@ -109,8 +115,10 @@ function main {
     target_dir=$(mktemp -d --suffix -configgen-target)
     source_dir=$(mktemp -d --suffix -configgen-source)
 
-    prepare_config_dir "$target_dir" $1
-    prepare_config_dir "$source_dir" ""
+    prepare_config_dir "$target_dir"
+    checkout "$target_dir" $1
+    prepare_config_dir "$source_dir"
+    merge "$source_dir" $1
 
     # Order is important as we need to reference target_dir before we redact it
     redact_config_dir $source_dir $target_dir

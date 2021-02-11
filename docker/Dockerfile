@@ -34,5 +34,5 @@ WORKDIR /stack
 USER stack
 
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
-COPY --chown=stack:stack ssh_config /stack/.ssh/config
+COPY --chown=stack:stack ssh_config /stack/.ssh/config && chmod 600 /stack/.ssh/config
 

@@ -208,6 +208,12 @@ function environment_setup {
     source "${KAYOBE_CONFIG_SOURCE_PATH}/kayobe-env"
 }
 
+function ensure_permissions {
+    # Ansible is being run in a world writable directory, ignoring it as an
+    # ansible.cfg source
+    chmod 660 ${KAYOBE_CONFIG_SOURCE_PATH}
+}
+
 function run_kayobe {
     # Run a kayobe command, including extra arguments provided via
     # $KAYOBE_EXTRA_ARGS.
@@ -235,6 +241,7 @@ function kayobe_init {
     environment_diagnostics
     install_dependencies
     workaround_start_sshd
+    ensure_permissions
     install_kayobe_venv
     environment_setup
     control_host_bootstrap

@@ -33,6 +33,9 @@ variables:
  # Also needs: privileged: true, volumes = ["/certs/client", "/cache"] in /etc/gitlab-runner/config.toml
  DOCKER_TLS_CERTDIR: "/certs"
  GIT_SUBMODULE_STRATEGY: normal
+ # Fixes: Ansible is being run in a world writable directory, see:
+ # https://github.com/stackhpc/kayobe-automation/issues/2
+ FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR: "true"
 
 build-image:
   image: docker:stable

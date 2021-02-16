@@ -65,9 +65,26 @@ function environment_diagnostics {
     set +x
 }
 
-function pause(){
+function pause {
    echo "Press [Enter] to continue..."
    read -p "$*"
+}
+
+function function_exists {
+    declare -f -F $1 > /dev/null
+    return $?
+}
+
+function call {
+    if function_exists $1; then
+        $1
+    fi
+}
+
+function call_with_hooks {
+    call "pre_$1"
+    call "$1"
+    call "post_$1"
 }
 
 # Configuration
@@ -242,12 +259,13 @@ function control_host_bootstrap {
 }
 
 function kayobe_init {
-    config_init
-    environment_diagnostics
-    install_dependencies
-    workaround_start_sshd
-    install_kayobe_venv
-    environment_setup
-    control_host_bootstrap
+    call_with_hooks validate
+    call_with_hooks config_init
+    call_with_hooks environment_diagnostics
+    call_with_hooks install_dependencies
+    call_with_hooks workaround_start_sshd
+    call_with_hooks install_kayobe_venv
+    call_with_hooks environment_setup
+    call_with_hooks control_host_bootstrap
 }
 

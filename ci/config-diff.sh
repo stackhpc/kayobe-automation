@@ -15,7 +15,7 @@ function validate {
     true
 }
 
-function config_extras {
+function post_config_init {
     # Overrides from config.sh
     KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=( "etc/kayobe/kolla/passwords.yml" "etc/kayobe/secrets.yml")
     KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
@@ -54,15 +54,6 @@ function encrypt_config_dir {
    done
 }
 
-function init {
-    config_init
-    config_extras
-    validate
-    environment_diagnostics
-    install_dependencies
-    workarounds
-}
-
 function checkout {
     cd $1/src/kayobe-config
     git checkout $2
@@ -73,12 +64,12 @@ function merge {
     git merge $2
 }
 
-function workarounds {
-  # These files must exist if ironic is enabled
+function post_install_dependencies {
+  # These files must exist if ironic is enabled. Use dummy files to prevent task from
+  # failing which expects these files to be present.
   sudo_if_available mkdir -p /opt/kayobe/images/ipa/
   sudo_if_available touch /opt/kayobe/images/ipa/ipa.kernel
   sudo_if_available touch /opt/kayobe/images/ipa/ipa.initramfs
-  workaround_start_sshd
 }
 
 function generate_config {
@@ -102,7 +93,14 @@ function generate_config {
 
 function main {
 
-    init
+    # We want to setup an environment for the source and target branches, so
+    # skip setting up the default one by undefining the functions that perform
+    # the steps we do not want to do not want to perform in the init function
+    unset install_kayobe_venv
+    unset environment_setup
+    unset control_host_bootstrap
+
+    kayobe_init
 
     # FIXME: Using a different directory name shows up in the diff output
     target_dir=$(mktemp -d --suffix -configgen-target)

@@ -76,11 +76,10 @@ function config_defaults {
     # Set default values for kayobe development configuration.
 
     export KAYOBE_BRANCH="${KAYOBE_BRANCH:-stable/ussuri}"
-    OPENSTACK_SERIES_DEFAULT="$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')"
-    export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$OPENSTACK_SERIES_DEFAULT}"
-    export KAYOBE_URL="https://github.com/openstack/kayobe"
+    export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')}"
+    export KAYOBE_URI="https://github.com/openstack/kayobe"
     export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
-    export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE} git+$KAYOBE_URL@${KAYOBE_BRANCH}#egg=kayobe"
+    export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE}"
 
     export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
 
@@ -198,20 +197,26 @@ function install_kayobe_venv {
     cp -rfp "$FUNCTIONS_PARENT"/ansible/ "$KAYOBE_ANSIBLE_PATH/.."
 }
 
+function create_kayobe_environment {
+    env=$1
+    mkdir -p "$env"/{src/kayobe,src/kayobe-config,venvs/kayobe}
+    git clone $KAYOBE_URI "$env/src/kayobe"
+    cp -rf "$KAYOBE_CONFIG_SOURCE_PATH" "$env/src/kayobe-config"
+    local KAYOBE_VENV_PATH="$env/venvs/kayobe"
+    local KAYOBE_PIP_INSTALL_ARGS="$KAYOBE_PIP_INSTALL_ARGS $env/src/kayobe"
+    install_kayobe_venv
+}
+
 # Runtime
 
 function environment_setup {
+    env=$(mktemp -d --suffix -kayobe-env)
+    create_kayobe_environment "$env"
     # NOTE: Virtualenv's activate script references an unbound variable.
     set +u
-    source "${KAYOBE_VENV_PATH}/bin/activate"
+    source "$env/venvs/kayobe/bin/activate"
     set -u
-    source "${KAYOBE_CONFIG_SOURCE_PATH}/kayobe-env"
-}
-
-function ensure_permissions {
-    # Ansible is being run in a world writable directory, ignoring it as an
-    # ansible.cfg source
-    chmod 660 ${KAYOBE_CONFIG_SOURCE_PATH}
+    source "$env/src/kayobe-config/kayobe-env"
 }
 
 function run_kayobe {
@@ -241,7 +246,6 @@ function kayobe_init {
     environment_diagnostics
     install_dependencies
     workaround_start_sshd
-    ensure_permissions
     install_kayobe_venv
     environment_setup
     control_host_bootstrap

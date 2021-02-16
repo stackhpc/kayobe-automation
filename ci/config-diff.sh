@@ -60,17 +60,7 @@ function init {
     validate
     environment_diagnostics
     install_dependencies
-    workaround_start_sshd
-    install_kayobe_venv
-    environment_setup
     workarounds
-}
-
-function prepare_config_dir {
-    # $1: directory to clone to
-    # $2: ref to checkout
-    mkdir -p $1/src/kayobe-config
-    cp -rf "$KAYOBE_REPO_ROOT" "$1/src/kayobe-config"
 }
 
 function checkout {
@@ -88,6 +78,7 @@ function workarounds {
   sudo_if_available mkdir -p /opt/kayobe/images/ipa/
   sudo_if_available touch /opt/kayobe/images/ipa/ipa.kernel
   sudo_if_available touch /opt/kayobe/images/ipa/ipa.initramfs
+  workaround_start_sshd
 }
 
 function generate_config {
@@ -98,6 +89,7 @@ function generate_config {
     unset KOLLA_VENV_PATH
     unset KOLLA_SOURCE_PATH
     . $1/src/kayobe-config/kayobe-env
+    . $1/venvs/kayobe/bin/activate
     export KAYOBE_VAULT_PASSWORD_OLD=$KAYOBE_VAULT_PASSWORD
     export KAYOBE_VAULT_PASSWORD=dummy-password
     kayobe control host bootstrap
@@ -112,12 +104,14 @@ function main {
 
     init
 
+    # FIXME: Using a different directory name shows up in the diff output
     target_dir=$(mktemp -d --suffix -configgen-target)
     source_dir=$(mktemp -d --suffix -configgen-source)
 
-    prepare_config_dir "$target_dir"
+    create_kayobe_environment "$target_dir"
     checkout "$target_dir" $1
-    prepare_config_dir "$source_dir"
+
+    create_kayobe_environment "$source_dir"
     merge "$source_dir" $1
 
     # Order is important as we need to reference target_dir before we redact it

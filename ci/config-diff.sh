@@ -88,7 +88,7 @@ function generate_config {
     . $1/venvs/kayobe/bin/activate
     export KAYOBE_VAULT_PASSWORD_OLD="$KAYOBE_VAULT_PASSWORD"
     export KAYOBE_VAULT_PASSWORD=dummy-password
-    local KAYOBE_ANSIBLE_PATH="$1/share/kayobe/ansible"
+    local KAYOBE_ANSIBLE_PATH="$1/venvs/kayobe/share/kayobe/ansible"
     kayobe control host bootstrap
     output_dir=$1/output
     echo "Generating config to $output_dir"

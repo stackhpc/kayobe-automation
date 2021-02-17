@@ -39,25 +39,41 @@ function log_level {
 
 function log_info {
     if [ "$(log_level)" -ge $_LOG_LEVEL_INFO ]; then
-        echo "[INFO]: " "$@" 1>&2
+        msg="[INFO]: $@"
+        echo "$msg" 1>&2
+        if [ ! -z ${LOGDIR:+x} ]; then
+            echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+        fi
     fi
 }
 
 function log_warn {
     if [ "$(log_level)" -ge $_LOG_LEVEL_WARN ]; then
-        echo "[WARNING]: " "$@" 1>&2
+        msg="[WARNING]: $@"
+        echo "$msg" 1>&2
+        if [ ! -z ${LOGDIR:+x} ]; then
+            echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+        fi
     fi
 }
 
 function log_debug {
     if [ "$(log_level)" -ge $_LOG_LEVEL_DEBUG ]; then
-        echo "[DEBUG]: " "$@" 1>&2
+        msg="[DEBUG]: $@"
+        echo "$msg" 1>&2
+        if [ ! -z ${LOGDIR:+x} ]; then
+            echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+        fi
     fi
 }
 
 function log_error {
     if [ "$(log_level)" -ge $_LOG_LEVEL_ERROR ]; then
-        echo "[ERROR]: " "$@" 1>&2
+        msg="[ERROR]: $@"
+        echo "$msg" 1>&2
+        if [ ! -z ${LOGDIR:+x} ]; then
+            echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+        fi
     fi
 }
 

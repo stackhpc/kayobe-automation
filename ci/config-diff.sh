@@ -9,6 +9,11 @@ PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${PARENT}/../functions"
 
+# We want to setup an environment for the source and target branches, so
+# skip setting up the default one by undefining the functions that perform
+# the steps we do not want to do not want to perform in the init function
+unset environment_setup
+unset control_host_bootstrap
 
 function validate {
     # Does nothing at the moment, but we want to do something in here a later date.
@@ -25,9 +30,9 @@ function redact_file {
     echo Redacting $1 with reference ${2:-None}
     export ANSIBLE_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD"
     if [ "$2" != "" ]; then
-        $KAYOBE_HELPERS_PATH/redact.py <(ansible-vault view --vault-password-file $KAYOBE_HELPERS_PATH/vault-helper.sh $1) <(ansible-vault view --vault-password-file $KAYOBE_HELPERS_PATH/vault-helper.sh $2) > $1.redact
+        $KAYOBE_HELPERS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_HELPERS_PATH/vault-helper.sh $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_HELPERS_PATH/vault-helper.sh $2) > $1.redact
     else
-        $KAYOBE_HELPERS_PATH/redact.py <(ansible-vault view --vault-password-file $KAYOBE_HELPERS_PATH/vault-helper.sh $1) > $1.redact
+        $KAYOBE_HELPERS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_HELPERS_PATH/vault-helper.sh $1) > $1.redact
     fi
     mv $1.redact $1
 }
@@ -35,7 +40,7 @@ function redact_file {
 function encrypt_file {
     echo Encrypting $1
     export ANSIBLE_VAULT_PASSWORD=dummy-password
-    ansible-vault encrypt --vault-password-file $KAYOBE_HELPERS_PATH/vault-helper.sh $1
+    $ANSIBLE_VAULT encrypt --vault-password-file $KAYOBE_HELPERS_PATH/vault-helper.sh $1
 }
 
 function redact_config_dir {
@@ -81,24 +86,18 @@ function generate_config {
     unset KOLLA_SOURCE_PATH
     . $1/src/kayobe-config/kayobe-env
     . $1/venvs/kayobe/bin/activate
-    export KAYOBE_VAULT_PASSWORD_OLD=$KAYOBE_VAULT_PASSWORD
+    export KAYOBE_VAULT_PASSWORD_OLD="$KAYOBE_VAULT_PASSWORD"
     export KAYOBE_VAULT_PASSWORD=dummy-password
+    local KAYOBE_ANSIBLE_PATH="$1/share/kayobe/ansible"
     kayobe control host bootstrap
     output_dir=$1/output
     echo "Generating config to $output_dir"
     kayobe playbook run "$KAYOBE_ANSIBLE_PATH/kayobe-automation-prepare-config-diff.yml"
     kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_CONFIG_PATH/../../../kayobe-extra-vars.yml" --kolla-extra-vars "@$KAYOBE_CONFIG_PATH/../../../kolla-extra-vars.yml" ${KAYOBE_EXTRA_ARGS}
-    export KAYOBE_VAULT_PASSWORD=$KAYOBE_VAULT_PASSWORD_OLD
+    export KAYOBE_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD_OLD"
 }
 
 function main {
-
-    # We want to setup an environment for the source and target branches, so
-    # skip setting up the default one by undefining the functions that perform
-    # the steps we do not want to do not want to perform in the init function
-    unset install_kayobe_venv
-    unset environment_setup
-    unset control_host_bootstrap
 
     kayobe_init
 
@@ -111,6 +110,12 @@ function main {
 
     create_kayobe_environment "$source_dir"
     merge "$source_dir" $1
+
+    # We require ansible-vault. Use the one from the source venv in preference
+    # to the target incase it is an updated version. Although might be cleaner
+    # to make a separate venv, but I've avoid that bullet for now in case there
+    # is some quirk with versions.
+    local ANSIBLE_VAULT="$source_dir"/venvs/kayobe/bin/ansible-vault
 
     # Order is important as we need to reference target_dir before we redact it
     redact_config_dir $source_dir $target_dir

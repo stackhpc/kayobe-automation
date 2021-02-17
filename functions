@@ -100,15 +100,6 @@ function config_defaults {
 
     export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
 
-    # Unstable: DO NOT USE - We need to create canonical environments so that we can run custom playbooks as
-    # they require symlinks to group_vars and filter plugins from kayobe. We thereforce might need to enforce
-    # a structure. If we fix a venv path, we could create symlinks to a known location from the automation
-    # directory. This would allow us to run custom playbooks that were internal to the automation "module"
-    # without resorting to dirty hacks. The same is true for hooks.
-    # Path to the kayobe virtual environment.
-    export KAYOBE_VENV_PATH="${KAYOBE_VENV_PATH:-${HOME}/kayobe-venv}"
-    export KAYOBE_ANSIBLE_PATH="${KAYOBE_ANSIBLE_PATH:-$KAYOBE_VENV_PATH/share/kayobe/ansible}"
-
    # Additional arguments to pass to kayobe commands.
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
 
@@ -207,8 +198,9 @@ function install_venv {
 }
 
 function install_kayobe_venv {
+    local KAYOBE_ANSIBLE_PATH="$1/share/kayobe/ansible"
     # Install the Kayobe venv.
-    install_venv "${KAYOBE_VENV_PATH}" "${KAYOBE_PIP_INSTALL_ARGS}"
+    install_venv "$1" $2
     # We need access to group_vars and plugins and if this venv can move it means that we can't
     # create a symlink to a known location. Plugins could be set with an environment variable.
     cp -rfp "$FUNCTIONS_PARENT"/ansible/ "$KAYOBE_ANSIBLE_PATH/.."
@@ -219,9 +211,8 @@ function create_kayobe_environment {
     mkdir -p "$env"/{src/kayobe,src/kayobe-config,venvs/kayobe}
     git clone $KAYOBE_URI "$env/src/kayobe"
     cp -rf "$KAYOBE_CONFIG_SOURCE_PATH" "$env/src/kayobe-config"
-    local KAYOBE_VENV_PATH="$env/venvs/kayobe"
     local KAYOBE_PIP_INSTALL_ARGS="$KAYOBE_PIP_INSTALL_ARGS $env/src/kayobe"
-    install_kayobe_venv
+    install_kayobe_venv "$env/venvs/kayobe" "$KAYOBE_PIP_INSTALL_ARGS"
 }
 
 # Runtime
@@ -264,7 +255,6 @@ function kayobe_init {
     call_with_hooks environment_diagnostics
     call_with_hooks install_dependencies
     call_with_hooks workaround_start_sshd
-    call_with_hooks install_kayobe_venv
     call_with_hooks environment_setup
     call_with_hooks control_host_bootstrap
 }

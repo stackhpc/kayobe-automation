@@ -10,7 +10,56 @@ export KAYOBE_HELPERS_PATH="$FUNCTIONS_PARENT/helpers"
 export KAYOBE_REPO_ROOT="$FUNCTIONS_PARENT/.."
 export KAYOBE_AUTOMATION_DIR="${KAYOBE_AUTOMATION_DIR:-$KAYOBE_REPO_ROOT/.automation.conf}"
 
+export _LOG_LEVEL_DEBUG=4000
+export _LOG_LEVEL_INFO=3000
+export _LOG_LEVEL_WARN=2000
+export _LOG_LEVEL_ERROR=1000
+
 # Utility functions
+
+function log_level {
+    case "${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}" in
+    debug)
+        echo -n "$_LOG_LEVEL_DEBUG"
+        ;;
+
+    info)
+        echo -n "$_LOG_LEVEL_INFO"
+        ;;
+
+    error)
+        echo -n "$_LOG_LEVEL_ERROR"
+        ;;
+
+    *)
+        echo -n "$_LOG_LEVEL_WARN"
+        ;;
+    esac
+}
+
+function log_info {
+    if [ "$(log_level)" -ge $_LOG_LEVEL_INFO ]; then
+        echo "[INFO]: " "$@" 1>&2
+    fi
+}
+
+function log_warn {
+    if [ "$(log_level)" -ge $_LOG_LEVEL_WARN ]; then
+        echo "[WARNING]: " "$@" 1>&2
+    fi
+}
+
+function log_debug {
+    if [ "$(log_level)" -ge $_LOG_LEVEL_DEBUG ]; then
+        echo "[DEBUG]: " "$@" 1>&2
+    fi
+}
+
+function log_error {
+    if [ "$(log_level)" -ge $_LOG_LEVEL_ERROR ]; then
+        echo "[ERROR]: " "$@" 1>&2
+    fi
+}
 
 # Prints backtrace info
 # filename:lineno:function
@@ -102,6 +151,8 @@ function config_defaults {
 
    # Additional arguments to pass to kayobe commands.
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
+
+    export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
 
     # Log directory in case of errors
     export LOGDIR=${LOGDIR:-/tmp/logs}

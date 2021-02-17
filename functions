@@ -101,7 +101,7 @@ function die {
         exitcode=1
     fi
     backtrace 2
-    err $line "$*"
+    _err $line "$*"
     # Give buffers a second to flush
     sleep 1
     exit $exitcode
@@ -109,8 +109,8 @@ function die {
 
 
 # Prints line number and "message" in error format
-# err $LINENO "message"
-function err {
+# _err $LINENO "message"
+function _err {
     local exitcode=$?
     local xtrace
     xtrace=$(set +o | grep xtrace)

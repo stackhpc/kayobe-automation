@@ -6,7 +6,7 @@ set -o pipefail
 # Library of functions for the kayobe development environment.
 
 FUNCTIONS_PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export KAYOBE_HELPERS_PATH="$FUNCTIONS_PARENT/helpers"
+export KAYOBE_AUTOMATION_UTILS_PATH="$FUNCTIONS_PARENT/utils"
 export KAYOBE_REPO_ROOT="$FUNCTIONS_PARENT/.."
 export KAYOBE_AUTOMATION_DIR="${KAYOBE_AUTOMATION_DIR:-$KAYOBE_REPO_ROOT/.automation.conf}"
 

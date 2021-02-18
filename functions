@@ -152,6 +152,14 @@ function call_with_hooks {
     call "post_$1"
 }
 
+function is_absolute_path {
+    path="$1"
+    case "$path" in
+        /*) true ;;
+        *) false ;;
+    esac
+}
+
 # Configuration
 
 function config_defaults {

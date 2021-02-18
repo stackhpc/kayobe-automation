@@ -183,6 +183,10 @@ function config_defaults {
 
     # Ansible defaults
     export ANSIBLE_FORCE_COLOR=${ANSIBLE_FORCE_COLOR:-True}
+
+    # SSH key to use. This exists for documentation purposes. It is not recommended
+    # to set it in config.sh
+    export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:-}
 }
 
 function config_set {

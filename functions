@@ -240,9 +240,19 @@ function sudo_if_available {
 function install_dependencies {
     echo "Installing package dependencies for kayobe"
     if is_dnf; then
-        sudo_if_available dnf -y install gcc git vim python3-pyyaml python3-virtualenv libffi-devel
+        sudo_if_available dnf -y install gcc git vim python3-pyyaml python3-virtualenv libffi-devel openssh-clients
     else
-        sudo_if_available apt install -y python-dev python3-virtualenv gcc git libffi-dev
+        sudo_if_available apt install -y python-dev python3-virtualenv gcc git libffi-dev openssh-client
+    fi
+}
+
+function setup_ssh_agent {
+    if [ ! -z ${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:+x} ]; then
+        log_info "Setting up SSH agent to use private key"
+        eval $(ssh-agent -s)
+        echo "$KAYOBE_AUTOMATION_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
     fi
 }
 
@@ -330,6 +340,7 @@ function kayobe_init {
     call_with_hooks environment_diagnostics
     call_with_hooks install_dependencies
     call_with_hooks workaround_start_sshd
+    call_with_hooks setup_ssh_agent
     call_with_hooks environment_setup
     call_with_hooks control_host_bootstrap
 }

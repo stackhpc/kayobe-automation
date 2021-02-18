@@ -32,3 +32,9 @@ You can change the branch at a later date with:
 ## Configuration
 
 Use the examples in examples/* for inspiration.
+
+## Environment variables
+
+`KAYOBE_AUTOMATION_SSH_PRIVATE_KEY`: Private key used to login to kayobe managed hosts
+`KAYOBE_AUTOMATION_LOG_LEVEL`: Verbosity of logging. Choose one of: `debug`, `info`, `warn`, `error`
+`KAYOBE_VAULT_PASSWORD`: Kayobe vault password.

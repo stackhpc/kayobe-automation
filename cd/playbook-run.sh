@@ -25,7 +25,7 @@ function main {
 
 if [ "$#" -lt 1 ]; then
     die $LINENO "Error: You must provide a playbook to run" \
-                "Usage: playbook-run.sh <playbook>"
+        "Usage: playbook-run.sh <playbook>"
 fi
 
 main "$1"

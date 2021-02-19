@@ -88,4 +88,3 @@ kolla diff:
   artifacts:
     expose_as: 'kayobe config diff'
     paths: ['./kayobe-config-diff.txt']
-

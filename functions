@@ -348,4 +348,3 @@ function kayobe_init {
     call_with_hooks environment_setup
     call_with_hooks control_host_bootstrap
 }
-

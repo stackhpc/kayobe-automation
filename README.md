@@ -38,3 +38,20 @@ Use the examples in examples/* for inspiration.
 `KAYOBE_AUTOMATION_SSH_PRIVATE_KEY`: Private key used to login to kayobe managed hosts
 `KAYOBE_AUTOMATION_LOG_LEVEL`: Verbosity of logging. Choose one of: `debug`, `info`, `warn`, `error`
 `KAYOBE_VAULT_PASSWORD`: Kayobe vault password.
+
+## Formatting
+
+Dependencies: go
+
+Install the git hooks:
+
+    [stack@seed .automation]$ virtualenv ~/will/venv/pre-commit
+    [stack@seed .automation]$ source ~/will/venv/pre-commit/bin/activate
+    (pre-commit) [stack@seed .automation]$ pip install pre-commit
+    (pre-commit) [stack@seed .automation]$ pre-commit install
+
+This will run the formatter on commit.
+
+To run manually:
+
+    (pre-commit) [stack@seed .automation]$ pre-commit run --all-files

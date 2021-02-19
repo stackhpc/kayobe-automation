@@ -14,7 +14,6 @@ function config_extras {
     export RUN_LOCAL_DOCKER_IMAGE="${RUN_LOCAL_DOCKER_IMAGE:-centos:8}"
 }
 
-
 function main {
     config_extras
     RELATIVE_PATH=$(realpath --relative-to="$REPO_ROOT" "$1")
@@ -25,15 +24,15 @@ function main {
     while [[ $# -gt 0 ]]; do
         key="$1"
         case $key in
-            --)
-                shift
-                break
+        --)
+            shift
+            break
             ;;
         *)
-        SCRIPT_ARGS+=("$1")
-        shift
-        ;;
-    esac
+            SCRIPT_ARGS+=("$1")
+            shift
+            ;;
+        esac
     done
     #echo "Script args: ${SCRIPT_ARGS[@]}"
     # WARNING: printing docker args will leak your environment file

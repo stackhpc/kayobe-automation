@@ -22,7 +22,7 @@ function validate {
 
 function post_config_init {
     # Overrides from config.sh
-    KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=( "etc/kayobe/kolla/passwords.yml" "etc/kayobe/secrets.yml")
+    KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=("etc/kayobe/kolla/passwords.yml" "etc/kayobe/secrets.yml")
     KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
 }
 
@@ -30,9 +30,9 @@ function redact_file {
     echo Redacting $1 with reference ${2:-None}
     export KAYOBE_AUTOMATION_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD"
     if [ "$2" != "" ]; then
-        $KAYOBE_AUTOMATION_UTILS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $2) > $1.redact
+        $KAYOBE_AUTOMATION_UTILS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $2) >$1.redact
     else
-        $KAYOBE_AUTOMATION_UTILS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1) > $1.redact
+        $KAYOBE_AUTOMATION_UTILS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1) >$1.redact
     fi
     mv $1.redact $1
 }
@@ -44,19 +44,19 @@ function encrypt_file {
 }
 
 function redact_config_dir {
-   for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
-      reference=""
-      if [ "$2" != "" ]; then
-        reference="$2/src/kayobe-config/$item"
-      fi
-      redact_file "$1/src/kayobe-config/$item" "$reference"
-   done
+    for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
+        reference=""
+        if [ "$2" != "" ]; then
+            reference="$2/src/kayobe-config/$item"
+        fi
+        redact_file "$1/src/kayobe-config/$item" "$reference"
+    done
 }
 
 function encrypt_config_dir {
-   for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
-      encrypt_file "$1/src/kayobe-config/$item"
-   done
+    for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
+        encrypt_file "$1/src/kayobe-config/$item"
+    done
 }
 
 function checkout {
@@ -70,11 +70,11 @@ function merge {
 }
 
 function post_install_dependencies {
-  # These files must exist if ironic is enabled. Use dummy files to prevent task from
-  # failing which expects these files to be present.
-  sudo_if_available mkdir -p /opt/kayobe/images/ipa/
-  sudo_if_available touch /opt/kayobe/images/ipa/ipa.kernel
-  sudo_if_available touch /opt/kayobe/images/ipa/ipa.initramfs
+    # These files must exist if ironic is enabled. Use dummy files to prevent task from
+    # failing which expects these files to be present.
+    sudo_if_available mkdir -p /opt/kayobe/images/ipa/
+    sudo_if_available touch /opt/kayobe/images/ipa/ipa.kernel
+    sudo_if_available touch /opt/kayobe/images/ipa/ipa.initramfs
 }
 
 function generate_config {
@@ -133,7 +133,7 @@ function main {
     generate_config "$source_dir"
 
     # diff gives non-zero exit status if there is a difference
-    if sudo_if_available diff -Naur $target_dir/output $source_dir/output > /tmp/kayobe-config-diff; then
+    if sudo_if_available diff -Naur $target_dir/output $source_dir/output >/tmp/kayobe-config-diff; then
         echo 'The diff was empty!'
     else
         echo 'The diff was non-empty. Please check the diff output.'
@@ -142,7 +142,7 @@ function main {
 
 if [ "$#" -lt 1 ]; then
     die $LINENO "Error: You must provide a git ref to compare to." \
-                "Usage: config-diff.sh <git ref>"
+        "Usage: config-diff.sh <git ref>"
 fi
 
 main $1

@@ -1,0 +1,39 @@
+name: Test and style check
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Set up Python 3.
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install -U pre-commit
+
+      - name: Install hooks
+        run: pre-commit install
+
+      - name: Run hooks manually to check for style violations
+        run: pre-commit run --all-files
+
+  bash-unit-tests:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out the codebase.
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install hooks
+        run: test/unit.sh

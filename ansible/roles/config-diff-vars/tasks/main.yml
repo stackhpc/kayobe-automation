@@ -13,4 +13,3 @@
     dest: "{{ config_diff_vars_kolla_output_path }}"
   vars:
     ip_mappings: "{{ groups['overcloud'] | ip_mappings }}"
-

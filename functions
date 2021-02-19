@@ -42,7 +42,7 @@ function log_info {
         msg="[INFO]: $@"
         echo "$msg" 1>&2
         if [ ! -z ${LOGDIR:+x} ]; then
-            echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
         fi
     fi
 }
@@ -52,7 +52,7 @@ function log_warn {
         msg="[WARNING]: $@"
         echo "$msg" 1>&2
         if [ ! -z ${LOGDIR:+x} ]; then
-            echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
         fi
     fi
 }
@@ -62,7 +62,7 @@ function log_debug {
         msg="[DEBUG]: $@"
         echo "$msg" 1>&2
         if [ ! -z ${LOGDIR:+x} ]; then
-            echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
         fi
     fi
 }
@@ -72,7 +72,7 @@ function log_error {
         msg="[ERROR]: $@"
         echo "$msg" 1>&2
         if [ ! -z ${LOGDIR:+x} ]; then
-            echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
         fi
     fi
 }
@@ -86,7 +86,7 @@ function backtrace {
     deep=$((${#BASH_SOURCE[@]} - 1))
     echo "[Call Trace]"
     while [ $level -le $deep ]; do
-        echo "${BASH_SOURCE[$deep]}:${BASH_LINENO[$deep-1]}:${FUNCNAME[$deep-1]}"
+        echo "${BASH_SOURCE[$deep]}:${BASH_LINENO[$deep - 1]}:${FUNCNAME[$deep - 1]}"
         deep=$((deep - 1))
     done
 }
@@ -96,7 +96,8 @@ function backtrace {
 function die {
     local exitcode=$?
     set +o xtrace
-    local line=$1; shift
+    local line=$1
+    shift
     if [ $exitcode == 0 ]; then
         exitcode=1
     fi
@@ -107,7 +108,6 @@ function die {
     exit $exitcode
 }
 
-
 # Prints line number and "message" in error format
 # _err $LINENO "message"
 function _err {
@@ -116,9 +116,9 @@ function _err {
     xtrace=$(set +o | grep xtrace)
     set +o xtrace
     local msg="[ERROR] ${BASH_SOURCE[2]}:$1 $2"
-    echo "$msg" 1>&2;
+    echo "$msg" 1>&2
     if [ ! -z ${LOGDIR:+x} ]; then
-        echo "$msg" >> "${LOGDIR}/kayobe-automation.log"
+        echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
     fi
     $xtrace
     return $exitcode
@@ -131,12 +131,12 @@ function environment_diagnostics {
 }
 
 function pause {
-   echo "Press [Enter] to continue..."
-   read -p "$*"
+    echo "Press [Enter] to continue..."
+    read -p "$*"
 }
 
 function function_exists {
-    declare -f -F $1 > /dev/null
+    declare -f -F $1 >/dev/null
     return $?
 }
 
@@ -155,8 +155,8 @@ function call_with_hooks {
 function is_absolute_path {
     path="$1"
     case "$path" in
-        /*) true ;;
-        *) false ;;
+    /*) true ;;
+    *) false ;;
     esac
 }
 
@@ -173,7 +173,7 @@ function config_defaults {
 
     export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
 
-   # Additional arguments to pass to kayobe commands.
+    # Additional arguments to pass to kayobe commands.
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
 
     export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
@@ -226,8 +226,7 @@ function is_dnf {
 function workaround_start_sshd {
     # Kayobe will try and keyscan localhost which will fail if sshd not running
     # See: https://github.com/openstack/kayobe/blob/869185ea7be5d6b5b21c964a620839d5475196fd/ansible/roles/bootstrap/tasks/main.yml#L31
-    if ! pgrep -x "sshd" > /dev/null
-    then
+    if ! pgrep -x "sshd" >/dev/null; then
         sudo_if_available /usr/bin/ssh-keygen -A
         sudo_if_available /usr/sbin/sshd &
     fi

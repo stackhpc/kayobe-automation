@@ -16,5 +16,6 @@ repos:
      language: golang
      additional_dependencies: [mvdan.cc/sh/v3/cmd/shfmt@v3.2.2]
      entry: shfmt
-     args: [-w, -i, '4']
+     args: [-w, '.']
+     pass_filenames: false
      types: [shell]

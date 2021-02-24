@@ -89,7 +89,12 @@ function git_untracked_count {
 }
 
 function is_git_dirty {
-    let result="$(git status --porcelain 2>/dev/null | wc -l)"
+    local file_spec=()
+    if [ "$#" -gt 0 ]; then
+        local file_spec=("--" "$@")
+    fi
+    log_debug "git_is_dirty::file_spec: " ${file_spec[@]}
+    let result="$(git status --porcelain "${file_spec[@]}" 2>/dev/null | wc -l)"
     log_debug "git_is_dirty::result: $result"
     if [ $result -eq 0 ]; then
         return $(false)

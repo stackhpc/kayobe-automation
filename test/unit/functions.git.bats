@@ -7,11 +7,17 @@ load '../libs/kayobe-automation'
 # teardown.
 
 setup() {
-    set -eu
+    # Backup old options otherwise we can break tests won't run and
+    # will show passed.
+    OLDOPTS=$(set +o)
     work_dir=$(mktemp -d --suffix kayobe-automation-testing)
     cd "$work_dir"
     git init
-    set +eu
+    # Restore old options
+    case $- in
+      *e*) OLDOPTS="$OLDOPTS; set -e";;
+      *) OLDOPTS="$OLDOPTS; set +e";;
+    esac
 }
 
 teardown() {
@@ -20,13 +26,37 @@ teardown() {
   set +eu
 }
 
-@test "git_is_dirty return false on clean repository" {
-  refute git_is_dirty $tempdir
+@test "git_is_dirty returns false on clean repository" {
+  refute is_git_dirty
 }
 
-@test "git_is_dirty return true if file not commited" {
+@test "git_is_dirty returns true if file not commited" {
   touch dummy-file
-  assert git_is_dirty $tempdir
+  assert is_git_dirty
+}
+
+@test "git_is_dirty returns false if file doesn't match spec" {
+  touch dummy-file
+  touch dummy-file-2
+  refute is_git_dirty "*.yml"
+}
+
+@test "git_is_dirty returns true if file matches spec" {
+  touch dummy-file
+  assert is_git_dirty "*"
+}
+
+@test "git_is_dirty returns true if one of patterns matches" {
+  touch dummy-file
+  touch dummy.txt
+  assert is_git_dirty ".yml" "*.txt" "*.py"
+}
+
+@test "git_is_dirty returns true with subdirectory match" {
+  touch dummy-file
+  mkdir test
+  touch test/dummy-file.txt
+  assert is_git_dirty ".yml" "**/*.txt" "*.py"
 }
 
 @test "git_untracked_count returns correct count" {

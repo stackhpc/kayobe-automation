@@ -11,7 +11,7 @@ function main {
     # This is a manually run test that will submit a gitlab PR. Variables are a bit hardcoded.
     # You need to export a valid personal access token with:
     # export KAYOBE_AUTOMATION_PR_AUTH_TOKEN=mytoken
-    export KAYOBE_AUTOMATION_PR_TYPE=github
+    export KAYOBE_AUTOMATION_PR_TYPE=gitlab
     export KAYOBE_AUTOMATION_PR_TARGET_BRANCH=master
     export KAYOBE_AUTOMATION_PR_TITLE="Testing that merge requests work"
     export KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID=24715064

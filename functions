@@ -30,6 +30,120 @@ export _LOG_LEVEL_WARN=2000
 export _LOG_LEVEL_ERROR=1000
 
 ###############################################################################
+# Configuration
+
+function config_defaults {
+    # Set default values for kayobe development configuration.
+
+    export KAYOBE_BRANCH="${KAYOBE_BRANCH:-stable/ussuri}"
+    export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')}"
+    export KAYOBE_URI="https://github.com/openstack/kayobe"
+    export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
+    export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE}"
+
+    export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
+
+    # Additional arguments to pass to kayobe commands.
+    export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
+
+    export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
+
+    # Log directory in case of errors
+    export LOGDIR=${LOGDIR:-/tmp/logs}
+
+    # Ansible defaults
+    export ANSIBLE_FORCE_COLOR=${ANSIBLE_FORCE_COLOR:-True}
+
+    # SSH key to use. This exists for documentation purposes. It is not recommended
+    # to set it in config.sh
+    export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:-}
+
+    # TODO: validate/auto detect?
+    # Determines which helper to use: gitlab, github, etc, defaults to none.
+    export KAYOBE_AUTOMATION_PR_TYPE=${KAYOBE_AUTOMATION_PR_TYPE:-}
+
+    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+        config_extension_pull_request
+    fi
+}
+
+function config_extension_pull_request {
+    # These are only set if KAYOBE_AUTOMATION_PR_TYPE is set.
+
+    # Which branch should we create a PR into?
+    export KAYOBE_AUTOMATION_PR_TARGET_BRANCH=${KAYOBE_AUTOMATION_PR_TARGET_BRANCH:-}
+    # Auth token to used to authenticate against the API
+    export KAYOBE_AUTOMATION_PR_AUTH_TOKEN=${KAYOBE_AUTOMATION_PR_AUTH_TOKEN:-}
+    # Do we only care about a subset of the files? e.g "**/*.yml"
+    export KAYOBE_AUTOMATION_PR_PATHSPEC=${KAYOBE_AUTOMATION_PR_PATHSPEC:-}
+
+    export KAYOBE_AUTOMATION_PR_URL_DEFAULT=
+    if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
+        # default to gitlab.com
+        export KAYOBE_AUTOMATION_PR_URL_DEFAULT="https://gitlab.com/api/v4/projects/${KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID:-}/merge_requests"
+    fi
+
+    # API endpoint used to created pull request
+    export KAYOBE_AUTOMATION_PR_URL=${KAYOBE_AUTOMATION_PR_URL:-$KAYOBE_AUTOMATION_PR_URL_DEFAULT}
+    # commit author
+    export KAYOBE_AUTOMATION_PR_USERNAME=${KAYOBE_AUTOMATION_PR_USERNAME:-kayobe-automation}
+    # commit email
+    export KAYOBE_AUTOMATION_PR_EMAIL=${KAYOBE_AUTOMATION_PR_EMAIL:-kayobe-automation@example.org}
+}
+
+function config_set {
+    # Source the configuration file, config.sh
+    source "${KAYOBE_AUTOMATION_DIR}/config.sh"
+}
+
+function config_check {
+    # Check the configuration environment variables.
+    set +u
+    if [[ -z "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
+        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
+            die $LINENO "KAYOBE_CONFIG_SOURCE_PATH must be set"
+        fi
+    fi
+    if [[ ! -e "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
+        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
+            die $LINENO "Kayobe configuration path $KAYOBE_CONFIG_SOURCE_PATH does not exist"
+        fi
+    fi
+
+    # PR validation
+    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+        # Shared validation
+        if [[ -z "${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_TARGET_BRANCH must be set"
+        fi
+        if [[ -z "${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_AUTH_TOKEN must be set"
+        fi
+        if [[ -z "${KAYOBE_AUTOMATION_PR_TITLE}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_TITLE must be set"
+        fi
+        if [[ -z "${KAYOBE_AUTOMATION_PR_URL}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_URL must be set"
+        fi
+        # Gitlab specific valiation
+        if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
+            if [[ -z "${KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID}" ]]; then
+                die $LINENO "KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID must be set"
+            fi
+        fi
+    fi
+
+    set -u
+}
+
+function config_init {
+    config_defaults
+    config_set
+    config_check
+    mkdir -p "$LOGDIR"
+}
+
+###############################################################################
 # Logging
 
 function log_level {
@@ -278,120 +392,6 @@ function is_absolute_path {
     /*) true ;;
     *) false ;;
     esac
-}
-
-###############################################################################
-# Configuration
-
-function config_defaults {
-    # Set default values for kayobe development configuration.
-
-    export KAYOBE_BRANCH="${KAYOBE_BRANCH:-stable/ussuri}"
-    export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')}"
-    export KAYOBE_URI="https://github.com/openstack/kayobe"
-    export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
-    export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE}"
-
-    export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
-
-    # Additional arguments to pass to kayobe commands.
-    export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
-
-    export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
-
-    # Log directory in case of errors
-    export LOGDIR=${LOGDIR:-/tmp/logs}
-
-    # Ansible defaults
-    export ANSIBLE_FORCE_COLOR=${ANSIBLE_FORCE_COLOR:-True}
-
-    # SSH key to use. This exists for documentation purposes. It is not recommended
-    # to set it in config.sh
-    export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:-}
-
-    # TODO: validate/auto detect?
-    # Determines which helper to use: gitlab, github, etc, defaults to none.
-    export KAYOBE_AUTOMATION_PR_TYPE=${KAYOBE_AUTOMATION_PR_TYPE:-}
-
-    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
-        config_extension_pull_request
-    fi
-}
-
-function config_extension_pull_request {
-    # These are only set if KAYOBE_AUTOMATION_PR_TYPE is set.
-
-    # Which branch should we create a PR into?
-    export KAYOBE_AUTOMATION_PR_TARGET_BRANCH=${KAYOBE_AUTOMATION_PR_TARGET_BRANCH:-}
-    # Auth token to used to authenticate against the API
-    export KAYOBE_AUTOMATION_PR_AUTH_TOKEN=${KAYOBE_AUTOMATION_PR_AUTH_TOKEN:-}
-    # Do we only care about a subset of the files? e.g "**/*.yml"
-    export KAYOBE_AUTOMATION_PR_PATHSPEC=${KAYOBE_AUTOMATION_PR_PATHSPEC:-}
-
-    export KAYOBE_AUTOMATION_PR_URL_DEFAULT=
-    if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
-        # default to gitlab.com
-        export KAYOBE_AUTOMATION_PR_URL_DEFAULT="https://gitlab.com/api/v4/projects/${KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID:-}/merge_requests"
-    fi
-
-    # API endpoint used to created pull request
-    export KAYOBE_AUTOMATION_PR_URL=${KAYOBE_AUTOMATION_PR_URL:-$KAYOBE_AUTOMATION_PR_URL_DEFAULT}
-    # commit author
-    export KAYOBE_AUTOMATION_PR_USERNAME=${KAYOBE_AUTOMATION_PR_USERNAME:-kayobe-automation}
-    # commit email
-    export KAYOBE_AUTOMATION_PR_EMAIL=${KAYOBE_AUTOMATION_PR_EMAIL:-kayobe-automation@example.org}
-}
-
-function config_set {
-    # Source the configuration file, config.sh
-    source "${KAYOBE_AUTOMATION_DIR}/config.sh"
-}
-
-function config_check {
-    # Check the configuration environment variables.
-    set +u
-    if [[ -z "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
-        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
-            die $LINENO "KAYOBE_CONFIG_SOURCE_PATH must be set"
-        fi
-    fi
-    if [[ ! -e "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
-        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
-            die $LINENO "Kayobe configuration path $KAYOBE_CONFIG_SOURCE_PATH does not exist"
-        fi
-    fi
-
-    # PR validation
-    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
-        # Shared validation
-        if [[ -z "${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}" ]]; then
-            die $LINENO "KAYOBE_AUTOMATION_PR_TARGET_BRANCH must be set"
-        fi
-        if [[ -z "${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" ]]; then
-            die $LINENO "KAYOBE_AUTOMATION_PR_AUTH_TOKEN must be set"
-        fi
-        if [[ -z "${KAYOBE_AUTOMATION_PR_TITLE}" ]]; then
-            die $LINENO "KAYOBE_AUTOMATION_PR_TITLE must be set"
-        fi
-        if [[ -z "${KAYOBE_AUTOMATION_PR_URL}" ]]; then
-            die $LINENO "KAYOBE_AUTOMATION_PR_URL must be set"
-        fi
-        # Gitlab specific valiation
-        if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
-            if [[ -z "${KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID}" ]]; then
-                die $LINENO "KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID must be set"
-            fi
-        fi
-    fi
-
-    set -u
-}
-
-function config_init {
-    config_defaults
-    config_set
-    config_check
-    mkdir -p "$LOGDIR"
 }
 
 ###############################################################################

@@ -10,6 +10,7 @@ source "${PARENT}/../functions"
 function main {
     kayobe_init
     run_kayobe overcloud service deploy
+    pull_request "${KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT}"
 }
 
 main

@@ -35,5 +35,13 @@ jobs:
         with:
           submodules: true
 
+      - name: Set git user name
+        # empty ident name (for <runner@fv-az200-232.z5vp5onzgpeubbrmro10dqbqjh.jx.internal.cloudapp.net>) not allowed
+        run: git config --global user.email "kayobe-automation-github-workflow@example.org"
+
+      - name: Set git user email
+        # empty ident name (for <runner@fv-az200-232.z5vp5onzgpeubbrmro10dqbqjh.jx.internal.cloudapp.net>) not allowed
+        run: git config --global user.name "kayobe-automation-github-workflow"
+
       - name: Install hooks
         run: test/unit.sh

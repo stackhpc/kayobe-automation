@@ -1,18 +1,5 @@
-#!/usr/bin/env ./test/libs/bats/bin/bats
-load 'libs/bats-support/load'
-load 'libs/bats-assert/load'
-load 'libs/kayobe-automation'
+#!/usr/bin/env bash
 
-@test "is_absolute_path returns true if path starts with /" {
-  assert is_absolute_path "/tmp/absolute-path"
-}
+PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-@test "is_absolute_path returns false for relative path" {
-  refute is_absolute_path "relative/path"
-}
-
-@test "die exits with error message" {
-  run die $LINENO "grep-me"
-  assert_failure
-  assert_output --partial "grep-me"
-}
+$PARENT/libs/bats/bin/bats $PARENT/unit/

@@ -21,6 +21,7 @@ function main {
         die $LINENO "Playbook path does not exist: $PLAYBOOK_PATH"
     fi
     run_kayobe playbook run "$PLAYBOOK_PATH"
+    pull_request "${KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT}"
 }
 
 if [ "$#" -lt 1 ]; then

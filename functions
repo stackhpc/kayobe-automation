@@ -5,6 +5,20 @@ set -o pipefail
 
 # Library of functions for the kayobe development environment.
 
+###############################################################################
+# Context variables
+# These get set according to execution context. They may not have been set
+# if you haven't reach a certain point in the execution. Instead of using
+# globals we could use assosociate arrays to namespace these, but it is
+# unclear if it is worth the effort.
+
+# Set after calling environment_setup. Points to the root of the kayobe-config
+# repository.
+export KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT=
+
+###############################################################################
+# Globals
+
 FUNCTIONS_PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export KAYOBE_AUTOMATION_UTILS_PATH="$FUNCTIONS_PARENT/utils"
 export KAYOBE_AUTOMATION_REPO_ROOT="$FUNCTIONS_PARENT/.."
@@ -15,7 +29,128 @@ export _LOG_LEVEL_INFO=3000
 export _LOG_LEVEL_WARN=2000
 export _LOG_LEVEL_ERROR=1000
 
-# Utility functions
+###############################################################################
+# Configuration
+
+function config_defaults {
+    # Set default values for kayobe development configuration.
+
+    export KAYOBE_BRANCH="${KAYOBE_BRANCH:-stable/ussuri}"
+    export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')}"
+    export KAYOBE_URI="https://github.com/openstack/kayobe"
+    export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
+    export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE}"
+
+    export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
+
+    # Additional arguments to pass to kayobe commands.
+    export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
+
+    export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
+
+    # Log directory in case of errors
+    export LOGDIR=${LOGDIR:-/tmp/logs}
+
+    # Ansible defaults
+    export ANSIBLE_FORCE_COLOR=${ANSIBLE_FORCE_COLOR:-True}
+
+    # SSH key to use. This exists for documentation purposes. It is not recommended
+    # to set it in config.sh
+    export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:-}
+
+    # TODO: validate/auto detect?
+    # Determines which helper to use: gitlab, github, etc, defaults to none.
+    export KAYOBE_AUTOMATION_PR_TYPE=${KAYOBE_AUTOMATION_PR_TYPE:-}
+
+    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+        config_extension_pull_request
+    fi
+}
+
+function config_extension_pull_request {
+    # These are only set if KAYOBE_AUTOMATION_PR_TYPE is set.
+
+    # Which branch should we create a PR into?
+    export KAYOBE_AUTOMATION_PR_TARGET_BRANCH=${KAYOBE_AUTOMATION_PR_TARGET_BRANCH:-}
+    # Auth token to used to authenticate against the API
+    export KAYOBE_AUTOMATION_PR_AUTH_TOKEN=${KAYOBE_AUTOMATION_PR_AUTH_TOKEN:-}
+    # Do we only care about a subset of the files? e.g "**/*.yml"
+    export KAYOBE_AUTOMATION_PR_PATHSPEC=${KAYOBE_AUTOMATION_PR_PATHSPEC:-}
+
+    export KAYOBE_AUTOMATION_PR_URL_DEFAULT=
+    if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
+        # default to gitlab.com
+        export KAYOBE_AUTOMATION_PR_URL_DEFAULT="https://gitlab.com/api/v4/projects/${KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID:-}/merge_requests"
+    fi
+
+    # API endpoint used to created pull request
+    export KAYOBE_AUTOMATION_PR_URL=${KAYOBE_AUTOMATION_PR_URL:-$KAYOBE_AUTOMATION_PR_URL_DEFAULT}
+    # commit author
+    export KAYOBE_AUTOMATION_PR_USERNAME=${KAYOBE_AUTOMATION_PR_USERNAME:-kayobe-automation}
+    # commit email
+    export KAYOBE_AUTOMATION_PR_EMAIL=${KAYOBE_AUTOMATION_PR_EMAIL:-kayobe-automation@example.org}
+}
+
+function config_set {
+    # Source the configuration file, config.sh
+    source "${KAYOBE_AUTOMATION_DIR}/config.sh"
+}
+
+function config_check {
+    # Check the configuration environment variables.
+    set +u
+    if [[ -z "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
+        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
+            die $LINENO "KAYOBE_CONFIG_SOURCE_PATH must be set"
+        fi
+    fi
+    if [[ ! -e "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
+        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
+            die $LINENO "Kayobe configuration path $KAYOBE_CONFIG_SOURCE_PATH does not exist"
+        fi
+    fi
+
+    # PR validation
+    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+        # Shared validation
+        if [[ -z "${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_TARGET_BRANCH must be set"
+        fi
+        if [[ -z "${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_AUTH_TOKEN must be set"
+        fi
+        if [[ -z "${KAYOBE_AUTOMATION_PR_TITLE}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_TITLE must be set"
+        fi
+        if [[ -z "${KAYOBE_AUTOMATION_PR_URL}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_URL must be set"
+        fi
+        # Gitlab specific valiation
+        if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
+            if [[ -z "${KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID}" ]]; then
+                die $LINENO "KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID must be set"
+            fi
+        fi
+        # Github specific valiation
+        if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "github" ]]; then
+            if [[ -z "${KAYOBE_AUTOMATION_PR_GITHUB_USER}" ]]; then
+                die $LINENO "KAYOBE_AUTOMATION_PR_GITHUB_USER must be set"
+            fi
+        fi
+    fi
+
+    set -u
+}
+
+function config_init {
+    config_defaults
+    config_set
+    config_check
+    mkdir -p "$LOGDIR"
+}
+
+###############################################################################
+# Logging
 
 function log_level {
     case "${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}" in
@@ -76,6 +211,135 @@ function log_error {
         fi
     fi
 }
+
+###############################################################################
+# Git utilities, see:
+#    - https://stackoverflow.com/questions/2657935/checking-for-a-dirty-index-or-untracked-files-with-git
+
+function git_modified_count {
+    echo $(git status --porcelain 2>/dev/null | egrep "^(M| M)" | wc -l)
+}
+
+function git_untracked_count {
+    echo $(git status --porcelain 2>/dev/null | grep "^??" | wc -l)
+}
+
+function is_git_dirty {
+    local path_spec=()
+    if [ "$#" -gt 0 ]; then
+        local path_spec=("--" "$@")
+    fi
+    log_debug "git_is_dirty::path_spec: " ${path_spec[@]}
+    let result="$(git status --porcelain "${path_spec[@]}" 2>/dev/null | wc -l)"
+    log_debug "git_is_dirty::result: $result"
+    if [ $result -eq 0 ]; then
+        return 1
+    fi
+    return 0
+}
+
+###############################################################################
+# Pull request utilities
+
+function _git_commit {
+    local branch_name="$1"
+
+    if [ ! -z ${KAYOBE_AUTOMATION_PR_PATHSPEC:+x} ]; then
+        for filespec in ${KAYOBE_AUTOMATION_PR_PATHSPEC}; do
+            # It is accept for one or more filespec to not match, so we
+            # swallow the failure
+            git add "${filespec}" ||
+                log_info "_git_commit::filespec: $filespec matches zero files"
+        done
+    else
+        git add -A
+    fi
+
+    git config --local user.name ${KAYOBE_AUTOMATION_PR_USERNAME}
+    git config --local user.email ${KAYOBE_AUTOMATION_PR_EMAIL}
+
+    git commit -m "${KAYOBE_AUTOMATION_PR_TITLE}"
+
+    git push origin HEAD:refs/heads/$branch_name
+}
+
+function gitlab_merge_request {
+    # TODO: optional params
+    #         \"assignee_id\":\"${GITLAB_USER_ID}\"
+
+    local branch_name="$(_pull_request_branch_name)"
+
+    _git_commit "${branch_name}"
+
+    local body="{
+        \"id\": ${KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID},
+        \"source_branch\": \"${branch_name}\",
+        \"target_branch\": \"${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}\",
+        \"remove_source_branch\": true,
+        \"title\": \"${KAYOBE_AUTOMATION_PR_TITLE}\"
+    }"
+
+    log_info "Submitting merge request to: $KAYOBE_AUTOMATION_PR_URL"
+
+    curl -X POST "$KAYOBE_AUTOMATION_PR_URL" \
+        --header "PRIVATE-TOKEN:${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" \
+        --header "Content-Type: application/json" \
+        --fail \
+        --data "${body}" | jq "."
+
+    log_info "Merge request created sucessfully"
+}
+
+function github_pull_request {
+    local branch_name="$(_pull_request_branch_name)"
+
+    _git_commit "${branch_name}"
+
+    local body="{
+        \"head\": \"${branch_name}\",
+        \"base\": \"${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}\",
+        \"title\": \"${KAYOBE_AUTOMATION_PR_TITLE}\"
+    }"
+
+    # Support 0Auth token? Current method requires a personal access token, but
+    # we might have access to 0Auth token in the gitlab runner? Recommended to
+    # to setup a service account otherwise.
+    # --header "Authorization: token ${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" \
+
+    log_info "Submitting merge request to: $KAYOBE_AUTOMATION_PR_URL"
+
+    # https://docs.github.com/en/rest/reference/pulls
+    curl -X POST "$KAYOBE_AUTOMATION_PR_URL" \
+        --user "${KAYOBE_AUTOMATION_PR_GITHUB_USER}:${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" \
+        --header "Accept: application/vnd.github.v3+json" \
+        --header "Content-Type: application/json" \
+        --data "${body}" | jq "."
+
+    log_info "Pull request created sucessfully"
+}
+
+function _pull_request_branch_name {
+    local uuid=$(uuidgen)
+    local branch_name="$(basename $0)/${uuid}"
+    echo "$branch_name"
+}
+
+function _pull_request {
+    if [[ -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+        log_info "Not creating PR as KAYOBE_AUTOMATION_PR_TYPE is not set"
+        return
+    elif [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
+        gitlab_merge_request
+        return
+    elif [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "github" ]]; then
+        github_pull_request
+        return
+    fi
+    die $LINENO "KAYOBE_AUTOMATION_PR_TYPE: $KAYOBE_AUTOMATION_PR_TYPE is an invalid value"
+}
+
+###############################################################################
+# General purpose utility functions
 
 # Prints backtrace info
 # filename:lineno:function
@@ -160,63 +424,7 @@ function is_absolute_path {
     esac
 }
 
-# Configuration
-
-function config_defaults {
-    # Set default values for kayobe development configuration.
-
-    export KAYOBE_BRANCH="${KAYOBE_BRANCH:-stable/ussuri}"
-    export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')}"
-    export KAYOBE_URI="https://github.com/openstack/kayobe"
-    export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
-    export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE}"
-
-    export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
-
-    # Additional arguments to pass to kayobe commands.
-    export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
-
-    export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
-
-    # Log directory in case of errors
-    export LOGDIR=${LOGDIR:-/tmp/logs}
-
-    # Ansible defaults
-    export ANSIBLE_FORCE_COLOR=${ANSIBLE_FORCE_COLOR:-True}
-
-    # SSH key to use. This exists for documentation purposes. It is not recommended
-    # to set it in config.sh
-    export KAYOBE_AUTOMATION_SSH_PRIVATE_KEY=${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:-}
-}
-
-function config_set {
-    # Source the configuration file, config.sh
-    source "${KAYOBE_AUTOMATION_DIR}/config.sh"
-}
-
-function config_check {
-    # Check the configuration environment variables.
-    set +u
-    if [[ -z "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
-        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
-            die $LINENO "KAYOBE_CONFIG_SOURCE_PATH must be set"
-        fi
-    fi
-    if [[ ! -e "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
-        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
-            die $LINENO "Kayobe configuration path $KAYOBE_CONFIG_SOURCE_PATH does not exist"
-        fi
-    fi
-    set -u
-}
-
-function config_init {
-    config_defaults
-    config_set
-    config_check
-    mkdir -p "$LOGDIR"
-}
-
+###############################################################################
 # Installation
 
 function is_dnf {
@@ -243,9 +451,9 @@ function sudo_if_available {
 function install_dependencies {
     echo "Installing package dependencies for kayobe"
     if is_dnf; then
-        sudo_if_available dnf -y install gcc git vim python3-pyyaml python3-virtualenv libffi-devel openssh-clients
+        sudo_if_available dnf -y install gcc git vim python3-pyyaml python3-virtualenv libffi-devel openssh-clients jq
     else
-        sudo_if_available apt install -y python-dev python3-virtualenv gcc git libffi-dev openssh-client
+        sudo_if_available apt install -y python-dev python3-virtualenv gcc git libffi-dev openssh-client jq
     fi
 }
 
@@ -303,6 +511,7 @@ function create_kayobe_environment {
     install_kayobe_venv "$env/venvs/kayobe" "$KAYOBE_PIP_INSTALL_ARGS"
 }
 
+###############################################################################
 # Runtime
 
 function environment_setup {
@@ -313,6 +522,8 @@ function environment_setup {
     source "$env/venvs/kayobe/bin/activate"
     set -u
     source "$env/src/kayobe-config/kayobe-env"
+    export KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT="$KAYOBE_CONFIG_PATH/../.."
+    log_info "Context variable: KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT set to $KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT"
 }
 
 function run_kayobe {
@@ -335,6 +546,20 @@ function control_host_bootstrap {
         die $LINENO "Failed to bootstrap control host"
     fi
     echo "Bootstrapped control host after $i attempts"
+}
+
+function pull_request {
+    # Little bit dirty to use this global var, but do we really want to pass
+    # the env around
+    pushd $1 >/dev/null
+    if is_git_dirty $KAYOBE_AUTOMATION_PR_PATHSPEC; then
+        # Delegate to the correct helper
+        log_info "Git repository is dirty, going to make a PR"
+        _pull_request
+    else
+        log_info "Repository is clean, no need to submit a PR..."
+    fi
+    popd >/dev/null
 }
 
 function kayobe_init {

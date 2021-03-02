@@ -1,5 +1,9 @@
 ---
 
+# This file is prefixed with kayobe-automation as it is copied into the kayobe source
+# checkout and this should prevent a collision with a kayobe playbook with the same
+# name.
+
 - hosts: localhost
   tasks:
     - include_role:

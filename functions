@@ -217,11 +217,11 @@ function log_error {
 #    - https://stackoverflow.com/questions/2657935/checking-for-a-dirty-index-or-untracked-files-with-git
 
 function git_modified_count {
-    echo $(git status --porcelain 2>/dev/null| egrep "^(M| M)" | wc -l)
+    echo $(git status --porcelain 2>/dev/null | egrep "^(M| M)" | wc -l)
 }
 
 function git_untracked_count {
-    echo $(git status --porcelain 2>/dev/null| grep "^??" | wc -l)
+    echo $(git status --porcelain 2>/dev/null | grep "^??" | wc -l)
 }
 
 function is_git_dirty {
@@ -248,8 +248,8 @@ function _git_commit {
         for filespec in ${KAYOBE_AUTOMATION_PR_PATHSPEC}; do
             # It is accept for one or more filespec to not match, so we
             # swallow the failure
-            git add "${filespec}" \
-                || log_info "_git_commit::filespec: $filespec matches zero files"
+            git add "${filespec}" ||
+                log_info "_git_commit::filespec: $filespec matches zero files"
         done
     else
         git add -A
@@ -277,7 +277,7 @@ function gitlab_merge_request {
         \"target_branch\": \"${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}\",
         \"remove_source_branch\": true,
         \"title\": \"${KAYOBE_AUTOMATION_PR_TITLE}\"
-    }";
+    }"
 
     log_info "Submitting merge request to: $KAYOBE_AUTOMATION_PR_URL"
 
@@ -299,7 +299,7 @@ function github_pull_request {
         \"head\": \"${branch_name}\",
         \"base\": \"${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}\",
         \"title\": \"${KAYOBE_AUTOMATION_PR_TITLE}\"
-    }";
+    }"
 
     # Support 0Auth token? Current method requires a personal access token, but
     # we might have access to 0Auth token in the gitlab runner? Recommended to

@@ -131,6 +131,12 @@ function config_check {
                 die $LINENO "KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID must be set"
             fi
         fi
+        # Github specific valiation
+        if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "github" ]]; then
+            if [[ -z "${KAYOBE_AUTOMATION_PR_GITHUB_USER}" ]]; then
+                die $LINENO "KAYOBE_AUTOMATION_PR_GITHUB_USER must be set"
+            fi
+        fi
     fi
 
     set -u
@@ -285,7 +291,31 @@ function gitlab_merge_request {
 }
 
 function github_pull_request {
-    die $LINENO "Not implemented"
+    local branch_name="$(_pull_request_branch_name)"
+
+    _git_commit "${branch_name}"
+
+    local body="{
+        \"head\": \"${branch_name}\",
+        \"base\": \"${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}\",
+        \"title\": \"${KAYOBE_AUTOMATION_PR_TITLE}\"
+    }";
+
+    # Support 0Auth token? Current method requires a personal access token, but
+    # we might have access to 0Auth token in the gitlab runner? Recommended to
+    # to setup a service account otherwise.
+    # --header "Authorization: token ${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" \
+
+    log_info "Submitting merge request to: $KAYOBE_AUTOMATION_PR_URL"
+
+    # https://docs.github.com/en/rest/reference/pulls
+    curl -X POST "$KAYOBE_AUTOMATION_PR_URL" \
+        --user "${KAYOBE_AUTOMATION_PR_GITHUB_USER}:${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" \
+        --header "Accept: application/vnd.github.v3+json" \
+        --header "Content-Type: application/json" \
+        --data "${body}" | jq "."
+
+    log_info "Pull request created sucessfully"
 }
 
 function _pull_request_branch_name {

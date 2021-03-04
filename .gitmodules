@@ -7,3 +7,6 @@
 [submodule "test/libs/bats-support"]
 	path = test/libs/bats-support
 	url = https://github.com/ztombol/bats-support
+[submodule "docker/rally"]
+	path = docker/rally
+	url = https://github.com/stackhpc/docker-rally

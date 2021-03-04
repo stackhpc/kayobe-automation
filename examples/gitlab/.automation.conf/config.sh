@@ -4,3 +4,6 @@
 #        As we have not configured the seed network interfaces. Remove this once they are configured.
 KAYOBE_EXTRA_ARGS_DEFAULTS="${KAYOBE_EXTRA_ARGS_DEFAULTS:=--skip-tags config-validation}"
 KAYOBE_EXTRA_ARGS="${KAYOBE_EXTRA_ARGS:-} ${KAYOBE_EXTRA_ARGS_DEFAULTS}"
+
+KAYOBE_AUTOMATION_TEMPEST_CONCURRENCY=2
+KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES="${KAYOBE_AUTOMATION_CONFIG_PATH}/tempest/tempest-production.overrides.conf"

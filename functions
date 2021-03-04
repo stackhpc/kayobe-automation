@@ -410,7 +410,9 @@ function function_exists {
 
 function call {
     if function_exists $1; then
+        log_debug "Entering $1"
         $1
+        log_debug "Exiting $1"
     fi
 }
 

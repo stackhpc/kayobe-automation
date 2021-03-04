@@ -569,8 +569,8 @@ function pull_request {
 }
 
 function kayobe_init {
-    call_with_hooks validate
     call_with_hooks config_init
+    call_with_hooks validate
     call_with_hooks environment_diagnostics
     call_with_hooks install_dependencies
     call_with_hooks workaround_start_sshd

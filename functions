@@ -149,6 +149,10 @@ function config_init {
     mkdir -p "$LOGDIR"
 }
 
+function validate {
+    true
+}
+
 ###############################################################################
 # Logging
 

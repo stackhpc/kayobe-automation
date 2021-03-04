@@ -22,7 +22,7 @@ export KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT=
 FUNCTIONS_PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export KAYOBE_AUTOMATION_UTILS_PATH="$FUNCTIONS_PARENT/utils"
 export KAYOBE_AUTOMATION_REPO_ROOT="$FUNCTIONS_PARENT/.."
-export KAYOBE_AUTOMATION_DIR="${KAYOBE_AUTOMATION_DIR:-$KAYOBE_AUTOMATION_REPO_ROOT/.automation.conf}"
+export KAYOBE_AUTOMATION_CONFIG_PATH="${KAYOBE_AUTOMATION_CONFIG_PATH:-$KAYOBE_AUTOMATION_REPO_ROOT/.automation.conf}"
 
 export _LOG_LEVEL_DEBUG=4000
 export _LOG_LEVEL_INFO=3000
@@ -93,7 +93,7 @@ function config_extension_pull_request {
 
 function config_set {
     # Source the configuration file, config.sh
-    source "${KAYOBE_AUTOMATION_DIR}/config.sh"
+    source "${KAYOBE_AUTOMATION_CONFIG_PATH}/config.sh"
 }
 
 function config_check {

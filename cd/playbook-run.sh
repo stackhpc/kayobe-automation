@@ -31,11 +31,11 @@ function main {
     pull_request "${KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT}"
 }
 
-if [ "$#" -lt 1 ]; then
-    die $LINENO "Error: You must provide a playbook to run" \
-        "Usage: playbook-run.sh <playbook>"
-fi
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  main "$1"
+    if [ "$#" -lt 1 ]; then
+        die $LINENO "Error: You must provide a playbook to run" \
+            "Usage: playbook-run.sh <playbook>"
+    fi
+    main "$1"
 fi

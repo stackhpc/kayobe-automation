@@ -9,12 +9,9 @@ source "${PARENT}/../functions"
 
 KAYOBE_AUTOMATION_CONTEXT_PLAYBOOK="$(basename $1)"
 
-# We are overriding this function, but want to modify its output.
-rename_function pull_request_branch_name _pull_request_branch_name
-
 function pull_request_branch_name {
     # playbook.sh/<uuid> -> playbook.sh/<playbook name>/<uuid>
-    echo $(_pull_request_branch_name | sed s"|/|/$KAYOBE_AUTOMATION_CONTEXT_PLAYBOOK/|" )
+    echo "playbook-run.sh/$KAYOBE_AUTOMATION_CONTEXT_PLAYBOOK/$(uuidgen)"
 }
 
 function main {

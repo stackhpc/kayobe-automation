@@ -437,6 +437,18 @@ function is_absolute_path {
     esac
 }
 
+# Special thanks to: https://stackoverflow.com/questions/1203583/how-do-i-rename-a-bash-function
+
+function copy_function {
+  test -n "$(declare -f "$1")" || return
+  eval "${_/$1/$2}"
+}
+
+function rename_function() {
+  copy_function "$@" || return
+  unset -f "$1"
+}
+
 ###############################################################################
 # Installation
 

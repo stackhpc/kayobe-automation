@@ -558,7 +558,7 @@ function pull_request {
     # Little bit dirty to use this global var, but do we really want to pass
     # the env around
     pushd $1 >/dev/null
-    if is_git_dirty $KAYOBE_AUTOMATION_PR_PATHSPEC; then
+    if is_git_dirty ${KAYOBE_AUTOMATION_PR_PATHSPEC:-}; then
         # Delegate to the correct helper
         log_info "Git repository is dirty, going to make a PR"
         _pull_request

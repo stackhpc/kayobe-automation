@@ -89,6 +89,8 @@ function config_extension_pull_request {
     export KAYOBE_AUTOMATION_PR_USERNAME=${KAYOBE_AUTOMATION_PR_USERNAME:-kayobe-automation}
     # commit email
     export KAYOBE_AUTOMATION_PR_EMAIL=${KAYOBE_AUTOMATION_PR_EMAIL:-kayobe-automation@example.org}
+    # Where to push the commit
+    export KAYOBE_AUTOMATION_PR_REMOTE=${KAYOBE_AUTOMATION_PR_REMOTE:-}
 }
 
 function config_set {
@@ -124,6 +126,9 @@ function config_check {
         fi
         if [[ -z "${KAYOBE_AUTOMATION_PR_URL}" ]]; then
             die $LINENO "KAYOBE_AUTOMATION_PR_URL must be set"
+        fi
+        if [[ -z "${KAYOBE_AUTOMATION_PR_REMOTE}" ]]; then
+            die $LINENO "KAYOBE_AUTOMATION_PR_REMOTE must be set"
         fi
         # Gitlab specific valiation
         if [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
@@ -264,7 +269,9 @@ function _git_commit {
 
     git commit -m "${KAYOBE_AUTOMATION_PR_TITLE}"
 
-    git push origin HEAD:refs/heads/$branch_name
+    git remote add kayobe-automation ${KAYOBE_AUTOMATION_PR_REMOTE}
+
+    git push kayobe-automation HEAD:refs/heads/$branch_name
 }
 
 function gitlab_merge_request {

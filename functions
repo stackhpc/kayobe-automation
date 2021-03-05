@@ -302,7 +302,7 @@ function gitlab_merge_request {
 }
 
 function github_pull_request {
-    local branch_name="$(_pull_request_branch_name)"
+    local branch_name="$(pull_request_branch_name)"
 
     _git_commit "${branch_name}"
 
@@ -329,7 +329,7 @@ function github_pull_request {
     log_info "Pull request created sucessfully"
 }
 
-function _pull_request_branch_name {
+function pull_request_branch_name {
     local uuid=$(uuidgen)
     local branch_name="$(basename $0)/${uuid}"
     echo "$branch_name"

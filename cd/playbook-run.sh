@@ -39,4 +39,6 @@ if [ "$#" -lt 1 ]; then
         "Usage: playbook-run.sh <playbook>"
 fi
 
-main "$1"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$1"
+fi

@@ -140,9 +140,10 @@ function main {
     fi
 }
 
-if [ "$#" -lt 1 ]; then
-    die $LINENO "Error: You must provide a git ref to compare to." \
-        "Usage: config-diff.sh <git ref>"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    if [ "$#" -lt 1 ]; then
+        die $LINENO "Error: You must provide a git ref to compare to." \
+            "Usage: config-diff.sh <git ref>"
+    fi
+    main "$1"
 fi
-
-main $1

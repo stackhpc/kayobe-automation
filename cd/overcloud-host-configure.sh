@@ -13,4 +13,6 @@ function main {
     pull_request "${KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT}"
 }
 
-main
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]];then
+  main
+fi

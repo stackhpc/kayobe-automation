@@ -6,10 +6,11 @@ variables:
  GIT_DEPTH: 0
  # Also needs: privileged: true, volumes = ["/certs/client", "/cache"] in /etc/gitlab-runner/config.toml
  DOCKER_TLS_CERTDIR: "/certs"
- GIT_SUBMODULE_STRATEGY: normal
+ GIT_SUBMODULE_STRATEGY: recursive
  # Fixes: Ansible is being run in a world writable directory, see:
  # https://github.com/stackhpc/kayobe-automation/issues/2
  FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR: "true"
+
  # Common configuration for pull requests
  KAYOBE_AUTOMATION_PR_TYPE: gitlab
  KAYOBE_AUTOMATION_PR_TARGET_BRANCH: "$CI_COMMIT_BRANCH"
@@ -17,7 +18,10 @@ variables:
  # NOTE: username is arbitrary and doesn't affect auth
  KAYOBE_AUTOMATION_PR_REMOTE: "https://service-account:$KAYOBE_AUTOMATION_PR_AUTH_TOKEN@gitlab.com/$CI_PROJECT_PATH"
 
-build-image:
+ # Name of the docker image that contains rally
+ RALLY_DOCKER_IMAGE: "$CI_REGISTRY/$CI_PROJECT_PATH/rally-docker"
+
+build-kayobe:
   image: docker:stable
   rules:
     - when: always
@@ -32,6 +36,22 @@ build-image:
     - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA --tag $CI_REGISTRY_IMAGE:latest .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
     - docker push $CI_REGISTRY_IMAGE:latest
+
+build-rally:
+  image: docker:stable
+  rules:
+    - when: always
+  services:
+    - name: docker:dind
+      command: ["--mtu=1450"]
+  stage: build
+  script:
+    - cd .automation/docker/rally
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker pull $RALLY_DOCKER_IMAGE:latest || true
+    - docker build --cache-from $RALLY_DOCKER_IMAGE:latest --tag $RALLY_DOCKER_IMAGE:$CI_COMMIT_SHA --tag $RALLY_DOCKER_IMAGE:latest .
+    - docker push $RALLY_DOCKER_IMAGE:$CI_COMMIT_SHA
+    - docker push $RALLY_DOCKER_IMAGE:latest
 
 overcloud service deploy:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
@@ -87,3 +107,23 @@ kolla diff:
   artifacts:
     expose_as: 'kayobe config diff'
     paths: ['./kayobe-config-diff.txt']
+
+tempest:
+  variables:
+     GIT_SUBMODULE_STRATEGY: normal
+  image: $RALLY_DOCKER_IMAGE:$CI_COMMIT_SHA
+  stage: run
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED
+      when: manual
+  script:
+    - .automation/cd/tempest.sh
+    - mkdir ${CI_PROJECT_DIR}/artifacts
+    - cp /home/rally/artifacts/* ${CI_PROJECT_DIR}/artifacts
+  artifacts:
+    when: always
+    paths:
+      - artifacts/rally-junit.xml
+      - artifacts/rally-verify-report.html
+    reports:
+      junit: artifacts/rally-junit.xml

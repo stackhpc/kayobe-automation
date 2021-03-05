@@ -10,6 +10,12 @@ variables:
  # Fixes: Ansible is being run in a world writable directory, see:
  # https://github.com/stackhpc/kayobe-automation/issues/2
  FF_DISABLE_UMASK_FOR_DOCKER_EXECUTOR: "true"
+ # Common configuration for pull requests
+ KAYOBE_AUTOMATION_PR_TYPE: gitlab
+ KAYOBE_AUTOMATION_PR_TARGET_BRANCH: "$CI_COMMIT_BRANCH"
+ KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID: "$CI_PROJECT_ID"
+ # NOTE: username is arbitrary and doesn't affect auth
+ KAYOBE_AUTOMATION_PR_REMOTE: "https://service-account:$KAYOBE_AUTOMATION_PR_AUTH_TOKEN@gitlab.com/$CI_PROJECT_PATH"
 
 build-image:
   image: docker:stable
@@ -53,6 +59,22 @@ overcloud deployment image build:
       when: manual
   script:
     - .automation/cd/overcloud-deployment-image-build.sh
+
+custom-playbook.yml:
+  image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+  variables:
+    KAYOBE_AUTOMATION_PR_TITLE: "[kayobe-automation] Testing that merge requests work"
+    # (Optional) You can refine what to include in the PR using a path spec. If this is
+    # not defined, all changes in the repository (new files and modificatins) will be
+    # be added to the commit. Multiple path specs can be specified by separating them
+    # with a space.
+    KAYOBE_AUTOMATION_PR_PATHSPEC: "etc/kayobe/ansible/*"
+  stage: run
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED
+      when: manual
+  script:
+    - .automation/cd/playbook-run.sh etc/kayobe/ansible/custom-playbook.yml
 
 kolla diff:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA

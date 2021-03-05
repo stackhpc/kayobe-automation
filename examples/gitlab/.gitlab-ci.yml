@@ -31,35 +31,28 @@ overcloud service deploy:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   stage: run
   rules:
-    - when: manual
+    - if: $CI_COMMIT_REF_PROTECTED
+      when: manual
   script:
     - .automation/cd/overcloud-service-deploy.sh
-  only:
-    variables:
-        - $CI_COMMIT_REF_PROTECTED
-
 
 overcloud host configure:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   stage: run
   rules:
-    - when: manual
+    - if: $CI_COMMIT_REF_PROTECTED
+      when: manual
   script:
     - .automation/cd/overcloud-host-configure.sh
-  only:
-    variables:
-        - $CI_COMMIT_REF_PROTECTED
 
 overcloud deployment image build:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
   stage: run
   rules:
-    - when: manual
+    - if: $CI_COMMIT_REF_PROTECTED
+      when: manual
   script:
     - .automation/cd/overcloud-deployment-image-build.sh
-  only:
-    variables:
-        - $CI_COMMIT_REF_PROTECTED
 
 kolla diff:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA

@@ -1,0 +1,7 @@
+  # Details: {u'message': u'Compute host cpu-e-1041-ironic could not be found.', u'code': 404}
+  # See: https://bugs.launchpad.net/mos/+bug/1570864.
+  # It essentially does:
+  #     (venv-openstack) [will@cumulus-seed ~]$ openstack host show cpu-e-1041-ironic
+  #     string indices must be integers
+  tempest.api.compute.admin.test_hosts.HostsAdminTestJSON.test_show_host_detail: >-
+    test is broken when there are no ironic nodes available.

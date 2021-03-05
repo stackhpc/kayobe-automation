@@ -22,7 +22,6 @@ function post_config_init {
     export KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH="${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH:-${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_SEARCH_PATH}/${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST}}"
 }
 
-
 function main {
     call_with_hooks config_init
     call_with_hooks validate
@@ -43,5 +42,5 @@ function main {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  main
+    main
 fi

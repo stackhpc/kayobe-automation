@@ -113,7 +113,7 @@ function config_check {
     fi
 
     # PR validation
-    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]] && [[ "$KAYOBE_AUTOMATION_PR_TYPE" != "disabled" ]]; then
         # Shared validation
         if [[ -z "${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}" ]]; then
             die $LINENO "KAYOBE_AUTOMATION_PR_TARGET_BRANCH must be set"
@@ -338,7 +338,7 @@ function pull_request_branch_name {
 }
 
 function _pull_request {
-    if [[ -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+    if [[ -z "$KAYOBE_AUTOMATION_PR_TYPE" ]] || [[ "$KAYOBE_AUTOMATION_PR_TYPE" == "disabled" ]]; then
         log_info "Not creating PR as KAYOBE_AUTOMATION_PR_TYPE is not set"
         return
     elif [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then

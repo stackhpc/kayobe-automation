@@ -60,7 +60,7 @@ overcloud service deploy:
     - if: $CI_COMMIT_REF_PROTECTED
       when: manual
   script:
-    - .automation/cd/overcloud-service-deploy.sh
+    - .automation/pipeline/overcloud-service-deploy.sh
 
 overcloud host configure:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
@@ -69,7 +69,7 @@ overcloud host configure:
     - if: $CI_COMMIT_REF_PROTECTED
       when: manual
   script:
-    - .automation/cd/overcloud-host-configure.sh
+    - .automation/pipeline/overcloud-host-configure.sh
 
 overcloud deployment image build:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
@@ -78,7 +78,7 @@ overcloud deployment image build:
     - if: $CI_COMMIT_REF_PROTECTED
       when: manual
   script:
-    - .automation/cd/overcloud-deployment-image-build.sh
+    - .automation/pipeline/overcloud-deployment-image-build.sh
 
 custom-playbook.yml:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
@@ -94,7 +94,7 @@ custom-playbook.yml:
     - if: $CI_COMMIT_REF_PROTECTED
       when: manual
   script:
-    - .automation/cd/playbook-run.sh etc/kayobe/ansible/custom-playbook.yml
+    - .automation/pipeline/playbook-run.sh etc/kayobe/ansible/custom-playbook.yml
 
 kolla diff:
   image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
@@ -117,7 +117,7 @@ tempest:
     - if: $CI_COMMIT_REF_PROTECTED
       when: manual
   script:
-    - .automation/cd/tempest.sh
+    - .automation/pipeline/tempest.sh
     - mkdir ${CI_PROJECT_DIR}/artifacts
     - cp /home/rally/artifacts/* ${CI_PROJECT_DIR}/artifacts
   artifacts:

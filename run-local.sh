@@ -3,7 +3,9 @@
 set -eu
 set -o pipefail
 
-# Example: RUN_LOCAL_DOCKER_IMAGE=config-prebuild automation/run-local.sh automation/ci/config-diff.sh -- --env KAYOBE_VAULT_PASSWORD=$(< ~/.kayobe-vault-pass)
+# Examples:
+#    - RUN_LOCAL_DOCKER_IMAGE=config-prebuild automation/run-local.sh .automation/pipeline/config-diff.sh -- --env KAYOBE_VAULT_PASSWORD=$(< ~/.kayobe-vault-pass)
+#    - RUN_LOCAL_DOCKER_IMAGE=rally-docker:latest .automation/run-local.sh .automation/pipeline/tempest.sh -- --env TEMPEST_PATTERN="tempest.api.compute.servers.test_delete_server.DeleteServersTestJSON" --env TEMPEST_OPENRC="$(< ~/src/um6p-kayobe-config/etc/kolla/public-openrc.sh )" --name will --env KAYOBE_AUTOMATION_LOG_LEVEL=info
 
 PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$PARENT/.."

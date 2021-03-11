@@ -13,6 +13,7 @@ variables:
 
  # Common configuration for pull requests
  KAYOBE_AUTOMATION_PR_TYPE: gitlab
+ KAYOBE_AUTOMATION_PR_TITLE: "[kayobe-automation] Updates to kayobe config (job: $CI_JOB_NAME)"
  KAYOBE_AUTOMATION_PR_TARGET_BRANCH: "$CI_COMMIT_BRANCH"
  KAYOBE_AUTOMATION_PR_GITLAB_PROJECT_ID: "$CI_PROJECT_ID"
  # NOTE: username is arbitrary and doesn't affect auth

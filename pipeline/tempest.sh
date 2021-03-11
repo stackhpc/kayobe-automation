@@ -39,7 +39,6 @@ function main {
         cp ${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH} ~/tempest-skip-list
     fi
     /usr/bin/rally-verify-wrapper.sh
-    pause
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

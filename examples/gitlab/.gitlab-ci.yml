@@ -103,7 +103,7 @@ kolla diff:
   rules:
     - if: $CI_MERGE_REQUEST_ID
   script:
-    - .automation/ci/config-diff.sh origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+    - .automation/pipeline/config-diff.sh origin/$CI_MERGE_REQUEST_TARGET_BRANCH_NAME
     - cp /tmp/kayobe-config-diff ${CI_PROJECT_DIR}/kayobe-config-diff.txt
   artifacts:
     expose_as: 'kayobe config diff'

@@ -539,6 +539,11 @@ function environment_setup {
     source "$env/src/kayobe-config/kayobe-env"
     export KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT="$KAYOBE_CONFIG_PATH/../.."
     log_info "Context variable: KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT set to $KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT"
+
+    # Workaround: fatal: unable to auto-detect email address (got 'stack@runner-bkqvjp4m-project-21118777-concurrent-0.(none)')
+    # Might not be the best place to put this, but it is causing control_host_bootstrap to fail.
+    git config --global user.name "Kayobe Automation"
+    git config --global user.email "kayobe-automation@example.org"
 }
 
 function run_kayobe {

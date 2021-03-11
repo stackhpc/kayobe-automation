@@ -455,6 +455,18 @@ function workaround_start_sshd {
     fi
 }
 
+function workaround_git_config {
+    # Workaround: fatal: unable to auto-detect email address (got 'stack@runner-bkqvjp4m-project-21118777-concurrent-0.(none)')
+    # Might not be the best place to put this, but it is causing control_host_bootstrap to fail.
+    git config --global user.name "Kayobe Automation"
+    git config --global user.email "kayobe-automation@example.org"
+}
+
+function workarounds {
+    call_with_hooks workaround_start_sshd
+    call_with_hooks workaround_git_config
+}
+
 function sudo_if_available {
     if [[ -e "/usr/bin/sudo" ]]; then
         sudo "$@"
@@ -530,11 +542,6 @@ function create_kayobe_environment {
 # Runtime
 
 function environment_setup {
-    # Workaround: fatal: unable to auto-detect email address (got 'stack@runner-bkqvjp4m-project-21118777-concurrent-0.(none)')
-    # Might not be the best place to put this, but it is causing control_host_bootstrap to fail.
-    git config --global user.name "Kayobe Automation"
-    git config --global user.email "kayobe-automation@example.org"
-
     env=$(mktemp -d --suffix -kayobe-env)
     create_kayobe_environment "$env"
     # NOTE: Virtualenv's activate script references an unbound variable.
@@ -587,7 +594,7 @@ function kayobe_init {
     call_with_hooks validate
     call_with_hooks environment_diagnostics
     call_with_hooks install_dependencies
-    call_with_hooks workaround_start_sshd
+    call_with_hooks workarounds
     call_with_hooks setup_ssh_agent
     call_with_hooks environment_setup
     call_with_hooks control_host_bootstrap

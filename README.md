@@ -49,22 +49,22 @@ Use the examples in examples/* for inspiration.
 
 You need to customise `/etc/gitlab-runner/config.toml` to add support for docker in docker:
 
-    [[runners]]                                                                                                                                                                  
-      name = "seed"                                                                                                                                                              
-      url = "https://gitlab.com/"                                                                                                                                                
-      token = "redacted"                                                                                                                                             
-      executor = "docker"                                                                                                                                                        
-      [runners.custom_build_dir]                                                                                                                                                 
-      [runners.cache]                                                                                                                                                            
-        [runners.cache.s3]                                                                                                                                                       
-        [runners.cache.gcs]                                                                                                                                                      
-        [runners.cache.azure]                                                                                                                                                    
-      [runners.docker]                                                                                                                                                           
-        tls_verify = false                                                                                                                                                       
-        image = "centos:8"                                                                                                                                                       
-        privileged = true                                                                                                                                                        
-        disable_entrypoint_overwrite = false                                                                                                                                     
-        oom_kill_disable = false                                                                                                                                                 
+    [[runners]]
+      name = "seed"
+      url = "https://gitlab.com/"
+      token = "redacted"
+      executor = "docker"
+      [runners.custom_build_dir]
+      [runners.cache]
+        [runners.cache.s3]
+        [runners.cache.gcs]
+        [runners.cache.azure]
+      [runners.docker]
+        tls_verify = false
+        image = "centos:8"
+        privileged = true
+        disable_entrypoint_overwrite = false
+        oom_kill_disable = false
         disable_cache = false
         volumes = ["/certs/client", "/cache", "/opt/kayobe/images"]
         shm_size = 0

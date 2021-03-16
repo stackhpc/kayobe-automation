@@ -38,6 +38,8 @@ Use the examples in examples/* for inspiration.
 `KAYOBE_AUTOMATION_SSH_PRIVATE_KEY`: Private key used to login to kayobe managed hosts
 `KAYOBE_AUTOMATION_LOG_LEVEL`: Verbosity of logging. Choose one of: `debug`, `info`, `warn`, `error`
 `KAYOBE_VAULT_PASSWORD`: Kayobe vault password.
+`KAYOBE_AUTOMATION_PR_AUTH_TOKEN`: (Required when `KAYOBE_AUTOMATION_PR_TYPE` is set) Auth token to use when submitting pull-requests. Typically you need to create a service account and generate a person access token.
+`TEMPEST_OPENRC`: openrc file to use when running tempest
 
 ## gitlab
 

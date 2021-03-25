@@ -77,6 +77,9 @@ function post_install_dependencies {
     sudo_if_available mkdir -p /opt/kayobe/images/ipa/
     sudo_if_available touch /opt/kayobe/images/ipa/ipa.kernel
     sudo_if_available touch /opt/kayobe/images/ipa/ipa.initramfs
+    # NOTE: We can remove this when we no longer care about train. It has been renamed in
+    # future versions.
+    sudo_if_available touch /opt/kayobe/images/ipa/ipa.vmlinuz
 }
 
 function generate_config {

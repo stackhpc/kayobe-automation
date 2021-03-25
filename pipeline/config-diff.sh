@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -euE
 set -o pipefail
 
 # Outputs a kolla-config diff between source and target branches

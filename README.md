@@ -36,8 +36,40 @@ Use the examples in examples/* for inspiration.
 ## Environment variables
 
 `KAYOBE_AUTOMATION_SSH_PRIVATE_KEY`: Private key used to login to kayobe managed hosts
+
 `KAYOBE_AUTOMATION_LOG_LEVEL`: Verbosity of logging. Choose one of: `debug`, `info`, `warn`, `error`
+
 `KAYOBE_VAULT_PASSWORD`: Kayobe vault password.
+
+`KAYOBE_AUTOMATION_PR_AUTH_TOKEN`: (Required when `KAYOBE_AUTOMATION_PR_TYPE` is set) Auth token to use when submitting pull-requests. Typically you need to create a service account and generate a person access token.
+
+`TEMPEST_OPENRC`: openrc file to use when running tempest
+
+## gitlab
+
+You need to customise `/etc/gitlab-runner/config.toml` to add support for docker in docker:
+
+    [[runners]]
+      name = "seed"
+      url = "https://gitlab.com/"
+      token = "redacted"
+      executor = "docker"
+      [runners.custom_build_dir]
+      [runners.cache]
+        [runners.cache.s3]
+        [runners.cache.gcs]
+        [runners.cache.azure]
+      [runners.docker]
+        tls_verify = false
+        image = "centos:8"
+        privileged = true
+        disable_entrypoint_overwrite = false
+        oom_kill_disable = false
+        disable_cache = false
+        volumes = ["/certs/client", "/cache", "/opt/kayobe/images"]
+        shm_size = 0
+
+This also uses a volume so that IPA images can be shared between pipelines.
 
 ## Formatting
 

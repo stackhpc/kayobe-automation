@@ -113,7 +113,7 @@ function config_check {
     fi
 
     # PR validation
-    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+    if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]] && [[ "$KAYOBE_AUTOMATION_PR_TYPE" != "disabled" ]]; then
         # Shared validation
         if [[ -z "${KAYOBE_AUTOMATION_PR_TARGET_BRANCH}" ]]; then
             die $LINENO "KAYOBE_AUTOMATION_PR_TARGET_BRANCH must be set"
@@ -338,7 +338,7 @@ function pull_request_branch_name {
 }
 
 function _pull_request {
-    if [[ -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
+    if [[ -z "$KAYOBE_AUTOMATION_PR_TYPE" ]] || [[ "$KAYOBE_AUTOMATION_PR_TYPE" == "disabled" ]]; then
         log_info "Not creating PR as KAYOBE_AUTOMATION_PR_TYPE is not set"
         return
     elif [[ "${KAYOBE_AUTOMATION_PR_TYPE,,}" == "gitlab" ]]; then
@@ -453,6 +453,18 @@ function workaround_start_sshd {
         sudo_if_available /usr/bin/ssh-keygen -A
         sudo_if_available /usr/sbin/sshd &
     fi
+}
+
+function workaround_git_config {
+    # Workaround: fatal: unable to auto-detect email address (got 'stack@runner-bkqvjp4m-project-21118777-concurrent-0.(none)')
+    # Might not be the best place to put this, but it is causing control_host_bootstrap to fail.
+    git config --global user.name "Kayobe Automation"
+    git config --global user.email "kayobe-automation@example.org"
+}
+
+function workarounds {
+    call_with_hooks workaround_start_sshd
+    call_with_hooks workaround_git_config
 }
 
 function sudo_if_available {
@@ -582,7 +594,7 @@ function kayobe_init {
     call_with_hooks validate
     call_with_hooks environment_diagnostics
     call_with_hooks install_dependencies
-    call_with_hooks workaround_start_sshd
+    call_with_hooks workarounds
     call_with_hooks setup_ssh_agent
     call_with_hooks environment_setup
     call_with_hooks control_host_bootstrap

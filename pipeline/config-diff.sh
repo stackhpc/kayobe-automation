@@ -69,7 +69,7 @@ function redact_config_dir {
     # replace vaulted files with md5sum of the vaulted file
     for item in "${KAYOBE_CONFIG_VAULTED_FILES_PATHS[@]}"; do
         # skip if file doesn't exist
-        if [ -f "$1/src/kayobe-config/$item"]; then
+        if [ -f "$1/src/kayobe-config/$item" ]; then
             md5sum "$1/src/kayobe-config/$item" >"$1/src/kayobe-config/$item"
         fi
     done

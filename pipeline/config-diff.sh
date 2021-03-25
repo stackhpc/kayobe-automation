@@ -22,12 +22,22 @@ function validate {
 
 function post_config_init {
     # Overrides from config.sh
-    KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=("etc/kayobe/kolla/passwords.yml" "etc/kayobe/secrets.yml")
+    KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=(
+        "etc/kayobe/kolla/passwords.yml"
+        "etc/kayobe/secrets.yml"
+        ${KAYOBE_CONFIG_SECRET_PATHS_EXTRA[@]}
+    )
     KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
     # This pipeline shouldn't create pull requests
     KAYOBE_AUTOMATION_PR_TYPE=disabled
     # TODO: could auto detect which files? e.g. "grep -irl "ANSIBLE_VAULT;1" etc/kayobe/kolla/config"
-    KAYOBE_CONFIG_VAULTED_FILES_PATHS=("etc/kayobe/kolla/config/octavia/server_ca.key.pem" "etc/kayobe/kolla/config/octavia/client.cert-and-key.pem")
+    KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT=(
+        "etc/kayobe/kolla/config/octavia/server_ca.key.pem"
+        "etc/kayobe/kolla/config/octavia/client.cert-and-key.pem"
+        ${KAYOBE_CONFIG_VAULTED_FILES_PATHS_EXTRA[@]}
+    )
+    KAYOBE_CONFIG_VAULTED_FILES_PATHS=("${KAYOBE_CONFIG_VAULTED_FILES_PATHS[@]:-${KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT[@]}}")
+
 }
 
 function redact_file {

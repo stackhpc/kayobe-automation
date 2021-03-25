@@ -154,9 +154,9 @@ function config_check {
 }
 
 function config_init {
-    config_set
-    config_defaults
-    config_check
+    call_with_hooks config_set
+    call_with_hooks config_defaults
+    call_with_hooks config_check
     # Ensure log file exists as we try and append to it in the logging functions.
     mkdir -p "$LOGDIR"
     touch "$LOGDIR"/kayobe-automation.log

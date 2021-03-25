@@ -20,12 +20,15 @@ function validate {
     true
 }
 
+function post_config_set {
+    # This pipeline shouldn't create pull requests
+    KAYOBE_AUTOMATION_PR_TYPE=disabled
+}
+
 function post_config_init {
     # Overrides from config.sh
     KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=("etc/kayobe/kolla/passwords.yml" "etc/kayobe/secrets.yml")
     KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
-    # This pipeline shouldn't create pull requests
-    KAYOBE_AUTOMATION_PR_TYPE=disabled
 }
 
 function redact_file {

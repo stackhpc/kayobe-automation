@@ -24,6 +24,8 @@ function post_config_init {
     # Overrides from config.sh
     KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=("etc/kayobe/kolla/passwords.yml" "etc/kayobe/secrets.yml")
     KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
+    # TODO: could auto detect which files? e.g. "grep -irl "ANSIBLE_VAULT;1" etc/kayobe/kolla/config"
+    KAYOBE_CONFIG_VAULTED_FILES_PATHS=("etc/kayobe/kolla/config/octavia/server_ca.key.pem" "etc/kayobe/kolla/config/octavia/client.cert-and-key.pem")
 }
 
 function redact_file {
@@ -50,6 +52,18 @@ function redact_config_dir {
             reference="$2/src/kayobe-config/$item"
         fi
         redact_file "$1/src/kayobe-config/$item" "$reference"
+    done
+
+    # replace vaulted files with md5sum of the vaulted file
+    for item in "${KAYOBE_CONFIG_VAULTED_FILES_PATHS[@]}"; do
+	# skip if file doesn't exist
+	if [ -f "$1/src/kayobe-config/$item"]; then
+	    if [ "$2" != "" ]; then
+                md5sum "$2/src/kayobe-config/$item" > "$1/src/kayobe-config/$item"
+            else
+                md5sum "$1/src/kayobe-config/$item" > "$1/src/kayobe-config/$item"
+            fi
+	fi
     done
 }
 
@@ -137,6 +151,7 @@ function main {
         echo 'The diff was empty!'
     else
         echo 'The diff was non-empty. Please check the diff output.'
+        cat /tmp/kayobe-config-diff
     fi
 }
 

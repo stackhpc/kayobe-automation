@@ -34,10 +34,9 @@ export _LOG_LEVEL_ERROR=1000
 
 function config_defaults {
     # Set default values for kayobe development configuration.
-
     export KAYOBE_BRANCH="${KAYOBE_BRANCH:-stable/ussuri}"
     export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')}"
-    export KAYOBE_URI="https://github.com/openstack/kayobe"
+    export KAYOBE_URI="${KAYOBE_URI:-https://github.com/openstack/kayobe}"
     export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
     export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE}"
 
@@ -148,8 +147,8 @@ function config_check {
 }
 
 function config_init {
-    config_defaults
     config_set
+    config_defaults
     config_check
     # Ensure log file exists as we try and append to it in the logging functions.
     mkdir -p "$LOGDIR"

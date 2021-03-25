@@ -38,7 +38,9 @@ function config_defaults {
     export OPENSTACK_SERIES="${OPENSTACK_SERIES:-$(echo ${KAYOBE_BRANCH} | sed 's|stable/||')}"
     export KAYOBE_URI="${KAYOBE_URI:-https://github.com/openstack/kayobe}"
     export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
-    export KAYOBE_PIP_INSTALL_ARGS="-c ${UPPER_CONSTRAINTS_FILE}"
+
+    KAYOBE_PIP_INSTALL_ARGS_DEFAULT="-c ${UPPER_CONSTRAINTS_FILE} ${KAYOBE_PIP_INSTALL_ARGS_EXTRA:-}"
+    export KAYOBE_PIP_INSTALL_ARGS="${KAYOBE_PIP_INSTALL_ARGS:-$KAYOBE_PIP_INSTALL_ARGS_DEFAULT}"
 
     export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
 

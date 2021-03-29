@@ -134,7 +134,7 @@ function main {
     environment_path=/tmp/kayobe-env
 
     # Assume same version of vault works for both for source and target. This is important for the secret diff.
-    local ANSIBLE_VAULT="/tmp/kayobe-env/venvs/kayobe/bin/ansible-vault"
+    local ANSIBLE_VAULT="$environment_path/venvs/kayobe/bin/ansible-vault"
 
     # These directories will contain the generated output.
     target_dir=$(mktemp -d --suffix -configgen-target)

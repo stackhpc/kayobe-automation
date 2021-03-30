@@ -112,13 +112,19 @@ function generate_config {
     # These override the kayobe-env defautlts if set:
     unset KOLLA_VENV_PATH
     unset KOLLA_SOURCE_PATH
-    . $1/src/kayobe-config/kayobe-env
-    . $1/venvs/kayobe/bin/activate
+    env_path=$1
+    output_dir=$2
+
+    # Shift arguments passed to the function so the sourced scripts don't get
+    # them as well. See https://unix.stackexchange.com/a/151896 for details.
+    shift $#
+
+    . $env_path/src/kayobe-config/kayobe-env
+    . $env_path/venvs/kayobe/bin/activate
     export KAYOBE_VAULT_PASSWORD_OLD="$KAYOBE_VAULT_PASSWORD"
     export KAYOBE_VAULT_PASSWORD=dummy-password
-    local KAYOBE_ANSIBLE_PATH="$1/venvs/kayobe/share/kayobe/ansible"
+    local KAYOBE_ANSIBLE_PATH="$env_path/venvs/kayobe/share/kayobe/ansible"
     kayobe control host bootstrap
-    output_dir=$2
     log_info "Generating config to $output_dir"
     kayobe playbook run "$KAYOBE_ANSIBLE_PATH/kayobe-automation-prepare-config-diff.yml"
     kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_CONFIG_PATH/../../../kayobe-extra-vars.yml" --kolla-extra-vars "@$KAYOBE_CONFIG_PATH/../../../kolla-extra-vars.yml" ${KAYOBE_EXTRA_ARGS}

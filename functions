@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -euE
 set -o pipefail
 
 # Library of functions for the kayobe development environment.
@@ -40,7 +40,7 @@ function config_defaults {
     export UPPER_CONSTRAINTS_FILE="${UPPER_CONSTRAINTS_FILE:-https://releases.openstack.org/constraints/upper/${OPENSTACK_SERIES}}"
 
     KAYOBE_PIP_INSTALL_ARGS_DEFAULT="-c ${UPPER_CONSTRAINTS_FILE} ${KAYOBE_PIP_INSTALL_ARGS_EXTRA:-}"
-    export KAYOBE_PIP_INSTALL_ARGS="${KAYOBE_PIP_INSTALL_ARGS:-$KAYOBE_PIP_INSTALL_ARGS_DEFAULT}"
+    export KAYOBE_PIP_INSTALL_ARGS="${KAYOBE_PIP_INSTALL_ARGS-$KAYOBE_PIP_INSTALL_ARGS_DEFAULT}"
 
     export KAYOBE_CONFIG_SOURCE_PATH="${KAYOBE_CONFIG_SOURCE_PATH:-${FUNCTIONS_PARENT}/..}"
 
@@ -48,6 +48,11 @@ function config_defaults {
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
 
     export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
+    # When to pause execution. This is useful for debugging. Can be one of:
+    #   - on-error
+    # You must run the script with errtrace (-E) if using errexit (-e) for the
+    # on-error trap to function.
+    export KAYOBE_AUTOMATION_BREAK=${KAYOBE_AUTOMATION_BREAK:-}
 
     # Log directory in case of errors
     export LOGDIR=${LOGDIR:-/tmp/logs}
@@ -149,9 +154,9 @@ function config_check {
 }
 
 function config_init {
-    config_set
-    config_defaults
-    config_check
+    call_with_hooks config_set
+    call_with_hooks config_defaults
+    call_with_hooks config_check
     # Ensure log file exists as we try and append to it in the logging functions.
     mkdir -p "$LOGDIR"
     touch "$LOGDIR"/kayobe-automation.log
@@ -440,6 +445,16 @@ function is_absolute_path {
     esac
 }
 
+##############################################################################
+# Traps
+
+function on_error {
+    if [ ${KAYOBE_AUTOMATION_BREAK:-invalid,,} == "on-error" ]; then
+        log_error "An error occured, pausing to allow debug access"
+        pause
+    fi
+}
+
 ###############################################################################
 # Installation
 
@@ -591,6 +606,7 @@ function pull_request {
 }
 
 function kayobe_init {
+    trap on_error ERR
     call_with_hooks config_init
     call_with_hooks validate
     call_with_hooks environment_diagnostics

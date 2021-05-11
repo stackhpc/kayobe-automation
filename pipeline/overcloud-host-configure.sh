@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -euE
 set -o pipefail
 
 PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

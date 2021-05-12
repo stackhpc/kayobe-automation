@@ -30,7 +30,7 @@ function post_config_init {
 function main {
     call_with_hooks config_init
     call_with_hooks validate
-    mkdir /home/rally/artifacts
+    mkdir /home/rally/artifacts || true
     if [ ! -z ${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES:+x} ]; then
         log_info "Configuring tempest.conf overrides"
         cp ${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES} ~/tempest-overrides.conf

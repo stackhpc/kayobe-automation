@@ -39,7 +39,7 @@ function main {
     #echo "Script args: ${SCRIPT_ARGS[@]}"
     # WARNING: printing docker args will leak your environment file
     #echo "docker args: $@"
-    docker run --rm -it "$@" -v $REPO_ROOT:/src "$RUN_LOCAL_DOCKER_IMAGE" "/src/$RELATIVE_PATH" "${SCRIPT_ARGS[@]}"
+    docker run --rm -it "$@" -v $REPO_ROOT:/src "$RUN_LOCAL_DOCKER_IMAGE" "/src/$RELATIVE_PATH" "${SCRIPT_ARGS[@]:-''}"
 }
 
 main "$@"

@@ -43,6 +43,8 @@ function main {
         log_info "Configuring skip list"
         cp ${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH} ~/tempest-skip-list
     fi
+    # TODO(johngarbutt) add tempest extensions via config
+    rally verify add-verifier-ext --source https://github.com/stackhpc/vipu_tempest_plugin.git --id default
     /usr/bin/rally-verify-wrapper.sh
 }
 

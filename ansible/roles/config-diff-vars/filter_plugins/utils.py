@@ -44,7 +44,7 @@ def ip_mappings(context, hosts):
             continue
         result[host] = []
         for network in networks:
-            interface = net_interface(context, host, network)
+            interface = net_interface(context, host, network) or ("missinginterface" + network)
             ip = net_ip(context, host, network) or "dhcp.or.missing"
             result[host].append({
                 'interface': interface,

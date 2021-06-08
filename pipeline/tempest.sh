@@ -45,6 +45,7 @@ function main {
     fi
     # TODO(johngarbutt) add tempest extensions via config
     rally verify add-verifier-ext --source https://github.com/stackhpc/vipu_tempest_plugin.git --id default
+    rally verify list-verifier-tests --id default
     /usr/bin/rally-verify-wrapper.sh
 }
 

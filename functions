@@ -2,6 +2,7 @@
 
 set -euE
 set -o pipefail
+set -x
 
 # Library of functions for the kayobe development environment.
 

@@ -57,6 +57,9 @@ function config_defaults {
 
     # Log directory in case of errors
     export LOGDIR=${LOGDIR:-/tmp/logs}
+    # Ensure log file exists as we try and append to it in the logging functions.
+    mkdir -p "$LOGDIR"
+    touch "$LOGDIR"/kayobe-automation.log
 
     # Ansible defaults
     export ANSIBLE_FORCE_COLOR=${ANSIBLE_FORCE_COLOR:-True}
@@ -158,9 +161,6 @@ function config_init {
     call_with_hooks config_set
     call_with_hooks config_defaults
     call_with_hooks config_check
-    # Ensure log file exists as we try and append to it in the logging functions.
-    mkdir -p "$LOGDIR"
-    touch "$LOGDIR"/kayobe-automation.log
 }
 
 function validate {

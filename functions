@@ -33,8 +33,7 @@ export _LOG_LEVEL_ERROR=1000
 # Configuration
 
 function config_defaults {
-    # Set default values for kayobe development configuration.
-    export KAYOBE_BRANCH="${KAYOBE_BRANCH:-stable/ussuri}"
+    # Set default values for kayobe automation.
     export KAYOBE_URI="${KAYOBE_URI:-https://github.com/openstack/kayobe}"
 
     KAYOBE_PIP_INSTALL_ARGS_DEFAULT="${KAYOBE_PIP_INSTALL_ARGS_EXTRA:-}"
@@ -105,6 +104,11 @@ function config_set {
 function config_check {
     # Check the configuration environment variables.
     set +u
+    if [[ -z "$KAYOBE_BRANCH" ]]; then
+        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
+            die $LINENO "KAYOBE_BRANCH must be set"
+        fi
+    fi
     if [[ -z "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
         if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
             die $LINENO "KAYOBE_CONFIG_SOURCE_PATH must be set"

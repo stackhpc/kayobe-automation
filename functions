@@ -552,7 +552,7 @@ function create_kayobe_environment {
     mkdir -p "$env"/{src/kayobe,src/kayobe-config,venvs/kayobe}
     git clone -b $KAYOBE_BRANCH --single-branch $KAYOBE_URI "$env/src/kayobe"
     sudo_if_available cp -rf "$KAYOBE_CONFIG_SOURCE_PATH" "$env/src/kayobe-config"
-    sudo_if_available chown -Rf stack:stack "$env/src/kayobe-config"
+    sudo_if_available chown -Rf $USER:$USER "$env/src/kayobe-config"
     # Adds kayobe source path to pip install args i.e pip install $env/src/kayobe
     local KAYOBE_PIP_INSTALL_ARGS="$KAYOBE_PIP_INSTALL_ARGS $env/src/kayobe"
     install_kayobe_venv "$env/venvs/kayobe" "$KAYOBE_PIP_INSTALL_ARGS"

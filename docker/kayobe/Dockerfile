@@ -17,7 +17,8 @@ ENV container docker
 # CMD ["/usr/sbin/init"]
 
 RUN dnf update -y && \
-    dnf install -y gcc git vim python3-pyyaml python3-virtualenv libffi-devel sudo which openssh-server && \
+    dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
+        libffi-devel sudo which openssh-server e2fsprogs && \
     dnf clean all
 
 RUN python3 -m pip install docker six

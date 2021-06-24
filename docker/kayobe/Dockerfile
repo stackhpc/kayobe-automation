@@ -20,6 +20,8 @@ RUN dnf update -y && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv libffi-devel sudo which openssh-server && \
     dnf clean all
 
+RUN python3 -m pip install docker six
+
 ENV KAYOBE_USER=stack
 ARG KAYOBE_USER_UID=1000
 ARG KAYOBE_USER_GID=1000

@@ -46,7 +46,7 @@ function main {
         cp ${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH} ~/tempest-skip-list
     fi
     # TODO(johngarbutt) add tempest extensions via config
-    if [ ! -z $KAYOBE_AUTOMATION_TEMPEST_EXT_SOURCE ]
+    if [ ! -z $KAYOBE_AUTOMATION_TEMPEST_EXT_SOURCE ]; then
         rally verify add-verifier-ext --source $KAYOBE_AUTOMATION_TEMPEST_EXT_SOURCE --version $KAYOBE_AUTOMATION_TEMPEST_EXT_VERSION --id default
         rally verify list-verifier-tests --id default
     fi

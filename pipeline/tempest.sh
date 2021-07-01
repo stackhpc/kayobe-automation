@@ -25,6 +25,8 @@ function post_config_init {
     export KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_SEARCH_PATH="${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_SEARCH_PATH:-${KAYOBE_AUTOMATION_CONFIG_PATH}/tempest/skip-lists}"
     export KAYOBE_AUTOMATION_TEMPEST_SKIPLIST=${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST:-$KAYOBE_AUTOMATION_TEMPEST_LOADLIST}
     export KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH="${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH:-${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_SEARCH_PATH}/${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST}}"
+    export KAYOBE_AUTOMATION_TEMPEST_EXT_SOURCE="${KAYOBE_AUTOMATION_TEMPEST_EXT_SOURCE:-}"
+    export KAYOBE_AUTOMATION_TEMPEST_EXT_VERSION="${KAYOBE_AUTOMATION_TEMPEST_EXT_VERSION:-main}"
 }
 
 function main {
@@ -44,8 +46,10 @@ function main {
         cp ${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH} ~/tempest-skip-list
     fi
     # TODO(johngarbutt) add tempest extensions via config
-    rally verify add-verifier-ext --source https://github.com/stackhpc/vipu_tempest_plugin.git --id default
-    rally verify list-verifier-tests --id default
+    if [ ! -z $KAYOBE_AUTOMATION_TEMPEST_EXT_SOURCE ]
+        rally verify add-verifier-ext --source $KAYOBE_AUTOMATION_TEMPEST_EXT_SOURCE --version $KAYOBE_AUTOMATION_TEMPEST_EXT_VERSION --id default
+        rally verify list-verifier-tests --id default
+    fi
     /usr/bin/rally-verify-wrapper.sh
 }
 

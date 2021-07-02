@@ -28,22 +28,21 @@ function post_config_init {
 }
 
 function main {
-    call_with_hooks config_init
-    call_with_hooks validate
-    mkdir /home/rally/artifacts || true
-    if [ ! -z ${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES:+x} ]; then
+    kayobe_init
+    if [ -f "${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES}" ]; then
         log_info "Configuring tempest.conf overrides"
-        cp ${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES} ~/tempest-overrides.conf
+        export TEMPEST_CONF_OVERRIDES="$(< $KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES)"
     fi
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH}" ]; then
         log_info "Configuring load list"
-        cp ${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH} ~/tempest-load-list
+        export TEMPEST_LOAD_LIST="$(< $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH)"
     fi
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH}" ]; then
         log_info "Configuring skip list"
-        cp ${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH} ~/tempest-skip-list
+        export TEMPEST_SKIP_LIST="$(< $KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH)"
     fi
-    /usr/bin/rally-verify-wrapper.sh
+    mkdir /home/rally/artifacts || true
+    run_kayobe_automation_playbook kayobe-automation-run-tempest.yml -e results_path_local=/home/rally/artifacts
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

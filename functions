@@ -12,9 +12,9 @@ set -o pipefail
 # globals we could use assosociate arrays to namespace these, but it is
 # unclear if it is worth the effort.
 
-# Set after calling environment_setup. Points to the root of the kayobe-config
-# repository.
-export KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT=
+# Set after calling activate_kayobe_env and points to the env that is
+# currently activated.
+export KAYOBE_AUTOMATION_CONTEXT_ENV_PATH=
 
 ###############################################################################
 # Globals
@@ -562,21 +562,34 @@ function create_kayobe_environment {
 # Runtime
 
 function environment_setup {
-    env=$(mktemp -d --suffix -kayobe-env)
+    env="$HOME/kayobe-automation-env"
     create_kayobe_environment "$env"
+    activate_kayobe_env "$env"
+}
+
+function activate_kayobe_env {
+    local env=$1
+    shift
     # NOTE: Virtualenv's activate script references an unbound variable.
     set +u
-    source "$env/venvs/kayobe/bin/activate"
+    . "$env/venvs/kayobe/bin/activate"
     set -u
-    source "$env/src/kayobe-config/kayobe-env"
-    export KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT="$KAYOBE_CONFIG_PATH/../.."
-    log_info "Context variable: KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT set to $KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT"
+    . "$env/src/kayobe-config/kayobe-env"
+    export KAYOBE_AUTOMATION_CONTEXT_ENV_PATH="$env"
+    log_info "Context variable: KAYOBE_AUTOMATION_CONTEXT_ENV_PATH set to $KAYOBE_AUTOMATION_CONTEXT_ENV_PATH"
 }
 
 function run_kayobe {
     # Run a kayobe command, including extra arguments provided via
     # $KAYOBE_EXTRA_ARGS.
     kayobe "${@}" ${KAYOBE_EXTRA_ARGS}
+}
+
+function run_kayobe_automation_playbook {
+    # Run a kayobe command, including extra arguments provided via
+    # $KAYOBE_EXTRA_ARGS.
+    local KAYOBE_ANSIBLE_PATH="$KAYOBE_AUTOMATION_CONTEXT_ENV_PATH/venvs/kayobe/share/kayobe/ansible"
+    run_kayobe playbook run "$KAYOBE_ANSIBLE_PATH/""$@"
 }
 
 function control_host_bootstrap {

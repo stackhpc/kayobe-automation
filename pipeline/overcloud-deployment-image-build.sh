@@ -10,7 +10,7 @@ source "${PARENT}/../functions"
 function main {
     kayobe_init
     run_kayobe overcloud deployment image build --force-rebuild
-    pull_request "${KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT}"
+    pull_request "${KAYOBE_AUTOMATION_ENV_KAYOBE_CONFIG_PATH}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

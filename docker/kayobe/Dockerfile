@@ -18,7 +18,7 @@ ENV container docker
 
 RUN dnf update -y && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
-        libffi-devel sudo which openssh-server e2fsprogs && \
+        libffi-devel sudo which openssh-server e2fsprogs rsync && \
     dnf clean all
 
 RUN python3 -m pip install docker six

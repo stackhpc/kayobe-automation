@@ -54,7 +54,8 @@ function main {
         rally_tag_override="-e rally_tag='$KAYOBE_AUTOMATION_RALLY_TAG'"
     fi
 
-    mkdir -p $HOME/artifacts || true
+    mkdir -p $HOME/tempest-artifacts || true
+    sudo_if_available chown $USER:$USER $HOME/tempest-artifacts
     run_kayobe_automation_playbook kayobe-automation-run-tempest.yml -e results_path_local=$HOME/tempest-artifacts $rally_image_override $rally_tag_override
 }
 

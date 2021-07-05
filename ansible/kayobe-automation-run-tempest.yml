@@ -32,6 +32,17 @@
         when:
           - kolla_docker_registry_username is not none
           - kolla_docker_registry_password is not none
+        become: true
+
+      - name: Force pull image
+        # This ensures you get the latest image if the image is updated
+        # and the tag isn't e.g when using the latest tag.
+        docker_image:
+          name: "{{ rally_image_full }}"
+          state: present
+          force_source: true
+          source: pull
+        become: true
 
       - name: run tempest
         command: |-

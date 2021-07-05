@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.2
+
 FROM centos:8
 MAINTAINER "Will Szumski" <will@stackhpc.com>
 
@@ -37,5 +39,16 @@ WORKDIR /stack
 USER stack
 
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
-COPY --chown=stack:stack ssh_config /stack/.ssh/config
+COPY --chown=stack:stack .automation/docker/kayobe/ssh_config /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
+
+COPY --chown=stack:stack . /opt/kayobe-config
+
+ENV PATH="/opt/kayobe-config/.automation/utils:${PATH}"
+
+# Strip the secrets so that we don't need to pass in a vault-password
+RUN grep -lR "\$ANSIBLE_VAULT" /opt/kayobe-config | xargs rm
+
+RUN --mount=type=ssh kayobe-automation-install
+RUN pushd /stack/kayobe-automation-env/src/kayobe-config && git reset --hard && popd
+

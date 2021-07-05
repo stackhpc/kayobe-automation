@@ -622,14 +622,21 @@ function pull_request {
     popd >/dev/null
 }
 
+function kayobe_install {
+    call_with_hooks config_init
+    call_with_hooks validate
+    call_with_hooks install_dependencies
+    call_with_hooks environment_setup
+    call_with_hooks workarounds
+    call_with_hooks control_host_bootstrap
+}
+
 function kayobe_init {
     trap on_error ERR
     call_with_hooks config_init
     call_with_hooks validate
     call_with_hooks environment_diagnostics
-    call_with_hooks install_dependencies
     call_with_hooks workarounds
     call_with_hooks setup_ssh_agent
-    call_with_hooks environment_setup
-    call_with_hooks control_host_bootstrap
+    activate_kayobe_env "$HOME/kayobe-automation-env"
 }

@@ -94,7 +94,7 @@ function merge {
     git merge $2
 }
 
-function post_install_dependencies {
+function post_workarounds {
     # These files must exist if ironic is enabled. Use dummy files to prevent task from
     # failing which expects these files to be present.
     sudo_if_available mkdir -p /opt/kayobe/images/ipa/

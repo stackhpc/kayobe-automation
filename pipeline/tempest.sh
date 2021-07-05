@@ -41,8 +41,8 @@ function main {
         log_info "Configuring skip list"
         export TEMPEST_SKIP_LIST="$(< $KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH)"
     fi
-    mkdir /home/rally/artifacts || true
-    run_kayobe_automation_playbook kayobe-automation-run-tempest.yml -e results_path_local=/home/rally/artifacts
+    mkdir -p $HOME/artifacts || true
+    run_kayobe_automation_playbook kayobe-automation-run-tempest.yml -e results_path_local=$HOME/tempest-artifacts
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

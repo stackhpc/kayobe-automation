@@ -1,6 +1,7 @@
 ---
 
 - hosts: tempest_runner
+  gather_facts: false
   vars:
     results_path_local: "{{ lookup('env', 'PWD') }}"
     rally_image: 'gwee/rally'
@@ -44,7 +45,7 @@
           source: pull
         become: true
 
-      - name: run tempest
+      - name: Run tempest
         command: |-
            docker run -it --rm --entrypoint=/usr/bin/rally-verify-wrapper.sh
            -v "{{ results_path_remote.path }}:/home/rally/artifacts"

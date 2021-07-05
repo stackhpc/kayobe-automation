@@ -47,9 +47,9 @@ function redact_file {
     log_info Redacting $1 with reference ${2:-None}
     export KAYOBE_AUTOMATION_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD"
     if [ "$2" != "" ]; then
-        $KAYOBE_AUTOMATION_UTILS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $2) >$1.redact
+        $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $2) >$1.redact
     else
-        $KAYOBE_AUTOMATION_UTILS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1) >$1.redact
+        $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) >$1.redact
     fi
     mv $1.redact $1
 }
@@ -57,7 +57,7 @@ function redact_file {
 function encrypt_file {
     log_info Encrypting $1
     export KAYOBE_AUTOMATION_VAULT_PASSWORD=dummy-password
-    $ANSIBLE_VAULT encrypt --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1
+    $ANSIBLE_VAULT encrypt --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1
 }
 
 function redact_config_dir {

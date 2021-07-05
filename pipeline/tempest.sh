@@ -33,15 +33,15 @@ function main {
     kayobe_init
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES}" ]; then
         log_info "Configuring tempest.conf overrides"
-        export TEMPEST_CONF_OVERRIDES="$(< $KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES)"
+        export TEMPEST_CONF_OVERRIDES="$(<$KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES)"
     fi
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH}" ]; then
         log_info "Configuring load list"
-        export TEMPEST_LOAD_LIST="$(< $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH)"
+        export TEMPEST_LOAD_LIST="$(<$KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH)"
     fi
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH}" ]; then
         log_info "Configuring skip list"
-        export TEMPEST_SKIP_LIST="$(< $KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH)"
+        export TEMPEST_SKIP_LIST="$(<$KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH)"
     fi
 
     rally_image_override=""

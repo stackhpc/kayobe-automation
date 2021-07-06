@@ -5,7 +5,7 @@ MAINTAINER "Will Szumski" <will@stackhpc.com>
 
 # Unclear at this time if different environments will change
 # control host bootstrap.
-ARG KAYOBE_ENVIRONMENT=aio
+ARG KAYOBE_ENVIRONMENT=""
 
 ENV container docker
 # NOTE: systemd requires privileged container

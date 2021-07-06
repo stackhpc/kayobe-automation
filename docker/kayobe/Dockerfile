@@ -51,3 +51,5 @@ RUN grep -lR "\$ANSIBLE_VAULT" /opt/kayobe-config | xargs rm
 
 RUN --mount=type=ssh kayobe-automation-install
 RUN pushd /stack/kayobe-automation-env/src/kayobe-config && git reset --hard && popd
+# Get rid of the ssh key kayobe generated
+RUN rm -rf $HOME/.ssh

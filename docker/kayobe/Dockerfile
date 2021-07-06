@@ -3,6 +3,10 @@
 FROM centos:8
 MAINTAINER "Will Szumski" <will@stackhpc.com>
 
+# Unclear at this time if different environments will change
+# control host bootstrap.
+ARG KAYOBE_ENVIRONMENT=aio
+
 ENV container docker
 # NOTE: systemd requires privileged container
 # RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \

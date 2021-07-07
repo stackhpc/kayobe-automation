@@ -14,5 +14,5 @@ ansible_{{ interface }}: {{ interface | interface_string }}
 
 {{ mappings() }}
 
-fluentd_binary: td-agent
-fluentd_version: 0.14
+fluentd_binary: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY') }}"
+fluentd_version: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_VERSION') }}"

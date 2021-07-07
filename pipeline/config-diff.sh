@@ -12,8 +12,7 @@ source "${PARENT}/../functions"
 # We want to setup an environment for the source and target branches, so
 # skip setting up the default one by undefining the functions that perform
 # the steps we do not want to do not want to perform in the init function
-unset environment_setup
-unset control_host_bootstrap
+unset activate_kayobe_env
 
 function validate {
     # Does nothing at the moment, but we want to do something in here a later date.

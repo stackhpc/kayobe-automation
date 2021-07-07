@@ -430,14 +430,14 @@ function function_exists {
 function call {
     if function_exists $1; then
         log_debug "Entering $1"
-        $1
+        "${@}"
         log_debug "Exiting $1"
     fi
 }
 
 function call_with_hooks {
     call "pre_$1"
-    call "$1"
+    call "$@"
     call "post_$1"
 }
 
@@ -640,5 +640,5 @@ function kayobe_init {
     call_with_hooks environment_diagnostics
     call_with_hooks workarounds
     call_with_hooks setup_ssh_agent
-    activate_kayobe_env "$HOME/kayobe-automation-env"
+    call_with_hooks activate_kayobe_env "$HOME/kayobe-automation-env"
 }

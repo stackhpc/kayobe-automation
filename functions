@@ -65,6 +65,8 @@ function config_defaults {
     # Determines which helper to use: gitlab, github, etc, defaults to none.
     export KAYOBE_AUTOMATION_PR_TYPE=${KAYOBE_AUTOMATION_PR_TYPE:-}
 
+    export KAYOBE_ENVIRONMENT=${KAYOBE_ENVIRONMENT:-}
+
     if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
         config_extension_pull_request
     fi

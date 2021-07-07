@@ -30,6 +30,8 @@ function post_config_init {
     KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=(
         "etc/kayobe/kolla/passwords.yml"
         "etc/kayobe/secrets.yml"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/secrets.yml"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/passwords.yml"
         ${KAYOBE_CONFIG_SECRET_PATHS_EXTRA[@]}
     )
     KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
@@ -37,6 +39,8 @@ function post_config_init {
     KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT=(
         "etc/kayobe/kolla/config/octavia/server_ca.key.pem"
         "etc/kayobe/kolla/config/octavia/client.cert-and-key.pem"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/server_ca.key.pem"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/client.cert-and-key.pem"
         ${KAYOBE_CONFIG_VAULTED_FILES_PATHS_EXTRA[@]}
     )
     KAYOBE_CONFIG_VAULTED_FILES_PATHS=("${KAYOBE_CONFIG_VAULTED_FILES_PATHS[@]:-${KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT[@]}}")
@@ -44,6 +48,10 @@ function post_config_init {
 }
 
 function redact_file {
+    if [ ! -f "$1" ]; then
+        log_info "Skipping redaction of: $1"
+        return
+    fi
     log_info Redacting $1 with reference ${2:-None}
     export KAYOBE_AUTOMATION_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD"
     if [ "$2" != "" ]; then
@@ -55,6 +63,9 @@ function redact_file {
 }
 
 function encrypt_file {
+    if [ ! -f "$1" ]; then
+        return
+    fi
     log_info Encrypting $1
     export KAYOBE_AUTOMATION_VAULT_PASSWORD=dummy-password
     $ANSIBLE_VAULT encrypt --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1

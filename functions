@@ -412,6 +412,7 @@ function _err {
 }
 
 function environment_diagnostics {
+    log_info "KAYOBE_ENVIRONMENT: $KAYOBE_ENVIRONMENT"
     set -x
     whoami
     set +x

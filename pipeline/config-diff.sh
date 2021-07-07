@@ -25,6 +25,9 @@ function post_config_set {
 }
 
 function post_config_init {
+    # Flag that can be used to conditionally set values in kayobe config.
+    export KAYOBE_AUTOMATION_CONFIG_DIFF=true
+
     # Overrides from config.sh
     KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=(
         "etc/kayobe/kolla/passwords.yml"

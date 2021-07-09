@@ -12,8 +12,7 @@ source "${PARENT}/../functions"
 # We want to setup an environment for the source and target branches, so
 # skip setting up the default one by undefining the functions that perform
 # the steps we do not want to do not want to perform in the init function
-unset environment_setup
-unset control_host_bootstrap
+unset activate_kayobe_env
 
 function validate {
     # Does nothing at the moment, but we want to do something in here a later date.
@@ -26,10 +25,15 @@ function post_config_set {
 }
 
 function post_config_init {
+    # Flag that can be used to conditionally set values in kayobe config.
+    export KAYOBE_AUTOMATION_CONFIG_DIFF=true
+
     # Overrides from config.sh
     KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=(
         "etc/kayobe/kolla/passwords.yml"
         "etc/kayobe/secrets.yml"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/secrets.yml"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/passwords.yml"
         ${KAYOBE_CONFIG_SECRET_PATHS_EXTRA[@]}
     )
     KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
@@ -37,27 +41,39 @@ function post_config_init {
     KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT=(
         "etc/kayobe/kolla/config/octavia/server_ca.key.pem"
         "etc/kayobe/kolla/config/octavia/client.cert-and-key.pem"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/server_ca.key.pem"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/client.cert-and-key.pem"
         ${KAYOBE_CONFIG_VAULTED_FILES_PATHS_EXTRA[@]}
     )
     KAYOBE_CONFIG_VAULTED_FILES_PATHS=("${KAYOBE_CONFIG_VAULTED_FILES_PATHS[@]:-${KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT[@]}}")
 
+    # Some values are currently determined dynamically from container versions
+    export KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY="${KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY:-td-agent}"
+    export KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_VERSION="${KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY:-0.14}"
 }
 
 function redact_file {
+    if [ ! -f "$1" ]; then
+        log_info "Skipping redaction of: $1"
+        return
+    fi
     log_info Redacting $1 with reference ${2:-None}
     export KAYOBE_AUTOMATION_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD"
     if [ "$2" != "" ]; then
-        $KAYOBE_AUTOMATION_UTILS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $2) >$1.redact
+        $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $2) >$1.redact
     else
-        $KAYOBE_AUTOMATION_UTILS_PATH/redact.py <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1) >$1.redact
+        $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) >$1.redact
     fi
     mv $1.redact $1
 }
 
 function encrypt_file {
+    if [ ! -f "$1" ]; then
+        return
+    fi
     log_info Encrypting $1
     export KAYOBE_AUTOMATION_VAULT_PASSWORD=dummy-password
-    $ANSIBLE_VAULT encrypt --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/vault-helper.sh $1
+    $ANSIBLE_VAULT encrypt --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1
 }
 
 function redact_config_dir {
@@ -94,7 +110,7 @@ function merge {
     git merge $2
 }
 
-function post_install_dependencies {
+function post_workarounds {
     # These files must exist if ironic is enabled. Use dummy files to prevent task from
     # failing which expects these files to be present.
     sudo_if_available mkdir -p /opt/kayobe/images/ipa/

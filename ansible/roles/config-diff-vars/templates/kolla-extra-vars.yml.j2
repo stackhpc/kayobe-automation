@@ -14,5 +14,17 @@ ansible_{{ interface }}: {{ interface | interface_string }}
 
 {{ mappings() }}
 
-fluentd_binary: td-agent
-fluentd_version: 0.14
+fluentd_binary: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY') }}"
+fluentd_version: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_VERSION') }}"
+
+{% raw %}
+# These are dynamically retrieved from the openstack resources defined
+# in the cloud. If we aren't actually running openstack, then we can't
+# retrieve them. As these are set as extra vars we can retrieve them from
+# localhost to avoid a templating loop.
+octavia_auto_configure: false
+amp_image_owner_id: "{{ hostvars.localhost.amp_image_owner_id | default('amp_image_owner_id_placeholder') }}"
+amp_boot_network_list: "{{ hostvars.localhost.amp_boot_network_list | default('amp_boot_network_list_placeholder') }}"
+amp_secgroup_list: "{{ hostvars.localhost.amp_secgroup_list | default('amp_secgroup_list_placeholder') }}"
+amp_flavor_id: "{{ hostvars.localhost.amp_flavor_id | default('amp_flavor_id_placeholder') }}"
+{% endraw %}

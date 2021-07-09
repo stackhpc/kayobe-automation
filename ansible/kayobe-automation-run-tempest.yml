@@ -52,11 +52,12 @@
            --env TEMPEST_OPENRC="$TEMPEST_OPENRC"
            --env TEMPEST_CONCURRENCY="$TEMPEST_CONCURRENCY"
            --env TEMPEST_VERSION="$TEMPEST_VERSION"
+           --env TEMPEST_LOAD_LIST="$TEMPEST_LOAD_LIST"
+           --env TEMPEST_SKIP_LIST="$TEMPEST_SKIP_LIST"
            --env TEMPEST_PATTERN="$TEMPEST_PATTERN"
            {{ rally_image_full }}
         environment:
           TEMPEST_PATTERN: "{{ lookup('env', 'TEMPEST_PATTERN') }}"
-          #TEMPEST_PATTERN: tempest.api.compute.servers.test_delete_server.DeleteServersTestJSON.test_delete_active_server
           TEMPEST_VERSION: "{{ lookup('env', 'TEMPEST_VERSION') }}"
           TEMPEST_CONCURRENCY: "{{ lookup('env', 'TEMPEST_CONCURRENCY') }}"
           TEMPEST_LOAD_LIST: "{{ lookup('env', 'TEMPEST_LOAD_LIST') }}"

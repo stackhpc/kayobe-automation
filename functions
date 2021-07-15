@@ -455,7 +455,6 @@ function on_error {
     if [ ${KAYOBE_AUTOMATION_BREAK:-invalid,,} == "on-error" ]; then
         log_error "An error occured, pausing to allow debug access"
         pause
-	sleep 1000000
     fi
 }
 

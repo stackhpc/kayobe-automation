@@ -289,7 +289,7 @@ function gitlab_merge_request {
     # TODO: optional params
     #         \"assignee_id\":\"${GITLAB_USER_ID}\"
 
-    local branch_name="$(_pull_request_branch_name)"
+    local branch_name="$(pull_request_branch_name)"
 
     _git_commit "${branch_name}"
 

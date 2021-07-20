@@ -68,6 +68,10 @@ function config_defaults {
     # Kayobe environment to use. Note this is overridden by .environment.
     export KAYOBE_ENVIRONMENT=${KAYOBE_ENVIRONMENT:-}
 
+    # Flag to control whether images are pushed. Can be one of: 0, 1. Where
+    # zero === false and one === true.
+    export KAYOBE_AUTOMATION_PUSH_IMAGE=0
+
     if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
         config_extension_pull_request
     fi
@@ -121,6 +125,10 @@ function config_check {
         if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
             die $LINENO "Kayobe configuration path $KAYOBE_CONFIG_SOURCE_PATH does not exist"
         fi
+    fi
+
+    if [[ "$KAYOBE_AUTOMATION_PUSH_IMAGE" != 0 ]] && [[ "$KAYOBE_AUTOMATION_PUSH_IMAGE" != 1 ]]; then
+        die $LINENO "KAYOBE_AUTOMATION_PUSH_IMAGE must be set to either: 0, or 1"
     fi
 
     # PR validation

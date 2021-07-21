@@ -70,7 +70,7 @@ function config_defaults {
 
     # Flag to control whether images are pushed. Can be one of: 0, 1. Where
     # zero === false and one === true.
-    export KAYOBE_AUTOMATION_PUSH_IMAGE=0
+    export KAYOBE_AUTOMATION_PUSH_IMAGE=${KAYOBE_AUTOMATION_PUSH_IMAGE:-0}
 
     if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
         config_extension_pull_request

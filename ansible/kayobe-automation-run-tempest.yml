@@ -1,0 +1,92 @@
+---
+
+- hosts: tempest_runner
+  gather_facts: false
+  vars:
+    results_path_local: "{{ lookup('env', 'PWD') }}"
+    rally_image: 'gwee/rally'
+    rally_tag: latest
+    rally_image_full: "{{ rally_image }}:{{ rally_tag }}"
+  tasks:
+    - block:
+
+      - name: Create temporary results directory
+        ansible.builtin.tempfile:
+          state: directory
+          suffix: rally-results
+        register: results_path_remote
+
+      - name: Ensure docker user has permissions to write to results directory
+        file:
+          path: "{{ results_path_remote.path }}"
+          state: directory
+          # We need user in docker container to be able to write to it
+          # TODO: Change ownership to user in docker container instead.
+          mode: 0777
+
+      - name: Login to docker registry
+        docker_login:
+          registry_url: "{{ kolla_docker_registry or omit }}"
+          username: "{{ kolla_docker_registry_username }}"
+          password: "{{ kolla_docker_registry_password }}"
+          reauthorize: yes
+        when:
+          - kolla_docker_registry_username is not none
+          - kolla_docker_registry_password is not none
+        become: true
+
+      - name: Force pull image
+        # This ensures you get the latest image if the image is updated
+        # and the tag isn't e.g when using the latest tag.
+        docker_image:
+          name: "{{ rally_image_full }}"
+          state: present
+          force_source: true
+          source: pull
+        become: true
+
+      - name: Run tempest
+        command: |-
+           docker run -it --rm --entrypoint=/usr/bin/rally-verify-wrapper.sh
+           -v "{{ results_path_remote.path }}:/home/rally/artifacts"
+           --env TEMPEST_OPENRC="$TEMPEST_OPENRC"
+           --env TEMPEST_CONCURRENCY="$TEMPEST_CONCURRENCY"
+           --env TEMPEST_VERSION="$TEMPEST_VERSION"
+           --env TEMPEST_LOAD_LIST="$TEMPEST_LOAD_LIST"
+           --env TEMPEST_SKIP_LIST="$TEMPEST_SKIP_LIST"
+           --env TEMPEST_PATTERN="$TEMPEST_PATTERN"
+           {{ rally_image_full }}
+        environment:
+          TEMPEST_PATTERN: "{{ lookup('env', 'TEMPEST_PATTERN') }}"
+          TEMPEST_VERSION: "{{ lookup('env', 'TEMPEST_VERSION') }}"
+          TEMPEST_CONCURRENCY: "{{ lookup('env', 'TEMPEST_CONCURRENCY') }}"
+          TEMPEST_LOAD_LIST: "{{ lookup('env', 'TEMPEST_LOAD_LIST') }}"
+          TEMPEST_SKIP_LIST: "{{ lookup('env', 'TEMPEST_SKIP_LIST') }}"
+          TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
+        become: true
+
+      - name: fixup permissions
+        # We want the files owned by the user on the host and not the user from
+        # the docker container
+        file:
+          path: "{{ results_path_remote.path }}"
+          owner: "{{ ansible_user }}"
+          recurse: true
+        become: true
+
+      - name: synchronize files
+        synchronize:
+          src: "{{ results_path_remote.path }}/"
+          dest: "{{ results_path_local }}"
+          mode: pull
+          archive: no
+          recursive: true
+          # For jump host
+          use_ssh_args: true
+
+      always:
+        - name: cleanup results
+          file:
+            path: "{{ results_path_remote.path }}"
+            state: absent
+          when: results_path_remote.path is defined

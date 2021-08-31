@@ -19,6 +19,8 @@ function post_config_set {
 }
 
 function post_config_init {
+    export KAYOBE_AUTOMATION_RALLY_IMAGE="${KAYOBE_AUTOMATION_RALLY_IMAGE:-}"
+    export KAYOBE_AUTOMATION_RALLY_TAG="${KAYOBE_AUTOMATION_RALLY_TAG:-}"
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH="${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH:-${KAYOBE_AUTOMATION_CONFIG_PATH}/tempest/load-lists}"
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST=${KAYOBE_AUTOMATION_TEMPEST_LOADLIST:-default}
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH="${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH:-${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH}/${KAYOBE_AUTOMATION_TEMPEST_LOADLIST}}"
@@ -28,22 +30,33 @@ function post_config_init {
 }
 
 function main {
-    call_with_hooks config_init
-    call_with_hooks validate
-    mkdir /home/rally/artifacts || true
-    if [ ! -z ${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES:+x} ]; then
+    kayobe_init
+    if [ -f "${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES}" ]; then
         log_info "Configuring tempest.conf overrides"
-        cp ${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES} ~/tempest-overrides.conf
+        export TEMPEST_CONF_OVERRIDES="$(<$KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES)"
     fi
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH}" ]; then
         log_info "Configuring load list"
-        cp ${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH} ~/tempest-load-list
+        export TEMPEST_LOAD_LIST="$(<$KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH)"
     fi
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH}" ]; then
         log_info "Configuring skip list"
-        cp ${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH} ~/tempest-skip-list
+        export TEMPEST_SKIP_LIST="$(<$KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH)"
     fi
-    /usr/bin/rally-verify-wrapper.sh
+
+    rally_image_override=""
+    if [ ! -z ${KAYOBE_AUTOMATION_RALLY_IMAGE:+x} ]; then
+        rally_image_override="-e rally_image='$KAYOBE_AUTOMATION_RALLY_IMAGE'"
+    fi
+
+    rally_tag_override=""
+    if [ ! -z ${KAYOBE_AUTOMATION_RALLY_TAG:+x} ]; then
+        rally_tag_override="-e rally_tag='$KAYOBE_AUTOMATION_RALLY_TAG'"
+    fi
+
+    mkdir -p $HOME/tempest-artifacts || true
+    sudo_if_available chown $USER:$USER $HOME/tempest-artifacts
+    run_kayobe_automation_playbook kayobe-automation-run-tempest.yml -e results_path_local=$HOME/tempest-artifacts $rally_image_override $rally_tag_override
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

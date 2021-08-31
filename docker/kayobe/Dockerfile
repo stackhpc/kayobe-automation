@@ -1,5 +1,11 @@
+# syntax=docker/dockerfile:1.2
+
 FROM centos:8
 MAINTAINER "Will Szumski" <will@stackhpc.com>
+
+# Unclear at this time if different environments will change
+# control host bootstrap.
+ARG KAYOBE_ENVIRONMENT=""
 
 ENV container docker
 # NOTE: systemd requires privileged container
@@ -17,7 +23,8 @@ ENV container docker
 # CMD ["/usr/sbin/init"]
 
 RUN dnf update -y && \
-    dnf install -y gcc git vim python3-pyyaml python3-virtualenv libffi-devel sudo which openssh-server && \
+    dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
+        libffi-devel sudo which openssh-server e2fsprogs rsync && \
     dnf clean all
 
 RUN python3 -m pip install docker six
@@ -36,5 +43,15 @@ WORKDIR /stack
 USER stack
 
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
-COPY --chown=stack:stack ssh_config /stack/.ssh/config
+COPY --chown=stack:stack .automation/docker/kayobe/ssh_config /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
+
+COPY --chown=stack:stack . /opt/kayobe-config
+
+ENV PATH="/opt/kayobe-config/.automation/utils:${PATH}"
+
+# Strip the secrets so that we don't need to pass in a vault-password
+RUN grep -lR "\$ANSIBLE_VAULT" /opt/kayobe-config | xargs rm
+
+RUN --mount=type=ssh kayobe-automation-install
+RUN pushd /stack/kayobe-automation-env/src/kayobe-config && git reset --hard && popd

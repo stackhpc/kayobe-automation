@@ -12,9 +12,9 @@ set -o pipefail
 # globals we could use assosociate arrays to namespace these, but it is
 # unclear if it is worth the effort.
 
-# Set after calling environment_setup. Points to the root of the kayobe-config
-# repository.
-export KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT=
+# Set after calling activate_kayobe_env and points to the env that is
+# currently activated.
+export KAYOBE_AUTOMATION_CONTEXT_ENV_PATH=
 
 ###############################################################################
 # Globals
@@ -64,6 +64,13 @@ function config_defaults {
     # TODO: validate/auto detect?
     # Determines which helper to use: gitlab, github, etc, defaults to none.
     export KAYOBE_AUTOMATION_PR_TYPE=${KAYOBE_AUTOMATION_PR_TYPE:-}
+
+    # Kayobe environment to use. Note this is overridden by .environment.
+    export KAYOBE_ENVIRONMENT=${KAYOBE_ENVIRONMENT:-}
+
+    # Flag to control whether images are pushed. Can be one of: 0, 1. Where
+    # zero === false and one === true.
+    export KAYOBE_AUTOMATION_PUSH_IMAGE=${KAYOBE_AUTOMATION_PUSH_IMAGE:-0}
 
     if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
         config_extension_pull_request
@@ -118,6 +125,10 @@ function config_check {
         if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
             die $LINENO "Kayobe configuration path $KAYOBE_CONFIG_SOURCE_PATH does not exist"
         fi
+    fi
+
+    if [[ "$KAYOBE_AUTOMATION_PUSH_IMAGE" != 0 ]] && [[ "$KAYOBE_AUTOMATION_PUSH_IMAGE" != 1 ]]; then
+        die $LINENO "KAYOBE_AUTOMATION_PUSH_IMAGE must be set to either: 0, or 1"
     fi
 
     # PR validation
@@ -410,6 +421,7 @@ function _err {
 }
 
 function environment_diagnostics {
+    log_info "KAYOBE_ENVIRONMENT: $KAYOBE_ENVIRONMENT"
     set -x
     whoami
     set +x
@@ -428,14 +440,14 @@ function function_exists {
 function call {
     if function_exists $1; then
         log_debug "Entering $1"
-        $1
+        "${@}"
         log_debug "Exiting $1"
     fi
 }
 
 function call_with_hooks {
     call "pre_$1"
-    call "$1"
+    call "$@"
     call "post_$1"
 }
 
@@ -562,21 +574,34 @@ function create_kayobe_environment {
 # Runtime
 
 function environment_setup {
-    env=$(mktemp -d --suffix -kayobe-env)
+    env="$HOME/kayobe-automation-env"
     create_kayobe_environment "$env"
+    activate_kayobe_env "$env"
+}
+
+function activate_kayobe_env {
+    local env=$1
+    shift
     # NOTE: Virtualenv's activate script references an unbound variable.
     set +u
-    source "$env/venvs/kayobe/bin/activate"
+    . "$env/venvs/kayobe/bin/activate"
     set -u
-    source "$env/src/kayobe-config/kayobe-env"
-    export KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT="$KAYOBE_CONFIG_PATH/../.."
-    log_info "Context variable: KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT set to $KAYOBE_AUTOMATION_CONTEXT_REPO_ROOT"
+    . "$env/src/kayobe-config/kayobe-env"
+    export KAYOBE_AUTOMATION_CONTEXT_ENV_PATH="$env"
+    log_info "Context variable: KAYOBE_AUTOMATION_CONTEXT_ENV_PATH set to $KAYOBE_AUTOMATION_CONTEXT_ENV_PATH"
 }
 
 function run_kayobe {
     # Run a kayobe command, including extra arguments provided via
     # $KAYOBE_EXTRA_ARGS.
     kayobe "${@}" ${KAYOBE_EXTRA_ARGS}
+}
+
+function run_kayobe_automation_playbook {
+    # Run a kayobe command, including extra arguments provided via
+    # $KAYOBE_EXTRA_ARGS.
+    local KAYOBE_ANSIBLE_PATH="$KAYOBE_AUTOMATION_CONTEXT_ENV_PATH/venvs/kayobe/share/kayobe/ansible"
+    run_kayobe playbook run "$KAYOBE_ANSIBLE_PATH/""$@"
 }
 
 function control_host_bootstrap {
@@ -609,14 +634,21 @@ function pull_request {
     popd >/dev/null
 }
 
+function kayobe_install {
+    call_with_hooks config_init
+    call_with_hooks validate
+    call_with_hooks install_dependencies
+    call_with_hooks environment_setup
+    call_with_hooks workarounds
+    call_with_hooks control_host_bootstrap
+}
+
 function kayobe_init {
     trap on_error ERR
     call_with_hooks config_init
     call_with_hooks validate
     call_with_hooks environment_diagnostics
-    call_with_hooks install_dependencies
     call_with_hooks workarounds
     call_with_hooks setup_ssh_agent
-    call_with_hooks environment_setup
-    call_with_hooks control_host_bootstrap
+    call_with_hooks activate_kayobe_env "$HOME/kayobe-automation-env"
 }

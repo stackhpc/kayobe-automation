@@ -499,7 +499,7 @@ function workarounds {
 
 function sudo_if_available {
     if [[ -e "/usr/bin/sudo" ]]; then
-        sudo "$@"
+        sudo --preserve-env=http_proxy,https_proxy,no_proxy,ftp_proxy,HTTP_PROXY,HTTPS_PROXY,NO_PROXY "$@"
         return
     fi
     "$@"

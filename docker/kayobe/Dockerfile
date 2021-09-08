@@ -6,6 +6,7 @@ MAINTAINER "Will Szumski" <will@stackhpc.com>
 # Unclear at this time if different environments will change
 # control host bootstrap.
 ARG KAYOBE_ENVIRONMENT=""
+ARG KAYOBE_DOCKER_SSH_CONFIG_PATH=".automation/docker/kayobe/ssh_config"
 
 ENV container docker
 # NOTE: systemd requires privileged container
@@ -43,7 +44,7 @@ WORKDIR /stack
 USER stack
 
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
-COPY --chown=stack:stack .automation/docker/kayobe/ssh_config /stack/.ssh/config
+COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
 
 COPY --chown=stack:stack . /opt/kayobe-config

@@ -62,5 +62,8 @@ ENV PATH="/opt/kayobe-config/.automation/utils:${PATH}"
 # Strip the secrets so that we don't need to pass in a vault-password
 RUN grep -lR "\$ANSIBLE_VAULT" /opt/kayobe-config | xargs rm
 
-RUN --mount=type=ssh kayobe-automation-install
+# Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
+COPY .automation/docker/kayobe/bin/kayobe-automation-workaround-missing .automation.conf/docker*/kayobe/bin/* /usr/local/bin
+
+RUN --mount=type=ssh,uid=1000 USER=stack kayobe-automation-install
 RUN pushd /stack/kayobe-automation-env/src/kayobe-config && git reset --hard && popd

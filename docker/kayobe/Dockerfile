@@ -40,8 +40,16 @@ RUN groupadd -g $KAYOBE_USER_GID -o stack &&  \
     -o -s /bin/bash stack
 RUN echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
+RUN echo export https_proxy=$https_proxy >> /etc/environment && \
+  echo export http_proxy=$http_proxy >> /etc/environment
+RUN echo export https_proxy=$https_proxy >> /root/.bashrc && \
+  echo export http_proxy=$http_proxy >> /root/.bashrc
+
 WORKDIR /stack
 USER stack
+
+RUN echo export https_proxy=$https_proxy >> $HOME/.bashrc && \
+  echo export http_proxy=$http_proxy >> $HOME/.bashrc
 
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
 COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config

@@ -55,6 +55,7 @@
            --env TEMPEST_LOAD_LIST="$TEMPEST_LOAD_LIST"
            --env TEMPEST_SKIP_LIST="$TEMPEST_SKIP_LIST"
            --env TEMPEST_PATTERN="$TEMPEST_PATTERN"
+           --env TEMPEST_CONF_OVERRIDES="$TEMPEST_CONF_OVERRIDES"
            {{ rally_image_full }}
         environment:
           TEMPEST_PATTERN: "{{ lookup('env', 'TEMPEST_PATTERN') }}"
@@ -63,6 +64,7 @@
           TEMPEST_LOAD_LIST: "{{ lookup('env', 'TEMPEST_LOAD_LIST') }}"
           TEMPEST_SKIP_LIST: "{{ lookup('env', 'TEMPEST_SKIP_LIST') }}"
           TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
+          TEMPEST_CONF_OVERRIDES: "{{ lookup('env', 'TEMPEST_CONF_OVERRIDES') }}"
         become: true
 
       - name: fixup permissions

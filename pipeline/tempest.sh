@@ -21,12 +21,14 @@ function post_config_set {
 function post_config_init {
     export KAYOBE_AUTOMATION_RALLY_IMAGE="${KAYOBE_AUTOMATION_RALLY_IMAGE:-}"
     export KAYOBE_AUTOMATION_RALLY_TAG="${KAYOBE_AUTOMATION_RALLY_TAG:-}"
+    export KAYOBE_AUTOMATION_RALLY_FORCE_PULL="${KAYOBE_AUTOMATION_RALLY_FORCE_PULL=:-}"
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH="${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH:-${KAYOBE_AUTOMATION_CONFIG_PATH}/tempest/load-lists}"
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST=${KAYOBE_AUTOMATION_TEMPEST_LOADLIST:-default}
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH="${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH:-${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH}/${KAYOBE_AUTOMATION_TEMPEST_LOADLIST}}"
     export KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_SEARCH_PATH="${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_SEARCH_PATH:-${KAYOBE_AUTOMATION_CONFIG_PATH}/tempest/skip-lists}"
     export KAYOBE_AUTOMATION_TEMPEST_SKIPLIST=${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST:-$KAYOBE_AUTOMATION_TEMPEST_LOADLIST}
     export KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH="${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH:-${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_SEARCH_PATH}/${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST}}"
+
 }
 
 function main {
@@ -54,9 +56,14 @@ function main {
         rally_tag_override="-e rally_tag='$KAYOBE_AUTOMATION_RALLY_TAG'"
     fi
 
+    rally_force_pull_override=""
+    if [ ! -z ${KAYOBE_AUTOMATION_RALLY_FORCE_PULL:+x} ]; then
+        rally_force_pull_override="-e rally_force_pull='$KAYOBE_AUTOMATION_RALLY_FORCE_PULL'"
+    fi
+
     mkdir -p $HOME/tempest-artifacts || true
     sudo_if_available chown $USER:$USER $HOME/tempest-artifacts
-    run_kayobe_automation_playbook kayobe-automation-run-tempest.yml -e results_path_local=$HOME/tempest-artifacts $rally_image_override $rally_tag_override
+    run_kayobe_automation_playbook kayobe-automation-run-tempest.yml -e results_path_local=$HOME/tempest-artifacts $rally_image_override $rally_tag_override $rally_force_pull_override
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

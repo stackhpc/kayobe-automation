@@ -563,7 +563,7 @@ function install_kayobe_venv {
 function create_kayobe_environment {
     env=$1
     mkdir -p "$env"/{src/kayobe,src/kayobe-config,venvs/kayobe}
-    if [ ! -d "$env/src/kayobe" ]; then
+    if [ ! "$(ls -A $env/src/kayobe)" ]; then
          git clone -b $KAYOBE_BRANCH --single-branch $KAYOBE_URI "$env/src/kayobe"
     fi
     if [ -d "$env/src/kayobe-config" ]; then

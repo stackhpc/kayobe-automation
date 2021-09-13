@@ -33,6 +33,7 @@ export _LOG_LEVEL_ERROR=1000
 # Configuration
 
 function config_defaults {
+    export USER=${USER:-$(whoami)}
     # Set default values for kayobe automation.
     export KAYOBE_URI="${KAYOBE_URI:-https://github.com/openstack/kayobe}"
 

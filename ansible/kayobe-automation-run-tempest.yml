@@ -56,6 +56,7 @@
            --env TEMPEST_SKIP_LIST="$TEMPEST_SKIP_LIST"
            --env TEMPEST_PATTERN="$TEMPEST_PATTERN"
            --env TEMPEST_CONF_OVERRIDES="$TEMPEST_CONF_OVERRIDES"
+           --network host
            {{ rally_image_full }}
         environment:
           TEMPEST_PATTERN: "{{ lookup('env', 'TEMPEST_PATTERN') }}"

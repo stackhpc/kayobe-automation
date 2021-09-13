@@ -563,7 +563,12 @@ function install_kayobe_venv {
 function create_kayobe_environment {
     env=$1
     mkdir -p "$env"/{src/kayobe,src/kayobe-config,venvs/kayobe}
-    git clone -b $KAYOBE_BRANCH --single-branch $KAYOBE_URI "$env/src/kayobe"
+    if [ ! -d "$env/src/kayobe" ]; then
+         git clone -b $KAYOBE_BRANCH --single-branch $KAYOBE_URI "$env/src/kayobe"
+    fi
+    if [ -d "$env/src/kayobe-config" ]; then
+        rm -rf $env/src/kayobe-config
+    fi
     sudo_if_available cp -rf "$KAYOBE_CONFIG_SOURCE_PATH" "$env/src/kayobe-config"
     sudo_if_available chown -Rf $USER:$USER "$env/src/kayobe-config"
     # Adds kayobe source path to pip install args i.e pip install $env/src/kayobe
@@ -649,7 +654,8 @@ function kayobe_init {
     call_with_hooks config_init
     call_with_hooks validate
     call_with_hooks environment_diagnostics
+    call_with_hooks environment_setup
     call_with_hooks workarounds
     call_with_hooks setup_ssh_agent
-    call_with_hooks activate_kayobe_env "$HOME/kayobe-automation-env"
+
 }

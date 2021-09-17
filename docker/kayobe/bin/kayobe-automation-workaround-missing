@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "This is a workaround to conditionally copy files into /usr/local/bin and is not designed to be run"
+

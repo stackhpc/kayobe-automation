@@ -12,7 +12,7 @@ function post_validate {
         die $LINENO "KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES: ${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES} does not exist"
     fi
     # Special case the default value of 'default'.
-    if [ "$(basename $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH$)" != "default" ] && \
+    if [ "$(basename $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH)" != "default" ] && \
 	    [ ! -f $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH ]; then
        die $LINENO "KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH: ${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH} does not exist"
     fi

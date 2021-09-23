@@ -55,14 +55,19 @@ RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
 COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
 
-COPY --chown=stack:stack . /opt/kayobe-config
-
-ENV PATH="/opt/kayobe-config/.automation/utils:${PATH}"
-
-# Strip the secrets so that we don't need to pass in a vault-password
-RUN grep -lR "\$ANSIBLE_VAULT" /opt/kayobe-config | xargs rm
-
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
 COPY .automation/docker/kayobe/bin/kayobe-automation-workaround-missing .automation.conf/docker*/kayobe/bin/* /usr/local/bin
 
-RUN --mount=type=ssh,uid=1000 USER=stack kayobe-automation-install && rm -rf /stack/kayobe-automation-env/src/kayobe-config
+# Control host bootsrap without leaving kayobe-config in the image
+RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \
+  sudo chown -Rf stack:stack /tmp/src && \
+  # Strip the secrets so that we don't need to pass in a vault-password
+  grep -lR "\$ANSIBLE_VAULT" /tmp/src | xargs rm && \
+  bash /tmp/src/.automation/utils/kayobe-automation-install; \
+  mkdir /stack/.ansible || true; \
+  cp -rfp /stack/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible/roles /stack/.ansible/kayobe-automation-roles || true; \
+  cp -rfp /stack/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible/collections /stack/.ansible/kayobe-automation-collections || true; \
+  rm -rf /stack/kayobe-automation-env/src/kayobe-config
+
+ENV ANSIBLE_ROLES_PATH="/stack/.ansible/kayobe-automation-roles:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles"
+ENV ANSIBLE_COLLECTIONS_PATH="/stack/.ansible/kayobe-automation-collections:~/.ansible/collections:/usr/share/ansible/collections"

@@ -22,6 +22,9 @@ function post_config_init {
     export KAYOBE_AUTOMATION_RALLY_IMAGE="${KAYOBE_AUTOMATION_RALLY_IMAGE:-}"
     export KAYOBE_AUTOMATION_RALLY_TAG="${KAYOBE_AUTOMATION_RALLY_TAG:-}"
     export KAYOBE_AUTOMATION_RALLY_FORCE_PULL="${KAYOBE_AUTOMATION_RALLY_FORCE_PULL=:-}"
+    export KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY="${KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY:-}"
+    export KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_USERNAME="${KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_USERNAME:-}"
+    export KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_PASSWORD="${KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_PASSWORD:-}"
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH="${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH:-${KAYOBE_AUTOMATION_CONFIG_PATH}/tempest/load-lists}"
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST=${KAYOBE_AUTOMATION_TEMPEST_LOADLIST:-default}
     export KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH="${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH:-${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_SEARCH_PATH}/${KAYOBE_AUTOMATION_TEMPEST_LOADLIST}}"
@@ -61,9 +64,28 @@ function main {
         rally_force_pull_override="-e rally_force_pull='$KAYOBE_AUTOMATION_RALLY_FORCE_PULL'"
     fi
 
+    rally_docker_registry_override=""
+    if [ ! -z ${KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY:+x} ]; then
+        rally_docker_registry_override="-e rally_docker_registry='$KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY'"
+    fi
+
+    rally_docker_registry_username_override=""
+    if [ ! -z ${KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_USERNAME:+x} ]; then
+        rally_docker_registry_username_override="-e rally_docker_registry_username='$KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_USERNAME'"
+    fi
+
+    rally_docker_registry_password_override=""
+    if [ ! -z ${KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_PASSWORD:+x} ]; then
+        rally_docker_registry_password_override="-e rally_docker_registry_password='$KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_PASSWORD'"
+    fi
+
     mkdir -p $HOME/tempest-artifacts || true
     sudo_if_available chown $USER:$USER $HOME/tempest-artifacts
-    run_kayobe_automation_playbook kayobe-automation-run-tempest.yml -e results_path_local=$HOME/tempest-artifacts $rally_image_override $rally_tag_override $rally_force_pull_override
+    run_kayobe_automation_playbook kayobe-automation-run-tempest.yml \
+	    -e results_path_local=$HOME/tempest-artifacts \
+	    $rally_image_override $rally_tag_override $rally_force_pull_override \
+	    $rally_docker_registry_override $rally_docker_registry_username_override \
+	    $rally_docker_registry_password_override
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

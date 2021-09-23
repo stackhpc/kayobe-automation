@@ -70,6 +70,7 @@
           TEMPEST_SKIP_LIST: "{{ lookup('env', 'TEMPEST_SKIP_LIST') }}"
           TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
           TEMPEST_CONF_OVERRIDES: "{{ lookup('env', 'TEMPEST_CONF_OVERRIDES') }}"
+        register: docker_result
         become: true
 
       - name: fixup permissions
@@ -80,6 +81,12 @@
           owner: "{{ ansible_user }}"
           recurse: true
         become: true
+
+      - name: Write docker logs to file
+        copy:
+          content: "{{ docker_result.stdout }}"
+          dest: "{{ results_path_remote.path }}/docker.log"
+          mode: '0644'
 
       - name: synchronize files
         synchronize:

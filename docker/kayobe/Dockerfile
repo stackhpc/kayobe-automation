@@ -65,5 +65,4 @@ RUN grep -lR "\$ANSIBLE_VAULT" /opt/kayobe-config | xargs rm
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
 COPY .automation/docker/kayobe/bin/kayobe-automation-workaround-missing .automation.conf/docker*/kayobe/bin/* /usr/local/bin
 
-RUN --mount=type=ssh,uid=1000 USER=stack kayobe-automation-install
-RUN pushd /stack/kayobe-automation-env/src/kayobe-config && git reset --hard && popd
+RUN --mount=type=ssh,uid=1000 USER=stack kayobe-automation-install && rm -rf /stack/kayobe-automation-env/src/kayobe-config

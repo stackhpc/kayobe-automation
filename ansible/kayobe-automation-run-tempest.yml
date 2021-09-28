@@ -60,6 +60,7 @@
            --env TEMPEST_SKIP_LIST="$TEMPEST_SKIP_LIST"
            --env TEMPEST_PATTERN="$TEMPEST_PATTERN"
            --env TEMPEST_CONF_OVERRIDES="$TEMPEST_CONF_OVERRIDES"
+           --env TEMPEST_NO_PROXY_EXTRA
            --network host
            {{ rally_image_full }}
         environment:
@@ -70,6 +71,7 @@
           TEMPEST_SKIP_LIST: "{{ lookup('env', 'TEMPEST_SKIP_LIST') }}"
           TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
           TEMPEST_CONF_OVERRIDES: "{{ lookup('env', 'TEMPEST_CONF_OVERRIDES') }}"
+          TEMPEST_NO_PROXY_EXTRA: "{{ lookup('env', 'TEMPEST_NO_PROXY_EXTRA') }}"
         register: docker_result
         become: true
 

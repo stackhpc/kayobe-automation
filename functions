@@ -45,6 +45,12 @@ function config_defaults {
     # Additional arguments to pass to kayobe commands.
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
 
+    # Additional arguments to pass to kayobe that are safe from shell injection.
+    export KAYOBE_TAGS=${KAYOBE_TAGS:-}
+    export KAYOBE_LIMIT=${KAYOBE_LIMIT:-}
+    export KOLLA_TAGS=${KOLLA_TAGS:-}
+    export KOLLA_LIMIT=${KOLLA_LIMIT:-}
+
     export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
     # When to pause execution. This is useful for debugging. Can be one of:
     #   - on-error
@@ -599,8 +605,30 @@ function activate_kayobe_env {
 
 function run_kayobe {
     # Run a kayobe command, including extra arguments provided via
-    # $KAYOBE_EXTRA_ARGS.
-    kayobe "${@}" ${KAYOBE_EXTRA_ARGS}
+    # $KAYOBE_EXTRA_ARGS, $KAYOBE_TAGS, $KOLLA_TAGS, $KOLLA_LIMIT,
+    # $KAYOBE_LIMIT.
+
+    declare -a kolla_limit
+    if [ ! -z ${KOLLA_LIMIT:+x} ]; then
+        kolla_limit=(--kolla-limit "$KOLLA_LIMIT")
+    fi
+
+    declare -a kolla_tags
+    if [ ! -z ${KOLLA_TAGS:+x} ]; then
+        kolla_tags=(--kolla-tags "$KOLLA_TAGS")
+    fi
+
+    declare -a kayobe_tags
+    if [ ! -z ${KAYOBE_TAGS:+x} ]; then
+        kayobe_tags=(--kayobe-tags "$KAYOBE_TAGS")
+    fi
+
+    declare -a kayobe_limit
+    if [ ! -z ${KAYOBE_LIMIT:+x} ]; then
+        kayobe_limit=(--limit "$KAYOBE_LIMIT")
+    fi
+
+    kayobe "${@}" "${kayobe_limit[@]}" "${kayobe_tags[@]}" "${kolla_limit[@]}" "${kolla_tags[@]}" ${KAYOBE_EXTRA_ARGS}
 }
 
 function run_kayobe_automation_playbook {

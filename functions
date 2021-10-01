@@ -620,7 +620,7 @@ function run_kayobe {
 
     declare -a kayobe_tags
     if [ ! -z ${KAYOBE_TAGS:+x} ]; then
-        kayobe_tags=(--kayobe-tags "$KAYOBE_TAGS")
+        kayobe_tags=(--tags "$KAYOBE_TAGS")
     fi
 
     declare -a kayobe_limit

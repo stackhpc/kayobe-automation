@@ -45,6 +45,9 @@ RUN echo export https_proxy=$https_proxy >> /etc/environment && \
 RUN echo export https_proxy=$https_proxy >> /root/.bashrc && \
   echo export http_proxy=$http_proxy >> /root/.bashrc
 
+RUN python3 -m venv /opt/crudini && /opt/crudini/bin/pip install crudini===0.9.3 && \
+    ln -s /opt/crudini/bin/crudini /usr/bin/crudini
+
 WORKDIR /stack
 USER stack
 

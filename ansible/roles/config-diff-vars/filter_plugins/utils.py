@@ -52,6 +52,18 @@ def ip_mappings(context, hosts):
             })
     return result
 
+@jinja2.contextfilter
+def dummy_facts_interfaces(context, host):
+   result = {}
+   mappings = ip_mappings(context, [host]).get(host, [])
+   for mapping in mappings:
+       interface = mapping['interface']
+       ip = mapping['ip']
+       key = "ansible_%s" % interface
+       value = {"ipv4": {"address": ip}}
+       result[key] = value
+   return result
+
 class FilterModule(object):
     """General purpose filters."""
 
@@ -59,5 +71,6 @@ class FilterModule(object):
         return {
             'ip_mappings': ip_mappings,
             'mappings2interfaces': mappings2interfaces,
-            'interface_string': interface_string
+            'interface_string': interface_string,
+            'dummy_facts_interfaces': dummy_facts_interfaces,
         }

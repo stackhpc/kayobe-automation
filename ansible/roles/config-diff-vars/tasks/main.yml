@@ -4,12 +4,23 @@
   template:
     src: templates/kayobe-extra-vars.yml.j2
     dest: "{{ config_diff_vars_kayobe_output_path }}"
-  vars:
-    ip_mappings: "{{ groups['overcloud'] | ip_mappings }}"
 
 - name: Template kolla vars
   template:
     src: templates/kolla-extra-vars.yml.j2
     dest: "{{ config_diff_vars_kolla_output_path }}"
+
+- name: Ensure kolla facts directory exists
+  file:
+    path: "{{ config_diff_kolla_facts_output_path }}"
+    state: directory
+
+- name: Template kolla facts
+  copy:
+    content: |-
+       {{ dummy_facts | to_nice_json }}
+    dest: "{{ config_diff_kolla_facts_output_path }}/{{ item }}"
+  loop: "{{ groups['overcloud'] }}"
   vars:
-    ip_mappings: "{{ groups['overcloud'] | ip_mappings }}"
+    dummy_interfaces: "{{ item | dummy_facts_interfaces }}"
+    dummy_facts: "{{ ansible_facts | combine(dummy_interfaces) }}"

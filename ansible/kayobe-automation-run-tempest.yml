@@ -13,6 +13,8 @@
     rally_docker_registry: "{{ kolla_docker_registry }}"
     rally_docker_registry_username: "{{ kolla_docker_registry_username }}"
     rally_docker_registry_password: "{{ kolla_docker_registry_password }}"
+    load_list_path_remote: "{{ results_path_remote.path }}/tempest-load-list"
+    skip_list_path_remote: "{{ results_path_remote.path }}/tempest-skip-list"
   tasks:
     - block:
 
@@ -49,6 +51,24 @@
           source: pull
         become: true
 
+      - name: Copy tempest load list to remote host
+        copy:
+          src: "{{ tempest_load_list_path }}"
+          dest: "{{ load_list_path_remote }}"
+          owner: "65500"
+          group: "1000"
+        become: true
+        when: tempest_load_list_path is defined
+
+      - name: Copy tempest skip list to remote host
+        copy:
+          content: "{{ tempest_skip_list_path }}"
+          dest: "{{ skip_list_path_remote }}"
+          owner: "65500"
+          group: "1000"
+        become: true
+        when: tempest_skip_list_path is defined
+
       - name: Run tempest
         command: |-
            docker run -it --rm --entrypoint=/usr/bin/rally-verify-wrapper.sh
@@ -56,11 +76,15 @@
            --env TEMPEST_OPENRC="$TEMPEST_OPENRC"
            --env TEMPEST_CONCURRENCY="$TEMPEST_CONCURRENCY"
            --env TEMPEST_VERSION="$TEMPEST_VERSION"
-           --env TEMPEST_LOAD_LIST="$TEMPEST_LOAD_LIST"
-           --env TEMPEST_SKIP_LIST="$TEMPEST_SKIP_LIST"
            --env TEMPEST_PATTERN="$TEMPEST_PATTERN"
            --env TEMPEST_CONF_OVERRIDES="$TEMPEST_CONF_OVERRIDES"
            --env TEMPEST_NO_PROXY_EXTRA
+           {% if tempest_load_list_path is defined -%}
+           -v {{ load_list_path_remote }}:/home/rally/tempest-load-list:rw
+           {% endif -%}
+           {% if tempest_skip_list_path is defined -%}
+           -v {{ skip_list_path_remote }}:/home/rally/tempest-skip-list:rw
+           {% endif -%}
            --network host
            {{ rally_image_full }}
         environment:

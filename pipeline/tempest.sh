@@ -45,13 +45,17 @@ function main {
         log_info "Configuring tempest.conf overrides"
         export TEMPEST_CONF_OVERRIDES="$(<$KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES)"
     fi
+
+    load_list_override=""
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH}" ]; then
         log_info "Configuring load list"
-        export TEMPEST_LOAD_LIST="$(<$KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH)"
+        load_list_override="-e tempest_load_list_path='$KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH'"
     fi
+
+    skip_list_override=""
     if [ -f "${KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH}" ]; then
         log_info "Configuring skip list"
-        export TEMPEST_SKIP_LIST="$(<$KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH)"
+        skip_list_override="-e tempest_skip_list_path='$KAYOBE_AUTOMATION_TEMPEST_SKIPLIST_FULL_PATH'"
     fi
 
     rally_image_override=""
@@ -90,7 +94,7 @@ function main {
 	    -e results_path_local=$HOME/tempest-artifacts \
 	    $rally_image_override $rally_tag_override $rally_force_pull_override \
 	    $rally_docker_registry_override $rally_docker_registry_username_override \
-	    $rally_docker_registry_password_override
+	    $rally_docker_registry_password_override $load_list_override $skip_list_override
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

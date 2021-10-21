@@ -12,9 +12,9 @@ function post_validate {
         die $LINENO "KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES: ${KAYOBE_AUTOMATION_TEMPEST_CONF_OVERRIDES} does not exist"
     fi
     # Special case the default value of 'default'.
-    if [ "$(basename $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH)" != "default" ] && \
-	    [ ! -f $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH ]; then
-       die $LINENO "KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH: ${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH} does not exist"
+    if [ "$(basename $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH)" != "default" ] &&
+        [ ! -f $KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH ]; then
+        die $LINENO "KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH: ${KAYOBE_AUTOMATION_TEMPEST_LOADLIST_FULL_PATH} does not exist"
     fi
 }
 
@@ -91,10 +91,10 @@ function main {
     mkdir -p $HOME/tempest-artifacts || true
     sudo_if_available chown $USER:$USER $HOME/tempest-artifacts
     run_kayobe_automation_playbook kayobe-automation-run-tempest.yml \
-	    -e results_path_local=$HOME/tempest-artifacts \
-	    $rally_image_override $rally_tag_override $rally_force_pull_override \
-	    $rally_docker_registry_override $rally_docker_registry_username_override \
-	    $rally_docker_registry_password_override $load_list_override $skip_list_override
+        -e results_path_local=$HOME/tempest-artifacts \
+        $rally_image_override $rally_tag_override $rally_force_pull_override \
+        $rally_docker_registry_override $rally_docker_registry_username_override \
+        $rally_docker_registry_password_override $load_list_override $skip_list_override
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

@@ -340,6 +340,8 @@ function github_pull_request {
         \"title\": \"${KAYOBE_AUTOMATION_PR_TITLE}\"
     }"
 
+    log_debug "Pull request body: $body"
+
     # Support 0Auth token? Current method requires a personal access token, but
     # we might have access to 0Auth token in the gitlab runner? Recommended to
     # to setup a service account otherwise.

@@ -89,6 +89,8 @@ function config_extension_pull_request {
 
     # Which branch should we create a PR into?
     export KAYOBE_AUTOMATION_PR_TARGET_BRANCH=${KAYOBE_AUTOMATION_PR_TARGET_BRANCH:-}
+    # For convienience strip refs/heads prefix
+    export KAYOBE_AUTOMATION_PR_TARGET_BRANCH=${KAYOBE_AUTOMATION_PR_TARGET_BRANCH#refs/heads/}
     # Auth token to used to authenticate against the API
     export KAYOBE_AUTOMATION_PR_AUTH_TOKEN=${KAYOBE_AUTOMATION_PR_AUTH_TOKEN:-}
     # Do we only care about a subset of the files? e.g "**/*.yml"

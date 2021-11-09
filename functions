@@ -524,10 +524,18 @@ function install_dependencies {
 function setup_ssh_agent {
     if [ ! -z ${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:+x} ]; then
         log_info "Setting up SSH agent to use private key"
-        eval $(ssh-agent -s)
-        echo "$KAYOBE_AUTOMATION_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-        mkdir -p ~/.ssh
-        chmod 700 ~/.ssh
+	eval $(ssh-agent -s)
+	echo "$KAYOBE_AUTOMATION_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    fi
+}
+
+function inject_ssh_keys {
+    # These are read when generating kolla passwords
+    if [ ! -z ${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:+x} ]; then
+        echo "${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY}" > ~/.ssh/id_rsa
+	chmod 600 ~/.ssh/id_rsa
+	ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub
+	chmod 600 ~/.ssh/id_rsa.pub
     fi
 }
 
@@ -684,6 +692,5 @@ function kayobe_init {
     call_with_hooks environment_diagnostics
     call_with_hooks environment_setup
     call_with_hooks workarounds
-    call_with_hooks setup_ssh_agent
-
+    call_with_hooks inject_ssh_keys
 }

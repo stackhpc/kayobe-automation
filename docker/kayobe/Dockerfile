@@ -67,7 +67,8 @@ RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bi
   sudo chown -Rf stack:stack /tmp/src && \
   # Strip the secrets so that we don't need to pass in a vault-password
   grep -lR "\$ANSIBLE_VAULT" /tmp/src | xargs rm && \
-  bash /tmp/src/.automation/utils/kayobe-automation-install; \
+  bash /tmp/src/.automation/utils/kayobe-automation-install && \
+  rm -f /stack/.ssh/{id_rsa,id_rsa.pub} || true; \
   mkdir /stack/.ansible || true; \
   cp -rfp /stack/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible/roles /stack/.ansible/kayobe-automation-roles || true; \
   cp -rfp /stack/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible/collections /stack/.ansible/kayobe-automation-collections || true; \

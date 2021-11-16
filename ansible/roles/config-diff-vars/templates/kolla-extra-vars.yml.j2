@@ -9,6 +9,8 @@ ansible_python_intepreter: "{{ kolla_ansible_target_venv | realpath }}/bin/pytho
 fluentd_binary: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY') }}"
 fluentd_version: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_VERSION') }}"
 
+ansible_os_family: "RedHat"
+
 {% raw %}
 # These are dynamically retrieved from the openstack resources defined
 # in the cloud. If we aren't actually running openstack, then we can't

@@ -10,6 +10,8 @@ ansible_python_intepreter: "{{ kolla_ansible_target_venv | realpath }}/bin/pytho
 fluentd_binary: td-agent
 fluentd_version: 0.14
 
+ansible_os_family: "RedHat"
+
 {% raw %}
 # These are dynamically retrieved from the openstack resources defined
 # in the cloud. If we aren't actually running openstack, then we can't

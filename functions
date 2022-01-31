@@ -33,6 +33,7 @@ export _LOG_LEVEL_ERROR=1000
 # Configuration
 
 function config_defaults {
+    export USER=${USER:-$(whoami)}
     # Set default values for kayobe automation.
     export KAYOBE_URI="${KAYOBE_URI:-https://github.com/openstack/kayobe}"
 
@@ -43,6 +44,12 @@ function config_defaults {
 
     # Additional arguments to pass to kayobe commands.
     export KAYOBE_EXTRA_ARGS=${KAYOBE_EXTRA_ARGS:-}
+
+    # Additional arguments to pass to kayobe that are safe from shell injection.
+    export KAYOBE_TAGS=${KAYOBE_TAGS:-}
+    export KAYOBE_LIMIT=${KAYOBE_LIMIT:-}
+    export KOLLA_TAGS=${KOLLA_TAGS:-}
+    export KOLLA_LIMIT=${KOLLA_LIMIT:-}
 
     export KAYOBE_AUTOMATION_LOG_LEVEL=${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}
     # When to pause execution. This is useful for debugging. Can be one of:
@@ -82,6 +89,8 @@ function config_extension_pull_request {
 
     # Which branch should we create a PR into?
     export KAYOBE_AUTOMATION_PR_TARGET_BRANCH=${KAYOBE_AUTOMATION_PR_TARGET_BRANCH:-}
+    # For convienience strip refs/heads prefix
+    export KAYOBE_AUTOMATION_PR_TARGET_BRANCH=${KAYOBE_AUTOMATION_PR_TARGET_BRANCH#refs/heads/}
     # Auth token to used to authenticate against the API
     export KAYOBE_AUTOMATION_PR_AUTH_TOKEN=${KAYOBE_AUTOMATION_PR_AUTH_TOKEN:-}
     # Do we only care about a subset of the files? e.g "**/*.yml"
@@ -333,6 +342,8 @@ function github_pull_request {
         \"title\": \"${KAYOBE_AUTOMATION_PR_TITLE}\"
     }"
 
+    log_debug "Pull request body: $body"
+
     # Support 0Auth token? Current method requires a personal access token, but
     # we might have access to 0Auth token in the gitlab runner? Recommended to
     # to setup a service account otherwise.
@@ -499,7 +510,7 @@ function workarounds {
 
 function sudo_if_available {
     if [[ -e "/usr/bin/sudo" ]]; then
-        sudo "$@"
+        sudo --preserve-env=http_proxy,https_proxy,no_proxy,ftp_proxy,HTTP_PROXY,HTTPS_PROXY,NO_PROXY "$@"
         return
     fi
     "$@"
@@ -519,8 +530,16 @@ function setup_ssh_agent {
         log_info "Setting up SSH agent to use private key"
         eval $(ssh-agent -s)
         echo "$KAYOBE_AUTOMATION_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-        mkdir -p ~/.ssh
-        chmod 700 ~/.ssh
+    fi
+}
+
+function inject_ssh_keys {
+    # These are read when generating kolla passwords
+    if [ ! -z ${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:+x} ]; then
+        echo "${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY}" >~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keygen -y -f ~/.ssh/id_rsa >~/.ssh/id_rsa.pub
+        chmod 600 ~/.ssh/id_rsa.pub
     fi
 }
 
@@ -562,7 +581,12 @@ function install_kayobe_venv {
 function create_kayobe_environment {
     env=$1
     mkdir -p "$env"/{src/kayobe,src/kayobe-config,venvs/kayobe}
-    git clone -b $KAYOBE_BRANCH --single-branch $KAYOBE_URI "$env/src/kayobe"
+    if [ ! "$(ls -A $env/src/kayobe)" ]; then
+        git clone -b $KAYOBE_BRANCH --single-branch $KAYOBE_URI "$env/src/kayobe"
+    fi
+    if [ -d "$env/src/kayobe-config" ]; then
+        rm -rf $env/src/kayobe-config
+    fi
     sudo_if_available cp -rf "$KAYOBE_CONFIG_SOURCE_PATH" "$env/src/kayobe-config"
     sudo_if_available chown -Rf $USER:$USER "$env/src/kayobe-config"
     # Adds kayobe source path to pip install args i.e pip install $env/src/kayobe
@@ -593,8 +617,30 @@ function activate_kayobe_env {
 
 function run_kayobe {
     # Run a kayobe command, including extra arguments provided via
-    # $KAYOBE_EXTRA_ARGS.
-    kayobe "${@}" ${KAYOBE_EXTRA_ARGS}
+    # $KAYOBE_EXTRA_ARGS, $KAYOBE_TAGS, $KOLLA_TAGS, $KOLLA_LIMIT,
+    # $KAYOBE_LIMIT.
+
+    declare -a kolla_limit
+    if [ ! -z ${KOLLA_LIMIT:+x} ]; then
+        kolla_limit=(--kolla-limit "$KOLLA_LIMIT")
+    fi
+
+    declare -a kolla_tags
+    if [ ! -z ${KOLLA_TAGS:+x} ]; then
+        kolla_tags=(--kolla-tags "$KOLLA_TAGS")
+    fi
+
+    declare -a kayobe_tags
+    if [ ! -z ${KAYOBE_TAGS:+x} ]; then
+        kayobe_tags=(--tags "$KAYOBE_TAGS")
+    fi
+
+    declare -a kayobe_limit
+    if [ ! -z ${KAYOBE_LIMIT:+x} ]; then
+        kayobe_limit=(--limit "$KAYOBE_LIMIT")
+    fi
+
+    kayobe "${@}" "${kayobe_limit[@]}" "${kayobe_tags[@]}" "${kolla_limit[@]}" "${kolla_tags[@]}" ${KAYOBE_EXTRA_ARGS}
 }
 
 function run_kayobe_automation_playbook {
@@ -648,7 +694,7 @@ function kayobe_init {
     call_with_hooks config_init
     call_with_hooks validate
     call_with_hooks environment_diagnostics
+    call_with_hooks environment_setup
     call_with_hooks workarounds
-    call_with_hooks setup_ssh_agent
-    call_with_hooks activate_kayobe_env "$HOME/kayobe-automation-env"
+    call_with_hooks inject_ssh_keys
 }

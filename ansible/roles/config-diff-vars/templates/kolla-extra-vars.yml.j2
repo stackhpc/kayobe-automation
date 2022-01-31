@@ -1,4 +1,3 @@
-{% from "macros.j2" import mappings with context %}
 ---
 
 {% raw %}
@@ -7,15 +6,10 @@ kolla_ansible_target_venv: "{{ lookup('env', 'KAYOBE_CONFIG_PATH') }}/../../../.
 ansible_python_intepreter: "{{ kolla_ansible_target_venv | realpath }}/bin/python3"
 {% endraw %}
 
-{% for interface in ip_mappings | mappings2interfaces %}
-ansible_{{ interface }}: {{ interface | interface_string }}
-
-{% endfor %}
-
-{{ mappings() }}
-
 fluentd_binary: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY') }}"
 fluentd_version: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_VERSION') }}"
+
+ansible_os_family: "RedHat"
 
 {% raw %}
 # These are dynamically retrieved from the openstack resources defined

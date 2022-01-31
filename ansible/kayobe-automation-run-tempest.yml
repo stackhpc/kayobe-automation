@@ -7,6 +7,14 @@
     rally_image: 'gwee/rally'
     rally_tag: latest
     rally_image_full: "{{ rally_image }}:{{ rally_tag }}"
+    # This ensures you get the latest image if the image is updated
+    # and the tag isn't e.g when using the latest tag.
+    rally_force_pull: true
+    rally_docker_registry: "{{ kolla_docker_registry }}"
+    rally_docker_registry_username: "{{ kolla_docker_registry_username }}"
+    rally_docker_registry_password: "{{ kolla_docker_registry_password }}"
+    load_list_path_remote: "{{ results_path_remote.path }}/tempest-load-list"
+    skip_list_path_remote: "{{ results_path_remote.path }}/tempest-skip-list"
   tasks:
     - block:
 
@@ -26,24 +34,40 @@
 
       - name: Login to docker registry
         docker_login:
-          registry_url: "{{ kolla_docker_registry or omit }}"
-          username: "{{ kolla_docker_registry_username }}"
-          password: "{{ kolla_docker_registry_password }}"
+          registry_url: "{{ rally_docker_registry or omit }}"
+          username: "{{ rally_docker_registry_username }}"
+          password: "{{ rally_docker_registry_password }}"
           reauthorize: yes
         when:
-          - kolla_docker_registry_username is not none
-          - kolla_docker_registry_password is not none
+          - rally_docker_registry_username is not none
+          - rally_docker_registry_password is not none
         become: true
 
-      - name: Force pull image
-        # This ensures you get the latest image if the image is updated
-        # and the tag isn't e.g when using the latest tag.
+      - name: Ensure rally image exists on runner
         docker_image:
           name: "{{ rally_image_full }}"
           state: present
-          force_source: true
+          force_source: "{{ rally_force_pull | bool }}"
           source: pull
         become: true
+
+      - name: Copy tempest load list to remote host
+        copy:
+          src: "{{ tempest_load_list_path }}"
+          dest: "{{ load_list_path_remote }}"
+          owner: "65500"
+          group: "1000"
+        become: true
+        when: tempest_load_list_path is defined
+
+      - name: Copy tempest skip list to remote host
+        copy:
+          content: "{{ tempest_skip_list_path }}"
+          dest: "{{ skip_list_path_remote }}"
+          owner: "65500"
+          group: "1000"
+        become: true
+        when: tempest_skip_list_path is defined
 
       - name: Run tempest
         command: |-
@@ -52,9 +76,16 @@
            --env TEMPEST_OPENRC="$TEMPEST_OPENRC"
            --env TEMPEST_CONCURRENCY="$TEMPEST_CONCURRENCY"
            --env TEMPEST_VERSION="$TEMPEST_VERSION"
-           --env TEMPEST_LOAD_LIST="$TEMPEST_LOAD_LIST"
-           --env TEMPEST_SKIP_LIST="$TEMPEST_SKIP_LIST"
            --env TEMPEST_PATTERN="$TEMPEST_PATTERN"
+           --env TEMPEST_CONF_OVERRIDES="$TEMPEST_CONF_OVERRIDES"
+           --env TEMPEST_NO_PROXY_EXTRA
+           {% if tempest_load_list_path is defined -%}
+           -v {{ load_list_path_remote }}:/home/rally/tempest-load-list:rw
+           {% endif -%}
+           {% if tempest_skip_list_path is defined -%}
+           -v {{ skip_list_path_remote }}:/home/rally/tempest-skip-list:rw
+           {% endif -%}
+           --network host
            {{ rally_image_full }}
         environment:
           TEMPEST_PATTERN: "{{ lookup('env', 'TEMPEST_PATTERN') }}"
@@ -63,6 +94,9 @@
           TEMPEST_LOAD_LIST: "{{ lookup('env', 'TEMPEST_LOAD_LIST') }}"
           TEMPEST_SKIP_LIST: "{{ lookup('env', 'TEMPEST_SKIP_LIST') }}"
           TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
+          TEMPEST_CONF_OVERRIDES: "{{ lookup('env', 'TEMPEST_CONF_OVERRIDES') }}"
+          TEMPEST_NO_PROXY_EXTRA: "{{ lookup('env', 'TEMPEST_NO_PROXY_EXTRA') }}"
+        register: docker_result
         become: true
 
       - name: fixup permissions
@@ -73,6 +107,12 @@
           owner: "{{ ansible_user }}"
           recurse: true
         become: true
+
+      - name: Write docker logs to file
+        copy:
+          content: "{{ docker_result.stdout }}"
+          dest: "{{ results_path_remote.path }}/docker.log"
+          mode: '0644'
 
       - name: synchronize files
         synchronize:

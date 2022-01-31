@@ -1,4 +1,6 @@
-FROM centos:8
+# syntax=docker/dockerfile:1.2
+
+FROM quay.io/centos/centos:stream8
 MAINTAINER "Will Szumski" <will@stackhpc.com>
 
 ENV container docker

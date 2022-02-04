@@ -30,11 +30,74 @@ export _LOG_LEVEL_WARN=2000
 export _LOG_LEVEL_ERROR=1000
 
 ###############################################################################
+# Logging
+
+function log_level {
+    case "${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}" in
+    debug)
+        echo -n "$_LOG_LEVEL_DEBUG"
+        ;;
+    info)
+        echo -n "$_LOG_LEVEL_INFO"
+        ;;
+
+    error)
+        echo -n "$_LOG_LEVEL_ERROR"
+        ;;
+
+    *)
+        echo -n "$_LOG_LEVEL_WARN"
+        ;;
+    esac
+}
+
+function log_info {
+    if [ "$(log_level)" -ge $_LOG_LEVEL_INFO ]; then
+        msg="[INFO]: $@"
+        echo "$msg" 1>&2
+        if [ ! -z ${LOGDIR:+x} ]; then
+            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
+        fi
+    fi
+}
+
+function log_warn {
+    if [ "$(log_level)" -ge $_LOG_LEVEL_WARN ]; then
+        msg="[WARNING]: $@"
+        echo "$msg" 1>&2
+        if [ ! -z ${LOGDIR:+x} ]; then
+            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
+        fi
+    fi
+}
+
+function log_debug {
+    if [ "$(log_level)" -ge $_LOG_LEVEL_DEBUG ]; then
+        msg="[DEBUG]: $@"
+        echo "$msg" 1>&2
+        if [ ! -z ${LOGDIR:+x} ]; then
+            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
+        fi
+    fi
+}
+
+function log_error {
+    if [ "$(log_level)" -ge $_LOG_LEVEL_ERROR ]; then
+        msg="[ERROR]: $@"
+        echo "$msg" 1>&2
+        if [ ! -z ${LOGDIR:+x} ]; then
+            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
+        fi
+    fi
+}
+
+###############################################################################
 # Configuration
 
 function config_defaults {
     export USER=${USER:-$(whoami)}
     # Set default values for kayobe automation.
+    # Deprecated: Add a requirements.txt to kayobe-config instead
     export KAYOBE_URI="${KAYOBE_URI:-https://github.com/openstack/kayobe}"
 
     KAYOBE_PIP_INSTALL_ARGS_DEFAULT="${KAYOBE_PIP_INSTALL_ARGS_EXTRA:-}"
@@ -120,10 +183,8 @@ function config_set {
 function config_check {
     # Check the configuration environment variables.
     set +u
-    if [[ -z "$KAYOBE_BRANCH" ]]; then
-        if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
-            die $LINENO "KAYOBE_BRANCH must be set"
-        fi
+    if [[ ! -z "$KAYOBE_BRANCH" ]]; then
+        log_info "KAYOBE_BRANCH and KAYOBE_URI are deprecated. Add a requirements.txt file to your kayobe config instead."
     fi
     if [[ -z "$KAYOBE_CONFIG_SOURCE_PATH" ]]; then
         if [[ ${KAYOBE_CONFIG_REQUIRED:-1} -eq 1 ]]; then
@@ -186,69 +247,6 @@ function config_init {
 
 function validate {
     true
-}
-
-###############################################################################
-# Logging
-
-function log_level {
-    case "${KAYOBE_AUTOMATION_LOG_LEVEL:-warn}" in
-    debug)
-        echo -n "$_LOG_LEVEL_DEBUG"
-        ;;
-
-    info)
-        echo -n "$_LOG_LEVEL_INFO"
-        ;;
-
-    error)
-        echo -n "$_LOG_LEVEL_ERROR"
-        ;;
-
-    *)
-        echo -n "$_LOG_LEVEL_WARN"
-        ;;
-    esac
-}
-
-function log_info {
-    if [ "$(log_level)" -ge $_LOG_LEVEL_INFO ]; then
-        msg="[INFO]: $@"
-        echo "$msg" 1>&2
-        if [ ! -z ${LOGDIR:+x} ]; then
-            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
-        fi
-    fi
-}
-
-function log_warn {
-    if [ "$(log_level)" -ge $_LOG_LEVEL_WARN ]; then
-        msg="[WARNING]: $@"
-        echo "$msg" 1>&2
-        if [ ! -z ${LOGDIR:+x} ]; then
-            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
-        fi
-    fi
-}
-
-function log_debug {
-    if [ "$(log_level)" -ge $_LOG_LEVEL_DEBUG ]; then
-        msg="[DEBUG]: $@"
-        echo "$msg" 1>&2
-        if [ ! -z ${LOGDIR:+x} ]; then
-            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
-        fi
-    fi
-}
-
-function log_error {
-    if [ "$(log_level)" -ge $_LOG_LEVEL_ERROR ]; then
-        msg="[ERROR]: $@"
-        echo "$msg" 1>&2
-        if [ ! -z ${LOGDIR:+x} ]; then
-            echo "$msg" >>"${LOGDIR}/kayobe-automation.log"
-        fi
-    fi
 }
 
 ###############################################################################
@@ -470,6 +468,16 @@ function is_absolute_path {
     esac
 }
 
+function clean_copy {
+    local src=$1
+    local dest=$2
+    if [ -d "$dest" ]; then
+        rm -rf "$dest"
+    fi
+    sudo_if_available cp -rf "$src" "$dest"
+    sudo_if_available chown -Rf $USER:$USER "$dest"
+}
+
 ##############################################################################
 # Traps
 
@@ -579,19 +587,24 @@ function install_kayobe_venv {
 }
 
 function create_kayobe_environment {
-    env=$1
+    local env=$1
+    local kayobe_config_source_path=${2:-$KAYOBE_CONFIG_SOURCE_PATH}
     mkdir -p "$env"/{src/kayobe,src/kayobe-config,venvs/kayobe}
-    if [ ! "$(ls -A $env/src/kayobe)" ]; then
+
+    # Ensure we have an unmodified copy of kayobe-config
+    clean_copy "$kayobe_config_source_path" "$env/src/kayobe-config"
+
+    if [ -f "$kayobe_config_source_path/requirements.txt" ]; then
+        # Requirements file gets precedence
+        install_kayobe_venv "$env/venvs/kayobe" "$KAYOBE_PIP_INSTALL_ARGS -r $kayobe_config_source_path/requirements.txt"
+    elif [ ! "$(ls -A $env/src/kayobe)" ]; then
+        # Fallback to Legacy KAYOBE_URI
         git clone -b $KAYOBE_BRANCH --single-branch $KAYOBE_URI "$env/src/kayobe"
+        install_kayobe_venv "$env/venvs/kayobe" "$KAYOBE_PIP_INSTALL_ARGS $env/src/kayobe"
+    else
+        # Kayobe pre-checked out
+        install_kayobe_venv "$env/venvs/kayobe" "$KAYOBE_PIP_INSTALL_ARGS $env/src/kayobe"
     fi
-    if [ -d "$env/src/kayobe-config" ]; then
-        rm -rf $env/src/kayobe-config
-    fi
-    sudo_if_available cp -rf "$KAYOBE_CONFIG_SOURCE_PATH" "$env/src/kayobe-config"
-    sudo_if_available chown -Rf $USER:$USER "$env/src/kayobe-config"
-    # Adds kayobe source path to pip install args i.e pip install $env/src/kayobe
-    local KAYOBE_PIP_INSTALL_ARGS="$KAYOBE_PIP_INSTALL_ARGS $env/src/kayobe"
-    install_kayobe_venv "$env/venvs/kayobe" "$KAYOBE_PIP_INSTALL_ARGS"
 }
 
 ###############################################################################

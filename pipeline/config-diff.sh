@@ -80,7 +80,7 @@ function redact_config_dir {
     for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
         reference=""
         if [ ! -z "${2:+x}" ]; then
-            reference="$2/src/kayobe-config/$item"
+            reference="$2/$item"
         fi
         redact_file "$1/src/kayobe-config/$item" "$reference"
     done
@@ -101,13 +101,15 @@ function encrypt_config_dir {
 }
 
 function checkout {
-    cd $1/src/kayobe-config
+    pushd $1
     git checkout $2
+    popd
 }
 
 function merge {
-    cd $1/src/kayobe-config
+    pushd $1
     git merge $2
+    popd
 }
 
 function post_workarounds {
@@ -159,17 +161,20 @@ function main {
     # Example: https://github.com/openstack/kolla-ansible/blob/5e638b757bdda9fbddf0fe0be5d76caa3419af74/ansible/roles/common/templates/td-agent.conf.j2#L9
     environment_path=/tmp/kayobe-env
 
-    # Assume same version of vault works for both for source and target. This is important for the secret diff.
     local ANSIBLE_VAULT="$environment_path/venvs/kayobe/bin/ansible-vault"
 
     # These directories will contain the generated output.
     target_dir=$(mktemp -d --suffix -configgen-target)
     source_dir=$(mktemp -d --suffix -configgen-source)
+    target_kayobe_config_dir=$(mktemp -d --suffix -configgen-kayobe-config-target)
+    source_kayobe_config_dir=$(mktemp -d --suffix -configgen-kayobe-config-source)
 
-    create_kayobe_environment "$environment_path"
+    clean_copy "$KAYOBE_CONFIG_SOURCE_PATH" "$source_kayobe_config_dir"
+    clean_copy "$KAYOBE_CONFIG_SOURCE_PATH" "$target_kayobe_config_dir"
+
     # Checkout the git reference provided as an argument to this script
-    checkout "$environment_path" $1
-
+    checkout "$target_kayobe_config_dir" $1
+    create_kayobe_environment "$environment_path" "$target_kayobe_config_dir"
     redact_config_dir "$environment_path"
     # Encryption expected on passwords.yml due to lookup in kayobe, see:
     # https://github.com/openstack/kayobe/blob/869185ea7be5d6b5b21c964a620839d5475196fd/ansible/roles/kolla-ansible/library/kolla_passwords.py#L81
@@ -179,19 +184,12 @@ function main {
     # Move it out the way so that we can use the same path
     mv "$environment_path" "$environment_path-$(date '+%Y-%m-%d-%H.%M.%S')"
 
-    # Create a reference environment for the secret diff. Not the old environment
-    # has had the secrets redacted, so we need a fresh one.
-    reference_dir=$(mktemp -d --suffix -configgen-reference)
-    create_kayobe_environment "$reference_dir"
-    # Checkout the git reference provided as an argument to this script
-    checkout "$reference_dir" $1
-
     # Perform same steps as above, but for the source branch
-    create_kayobe_environment "$environment_path"
     # Merge in the target branch so that we don't see changes that were added since we branched.
-    merge "$environment_path" $1
-    # Supplying a reference directory will do a diff on the secrets
-    redact_config_dir "$environment_path" "$reference_dir"
+    merge "$source_kayobe_config_dir" $1
+    create_kayobe_environment "$environment_path" "$source_kayobe_config_dir"
+    # Supplying a reference kayobe-config will do a diff on the secrets
+    redact_config_dir "$environment_path" "$target_kayobe_config_dir"
     encrypt_config_dir "$environment_path"
     generate_config "$environment_path" "$source_dir"
 

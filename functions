@@ -597,6 +597,17 @@ function create_kayobe_environment {
     if [ -f "$kayobe_config_source_path/requirements.txt" ]; then
         # Requirements file gets precedence
         install_kayobe_venv "$env/venvs/kayobe" "$KAYOBE_PIP_INSTALL_ARGS -r $kayobe_config_source_path/requirements.txt"
+	# Custom playbooks require symlinks to be in a certain location.
+	# A common custom is to reference a kayobe source checkout using
+	# a canonical layout. This adds a level of indirection to support
+	# the following layout:
+	#  - env/src/kayobe
+	#  - env/src/kayobe-config
+	pushd "$env/src/kayobe"
+	if [ ! -e  ansible ]; then
+            ln -s ../../venvs/kayobe/share/kayobe/ansible ansible
+	fi
+	popd
     elif [ ! "$(ls -A $env/src/kayobe)" ]; then
         # Fallback to Legacy KAYOBE_URI
         git clone -b $KAYOBE_BRANCH --single-branch $KAYOBE_URI "$env/src/kayobe"

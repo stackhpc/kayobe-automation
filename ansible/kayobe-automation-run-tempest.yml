@@ -62,7 +62,7 @@
 
       - name: Copy tempest skip list to remote host
         copy:
-          content: "{{ tempest_skip_list_path }}"
+          src: "{{ tempest_skip_list_path }}"
           dest: "{{ skip_list_path_remote }}"
           owner: "65500"
           group: "1000"

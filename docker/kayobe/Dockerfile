@@ -66,7 +66,7 @@ COPY .automation/docker/kayobe/bin/kayobe-automation-workaround-missing .automat
 RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \
   sudo chown -Rf stack:stack /tmp/src && \
   # Strip the secrets so that we don't need to pass in a vault-password
-  grep -lR "\$ANSIBLE_VAULT" /tmp/src | xargs rm && \
+  grep -lR "\$ANSIBLE_VAULT" /tmp/src | xargs rm -f && \
   bash /tmp/src/.automation/utils/kayobe-automation-install && \
   rm -f /stack/.ssh/{id_rsa,id_rsa.pub} || true; \
   mkdir /stack/.ansible || true; \

@@ -31,6 +31,28 @@ def mappings2interfaces(ip_mappings):
             result.add(desc["interface"])
     return result
 
+def should_prefix_fact(key):
+    if key.startswith('ansible'):
+        return False
+    if key.startswith('_ansible'):
+        return False
+    if key == 'module_setup':
+        return False
+    if key == 'gather_subset':
+        return False
+    return True
+
+def dummy_facts_prefix(facts, inject_facts):
+    if not inject_facts:
+       return facts
+    result = {}
+    for key in facts:
+        if should_prefix_fact(key):
+          result["ansible_%s" % key] = facts[key]
+        else:
+          result[key] = facts[key]
+    return result
+
 def interface_string(interface):
     return "\"{{ lookup('vars', inventory_hostname | replace('-', '_') ~ '_' ~ '" + interface + "') }}\""
 
@@ -73,4 +95,5 @@ class FilterModule(object):
             'mappings2interfaces': mappings2interfaces,
             'interface_string': interface_string,
             'dummy_facts_interfaces': dummy_facts_interfaces,
+            'dummy_facts_prefix': dummy_facts_prefix,
         }

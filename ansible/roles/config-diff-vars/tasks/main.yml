@@ -18,7 +18,7 @@
 - name: Template kolla facts
   copy:
     content: |-
-       {{ dummy_facts | to_nice_json }}
+       {{ dummy_facts | dummy_facts_prefix(config_diff_vars_inject_facts) | to_nice_json }}
     dest: "{{ config_diff_kolla_facts_output_path }}/{{ item }}"
   loop: "{{ groups['overcloud'] }}"
   vars:

@@ -1,5 +1,6 @@
 ---
 
+config_diff_vars_inject_facts: "{{ lookup('env', 'KAYOBE_AUTOMATION_CONFIG_DIFF_INJECT_FACTS') | default(false, true) | bool }}"
 config_diff_vars_kayobe_output_path: "{{ lookup('env', 'KAYOBE_CONFIG_PATH') }}/../../../kayobe-extra-vars.yml"
 config_diff_vars_kolla_output_path: "{{ lookup('env', 'KAYOBE_CONFIG_PATH') }}/../../../kolla-extra-vars.yml"
 config_diff_kolla_facts_output_path: "{{ lookup('env', 'KAYOBE_CONFIG_PATH') }}/../../kayobe-automation-config-diff-kolla-facts"

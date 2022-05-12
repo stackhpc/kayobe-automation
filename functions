@@ -141,6 +141,8 @@ function config_defaults {
     # Flag to control whether images are pushed. Can be one of: 0, 1. Where
     # zero === false and one === true.
     export KAYOBE_AUTOMATION_PUSH_IMAGE=${KAYOBE_AUTOMATION_PUSH_IMAGE:-0}
+    # Flag to pass --skip-prechecks as CLI option
+    export KAYOBE_AUTOMATION_SKIP_PRECHECKS=${KAYOBE_AUTOMATION_SKIP_PRECHECKS:-0}
 
     if [[ ! -z "$KAYOBE_AUTOMATION_PR_TYPE" ]]; then
         config_extension_pull_request
@@ -199,6 +201,10 @@ function config_check {
 
     if [[ "$KAYOBE_AUTOMATION_PUSH_IMAGE" != 0 ]] && [[ "$KAYOBE_AUTOMATION_PUSH_IMAGE" != 1 ]]; then
         die $LINENO "KAYOBE_AUTOMATION_PUSH_IMAGE must be set to either: 0, or 1"
+    fi
+
+    if [[ "$KAYOBE_AUTOMATION_SKIP_PRECHECKS" != 0 ]] && [[ "$KAYOBE_AUTOMATION_SKIP_PRECHECKS" != 1 ]]; then
+        die $LINENO "KAYOBE_AUTOMATION_SKIP_PRECHECKS must be set to either: 0, or 1"
     fi
 
     # PR validation

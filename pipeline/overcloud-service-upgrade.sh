@@ -13,7 +13,6 @@ function main {
     if [ "${KAYOBE_AUTOMATION_SKIP_PRECHECKS}" -ne 0 ]; then
         args+=("--skip-prechecks")
     fi
-    args=()
     run_kayobe overcloud service upgrade "${args[@]}"
     pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
 }

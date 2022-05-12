@@ -9,13 +9,16 @@ source "${PARENT}/../functions"
 
 function main {
     kayobe_init
-    push_arg=""
+    args=()
     # Validation in kayobe_init guarentees we can use numeric comparison.
     if [ "${KAYOBE_AUTOMATION_PUSH_IMAGE}" -ne 0 ]; then
         log_info "Images are configured to be pushed"
-        push_arg="--push"
+        args+=("--push")
     fi
-    run_kayobe overcloud container image build "$@" $push_arg
+    if [ ! -z ${KAYOBE_AUTOMATION_CONTAINER_BUILD_REGEX:+x} ]; then
+        args+=("$KAYOBE_AUTOMATION_CONTAINER_BUILD_REGEX")
+    fi
+    run_kayobe overcloud container image build "${args[@]}" "$@"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

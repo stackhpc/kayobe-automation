@@ -147,8 +147,9 @@ function generate_config {
     . $env_path/venvs/kayobe/bin/activate
 
     local kayobe_environment_path="$env_path/src/kayobe-config/etc/kayobe/environments/${KAYOBE_ENVIRONMENT}"
-
-    KAYOBE_ENVIRONMENT_OLD="${KAYOBE_ENVIRONMENT}"
+    local kayobe_ansible_path="$env_path/venvs/kayobe/share/kayobe/ansible"
+    local kayobe_environment_old="${KAYOBE_ENVIRONMENT}"
+    local kayobe_vault_password_old="$KAYOBE_VAULT_PASSWORD"
 
     if [ ! -d "${kayobe_environment_path}" ] && [ ${KAYOBE_AUTOMATION_CONFIG_DIFF_AUTO_UNSET_ENVIRONMENT} -ne 0 ]; then
         # For compatability with non-multi environments setup.
@@ -156,21 +157,19 @@ function generate_config {
         unset KAYOBE_ENVIRONMENT
     fi
 
-    export KAYOBE_VAULT_PASSWORD_OLD="$KAYOBE_VAULT_PASSWORD"
     export KAYOBE_VAULT_PASSWORD=dummy-password
-    local KAYOBE_ANSIBLE_PATH="$env_path/venvs/kayobe/share/kayobe/ansible"
 
     kayobe control host bootstrap
     log_info "Generating config to $output_dir"
-    kayobe playbook run "$KAYOBE_ANSIBLE_PATH/kayobe-automation-prepare-config-diff.yml"
+    kayobe playbook run "$kayobe_ansible_path/kayobe-automation-prepare-config-diff.yml"
     kolla_ansible_cfg=$env_path/src/kayobe-config/etc/kayobe/kolla/ansible.cfg
     crudini --set $kolla_ansible_cfg defaults gathering smart
     crudini --set $kolla_ansible_cfg defaults fact_caching jsonfile
     crudini --set $kolla_ansible_cfg defaults fact_caching_connection $env_path/src/kayobe-config/kayobe-automation-config-diff-kolla-facts
     kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_CONFIG_PATH/../../../kayobe-extra-vars.yml" --kolla-extra-vars "@$KAYOBE_CONFIG_PATH/../../../kolla-extra-vars.yml" ${KAYOBE_EXTRA_ARGS}
 
-    export KAYOBE_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD_OLD"
-    export KAYOBE_ENVIRONMENT="$KAYOBE_ENVIRONMENT_OLD"
+    export KAYOBE_VAULT_PASSWORD="$kayobe_vault_password_old"
+    export KAYOBE_ENVIRONMENT="$kayobe_environment_old"
 }
 
 function main {

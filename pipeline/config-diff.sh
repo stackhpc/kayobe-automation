@@ -143,6 +143,15 @@ function generate_config {
 
     . $env_path/src/kayobe-config/kayobe-env
     . $env_path/venvs/kayobe/bin/activate
+
+    local kayobe_environment_path="$env_path/src/kayobe-config/etc/kayobe/environments/${KAYOBE_ENVIRONMENT}"
+
+    if [ ! -d "${kayobe_environment_path}" ]; then
+        # For compatability with non-multi environments setup.
+        log_warn "Environment folder: ${kayobe_environment_path} not found. Unsetting kayobe environment."
+        unset KAYOBE_ENVIRONMENT
+    fi
+
     export KAYOBE_VAULT_PASSWORD_OLD="$KAYOBE_VAULT_PASSWORD"
     export KAYOBE_VAULT_PASSWORD=dummy-password
     local KAYOBE_ANSIBLE_PATH="$env_path/venvs/kayobe/share/kayobe/ansible"

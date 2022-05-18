@@ -83,12 +83,17 @@ function encrypt_file {
 }
 
 function redact_config_dir {
+    declare -A unique_paths
     for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
         reference=""
         if [ ! -z "${2:+x}" ]; then
             reference="$2/$item"
         fi
-        redact_file "$1/src/kayobe-config/$item" "$reference"
+        unique_paths[$(realpath "$1/src/kayobe-config/$item")]="$reference"
+    done
+
+    for item in "${!unique_paths[@]}"; do
+        redact_file "$item" "${unique_paths[$item]}"
     done
 
     # replace vaulted files with md5sum of the vaulted file
@@ -101,8 +106,13 @@ function redact_config_dir {
 }
 
 function encrypt_config_dir {
+    declare -A unique_paths
     for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
-        encrypt_file "$1/src/kayobe-config/$item"
+        unique_paths[$(realpath "$1/src/kayobe-config/$item")]=1
+    done
+
+    for item in "${!unique_paths[@]}"; do
+        encrypt_file "$item"
     done
 }
 

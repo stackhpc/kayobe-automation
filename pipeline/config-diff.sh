@@ -41,6 +41,8 @@ function post_config_init {
     KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT=(
         "etc/kayobe/kolla/config/octavia/server_ca.key.pem"
         "etc/kayobe/kolla/config/octavia/client.cert-and-key.pem"
+        "etc/kayobe/kolla/config/octavia/client_ca.key.pem"
+        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/client_ca.key.pem"
         "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/server_ca.key.pem"
         "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/client.cert-and-key.pem"
         ${KAYOBE_CONFIG_VAULTED_FILES_PATHS_EXTRA[@]}

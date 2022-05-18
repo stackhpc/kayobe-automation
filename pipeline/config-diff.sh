@@ -53,7 +53,9 @@ function post_config_init {
     export KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY="${KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY:-td-agent}"
     export KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_VERSION="${KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY:-0.14}"
 
-    export KAYOBE_AUTOMATION_CONFIG_DIFF_INJECT_FACTS="${KAYOBE_AUTOMATION_CONFIG_DIFF_INJECT_FACTS=-false}"
+    export KAYOBE_AUTOMATION_CONFIG_DIFF_INJECT_FACTS="${KAYOBE_AUTOMATION_CONFIG_DIFF_INJECT_FACTS=-0}"
+    export KAYOBE_AUTOMATION_CONFIG_DIFF_AUTO_UNSET_ENVIRONMENT="${KAYOBE_AUTOMATION_CONFIG_DIFF_AUTO_UNSET_ENVIRONMENT=-0}"
+
 }
 
 function redact_file {
@@ -146,7 +148,9 @@ function generate_config {
 
     local kayobe_environment_path="$env_path/src/kayobe-config/etc/kayobe/environments/${KAYOBE_ENVIRONMENT}"
 
-    if [ ! -d "${kayobe_environment_path}" ]; then
+    KAYOBE_ENVIRONMENT_OLD="${KAYOBE_ENVIRONMENT}"
+
+    if [ ! -d "${kayobe_environment_path}" ] && [ ${KAYOBE_AUTOMATION_CONFIG_DIFF_AUTO_UNSET_ENVIRONMENT} -ne 0 ]; then
         # For compatability with non-multi environments setup.
         log_warn "Environment folder: ${kayobe_environment_path} not found. Unsetting kayobe environment."
         unset KAYOBE_ENVIRONMENT
@@ -164,7 +168,9 @@ function generate_config {
     crudini --set $kolla_ansible_cfg defaults fact_caching jsonfile
     crudini --set $kolla_ansible_cfg defaults fact_caching_connection $env_path/src/kayobe-config/kayobe-automation-config-diff-kolla-facts
     kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_CONFIG_PATH/../../../kayobe-extra-vars.yml" --kolla-extra-vars "@$KAYOBE_CONFIG_PATH/../../../kolla-extra-vars.yml" ${KAYOBE_EXTRA_ARGS}
+
     export KAYOBE_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD_OLD"
+    export KAYOBE_ENVIRONMENT="$KAYOBE_ENVIRONMENT_OLD"
 }
 
 function main {

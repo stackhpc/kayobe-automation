@@ -124,7 +124,7 @@ function checkout {
 
 function merge {
     pushd $1
-    git merge $2
+    git merge --no-edit $2
     popd
 }
 

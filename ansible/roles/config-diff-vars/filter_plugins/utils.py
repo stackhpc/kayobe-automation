@@ -78,12 +78,15 @@ def ip_mappings(context, hosts):
 def dummy_facts_interfaces(context, host):
    result = {}
    mappings = ip_mappings(context, [host]).get(host, [])
+   interfaces = []
    for mapping in mappings:
        interface = mapping['interface']
+       interfaces.append(interface)
        ip = mapping['ip']
        key = "ansible_%s" % interface
        value = {"ipv4": {"address": ip}}
        result[key] = value
+   result['interfaces'] = result.get('interfaces',[]) + interfaces
    return result
 
 class FilterModule(object):

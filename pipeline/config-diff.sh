@@ -85,6 +85,9 @@ function encrypt_file {
 function redact_config_dir {
     declare -A unique_paths
     for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
+        if [ ! -e "$1/src/kayobe-config/$item" ]; then
+            continue
+        fi
         reference=""
         if [ ! -z "${2:+x}" ]; then
             reference="$2/$item"
@@ -108,6 +111,9 @@ function redact_config_dir {
 function encrypt_config_dir {
     declare -A unique_paths
     for item in "${KAYOBE_CONFIG_SECRET_PATHS[@]}"; do
+        if [ ! -e "$1/src/kayobe-config/$item" ]; then
+            continue
+        fi
         unique_paths[$(realpath "$1/src/kayobe-config/$item")]=1
     done
 

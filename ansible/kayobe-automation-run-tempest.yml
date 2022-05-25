@@ -72,7 +72,7 @@
 
       - name: Run tempest
         command: |-
-           docker run -it --rm --entrypoint=/usr/bin/rally-verify-wrapper.sh
+           docker run -it --entrypoint=/usr/bin/rally-verify-wrapper.sh
            -v "{{ results_path_remote.path }}:/home/rally/artifacts"
            --env TEMPEST_OPENRC="$TEMPEST_OPENRC"
            --env TEMPEST_CONCURRENCY="$TEMPEST_CONCURRENCY"

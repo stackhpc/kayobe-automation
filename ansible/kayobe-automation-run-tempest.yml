@@ -7,6 +7,7 @@
     rally_image: 'gwee/rally'
     rally_tag: latest
     rally_image_full: "{{ rally_image }}:{{ rally_tag }}"
+    rally_no_sensitive_log: true
     # This ensures you get the latest image if the image is updated
     # and the tag isn't e.g when using the latest tag.
     rally_force_pull: true
@@ -96,6 +97,7 @@
           TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
           TEMPEST_CONF_OVERRIDES: "{{ lookup('env', 'TEMPEST_CONF_OVERRIDES') }}"
           TEMPEST_NO_PROXY_EXTRA: "{{ lookup('env', 'TEMPEST_NO_PROXY_EXTRA') }}"
+        no_log: "{{ rally_no_sensitive_log }}"
         register: docker_result
         become: true
 

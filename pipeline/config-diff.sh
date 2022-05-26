@@ -26,7 +26,7 @@ function post_config_set {
 
 function pre_config_init {
     # Flag that can be used to conditionally set values in kayobe config.
-    export KAYOBE_AUTOMATION_CONFIG_DIFF=true
+    export KAYOBE_AUTOMATION_CONFIG_DIFF=1
 }
 
 function post_config_init {

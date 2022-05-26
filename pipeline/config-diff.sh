@@ -184,7 +184,28 @@ function generate_config {
     crudini --set $kolla_ansible_cfg defaults gathering smart
     crudini --set $kolla_ansible_cfg defaults fact_caching jsonfile
     crudini --set $kolla_ansible_cfg defaults fact_caching_connection $env_path/src/kayobe-config/kayobe-automation-config-diff-kolla-facts
-    kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_CONFIG_PATH/../../../kayobe-extra-vars.yml" --kolla-extra-vars "@$KAYOBE_CONFIG_PATH/../../../kolla-extra-vars.yml" ${KAYOBE_EXTRA_ARGS}
+
+    declare -a kolla_limit
+    if [ ! -z ${KOLLA_LIMIT:+x} ]; then
+        kolla_limit=(--kolla-limit "$KOLLA_LIMIT")
+    fi
+
+    declare -a kolla_tags
+    if [ ! -z ${KOLLA_TAGS:+x} ]; then
+        kolla_tags=(--kolla-tags "$KOLLA_TAGS")
+    fi
+
+    declare -a kayobe_tags
+    if [ ! -z ${KAYOBE_TAGS:+x} ]; then
+        kayobe_tags=(--tags "$KAYOBE_TAGS")
+    fi
+
+    declare -a kayobe_limit
+    if [ ! -z ${KAYOBE_LIMIT:+x} ]; then
+        kayobe_limit=(--limit "$KAYOBE_LIMIT")
+    fi
+
+    kayobe overcloud service configuration generate --node-config-dir "$output_dir"'/{{inventory_hostname}}' --skip-prechecks -e "@$KAYOBE_CONFIG_PATH/../../../kayobe-extra-vars.yml" --kolla-extra-vars "@$KAYOBE_CONFIG_PATH/../../../kolla-extra-vars.yml" "${kayobe_limit[@]}" "${kayobe_tags[@]}" "${kolla_limit[@]}" "${kolla_tags[@]}" ${KAYOBE_EXTRA_ARGS}
 
     export KAYOBE_VAULT_PASSWORD="$kayobe_vault_password_old"
     export KAYOBE_ENVIRONMENT="$kayobe_environment_old"

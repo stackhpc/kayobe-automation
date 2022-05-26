@@ -161,8 +161,10 @@ function generate_config {
     # them as well. See https://unix.stackexchange.com/a/151896 for details.
     shift $#
 
+    set +eu
     . $env_path/src/kayobe-config/kayobe-env
     . $env_path/venvs/kayobe/bin/activate
+    set -eu
 
     local kayobe_environment_path="$env_path/src/kayobe-config/etc/kayobe/environments/${KAYOBE_ENVIRONMENT}"
     local kayobe_ansible_path="$env_path/venvs/kayobe/share/kayobe/ansible"

@@ -191,7 +191,7 @@ function main {
     generate_config "$environment_path" "$source_dir"
 
     # diff gives non-zero exit status if there is a difference
-    if sudo_if_available diff -Naur $target_dir $source_dir >/tmp/kayobe-config-diff; then
+    if sudo_if_available diff -Nur $target_dir $source_dir >/tmp/kayobe-config-diff; then
         echo 'The diff was empty!'
     else
         echo 'The diff was non-empty. Please check the diff output.'

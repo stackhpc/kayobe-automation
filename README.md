@@ -1,10 +1,13 @@
 # kayobe-automation
 
-WARNING: Experimental
-
-Scripts for automating kayobe.
+Scripts and tools for automating Kayobe operations. Intended for use in CI/CD
+pipelines.
 
 ## Installation
+
+kayobe-automation is typically installed as a Git submodule within a Kayobe
+configuration repository. This allows the version of kayobe-automation in use
+to be controlled.
 
 Check out your kayobe-config repository and add the submodule.
 
@@ -31,9 +34,25 @@ You can change the branch at a later date with:
 
 ## Configuration
 
-Use the examples in examples/* for inspiration.
+Configuration for kayobe-automation is typically provided via files in a
+`.automation.conf` directory at the root of the kayobe-config repository.
+The following files are supported:
+
+* `config.sh`: Mandatory bash script that will be sourced by kayobe-automation
+  scripts. Typically it will export environment variables necessary to configure
+  kayobe-automation.
+
+Use the examples in examples/\* for inspiration.
 
 ## Environment variables
+
+`KAYOBE_URI`: **Deprecated** Kayobe source repository URI. It is preferred to install Kayobe via a `requirements.txt` file in kayobe-config.
+
+`KAYOBE_BRANCH`: **Deprecated** Kayobe source repository branch name. It is preferred to install Kayobe via a `requirements.txt` file in kayobe-config.
+
+`KAYOBE_ENVIRONMENT`: Optional Kayobe environment name.
+
+`KAYOBE_AUTOMATION_CONFIG_PATH`: Path to kayobe-automation configuration directory. Defaults to `.automation.conf` in the kayobe-config root directory.
 
 `KAYOBE_AUTOMATION_SSH_PRIVATE_KEY`: Private key used to login to kayobe managed hosts
 
@@ -44,6 +63,42 @@ Use the examples in examples/* for inspiration.
 `KAYOBE_AUTOMATION_PR_AUTH_TOKEN`: (Required when `KAYOBE_AUTOMATION_PR_TYPE` is set) Auth token to use when submitting pull-requests. Typically you need to create a service account and generate a person access token.
 
 `TEMPEST_OPENRC`: openrc file to use when running tempest
+
+## Pipeline scripts
+
+kayobe-automation provides various pipeline scripts in the `pipeline`
+directory. Many of these are wrappers around Kayobe commands.
+
+## Container images
+
+### Kayobe
+
+kayobe-automation provides a Dockerfile to build a container image for running
+commands in `docker/kayobe/`.
+
+Building the image requires the use of [Docker
+buildkit](https://docs.docker.com/develop/develop-images/build_enhancements/).
+
+On Ubuntu, you may need to [do the
+following](https://blog.sylo.space/can-not-login-docker-account/):
+```
+sudo apt install golang-docker-credential-helpers
+```
+
+To build, from the root of the kayobe-config repository:
+```
+DOCKER_BUILDKIT=1 docker build --file .automation/docker/kayobe/Dockerfile --tag kayobe:latest .
+```
+
+To use the image to run one of the pipeline scripts, from the root of the
+kayobe-config repository:
+```
+docker run -it --rm -v $(pwd):/stack/kayobe-config kayobe:latest /stack/kayobe-config/.automation/pipeline/overcloud-host-configure.sh
+```
+
+It may be necessary to provide certain environment variables at runtime, e.g.
+`KAYOBE_ENVIRONMENT` or `KAYOBE_VAULT_PASSWORD`. This may be done via `docker
+run -e ENV_VAR=value ...`.
 
 ## gitlab
 

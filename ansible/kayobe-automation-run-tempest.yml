@@ -16,6 +16,7 @@
     rally_docker_registry_password: "{{ kolla_docker_registry_password }}"
     load_list_path_remote: "{{ results_path_remote.path }}/tempest-load-list"
     skip_list_path_remote: "{{ results_path_remote.path }}/tempest-skip-list"
+    accounts_path_remote: "{{ results_path_remote.path }}/tempest-accounts"
   tasks:
     - block:
 
@@ -70,6 +71,15 @@
         become: true
         when: tempest_skip_list_path is defined
 
+      - name: Template tempest accounts
+        template:
+          src: "{{ tempest_accounts_path }}"
+          dest: "{{ accounts_path_remote }}"
+          owner: "65500"
+          group: "1000"
+        become: true
+        when: tempest_accounts_path is defined
+
       - name: Run tempest
         command: |-
            docker run --rm --entrypoint=/usr/bin/rally-verify-wrapper.sh
@@ -85,6 +95,9 @@
            {% endif -%}
            {% if tempest_skip_list_path is defined -%}
            -v {{ skip_list_path_remote }}:/home/rally/tempest-skip-list:rw
+           {% endif -%}
+           {% if tempest_accounts_path is defined -%}
+           -v {{ accounts_path_remote }}:/home/rally/tempest-accounts:ro
            {% endif -%}
            --network host
            {{ rally_image_full }}

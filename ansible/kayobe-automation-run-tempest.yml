@@ -90,6 +90,7 @@
            --env TEMPEST_PATTERN="$TEMPEST_PATTERN"
            --env TEMPEST_CONF_OVERRIDES="$TEMPEST_CONF_OVERRIDES"
            --env TEMPEST_NO_PROXY_EXTRA
+           --env RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES
            {% if tempest_load_list_path is defined -%}
            -v {{ load_list_path_remote }}:/home/rally/tempest-load-list:rw
            {% endif -%}
@@ -110,6 +111,7 @@
           TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
           TEMPEST_CONF_OVERRIDES: "{{ lookup('env', 'TEMPEST_CONF_OVERRIDES') }}"
           TEMPEST_NO_PROXY_EXTRA: "{{ lookup('env', 'TEMPEST_NO_PROXY_EXTRA') }}"
+          RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES: "{{ lookup('env', 'TEMPEST_NO_PROXY_EXTRA') }}"
         no_log: "{{ rally_no_sensitive_log }}"
         register: docker_result
         become: true

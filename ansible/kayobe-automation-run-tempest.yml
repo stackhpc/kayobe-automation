@@ -111,7 +111,7 @@
           TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
           TEMPEST_CONF_OVERRIDES: "{{ lookup('env', 'TEMPEST_CONF_OVERRIDES') }}"
           TEMPEST_NO_PROXY_EXTRA: "{{ lookup('env', 'TEMPEST_NO_PROXY_EXTRA') }}"
-          RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES: "{{ lookup('env', 'TEMPEST_NO_PROXY_EXTRA') }}"
+          RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES: "{{ lookup('env', 'RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES') }}"
         no_log: "{{ rally_no_sensitive_log }}"
         register: docker_result
         become: true

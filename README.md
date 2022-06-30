@@ -62,7 +62,7 @@ Use the examples in examples/\* for inspiration.
 
 `KAYOBE_AUTOMATION_PR_AUTH_TOKEN`: (Required when `KAYOBE_AUTOMATION_PR_TYPE` is set) Auth token to use when submitting pull-requests. Typically you need to create a service account and generate a person access token.
 
-`TEMPEST_OPENRC`: openrc file to use when running tempest
+`TEMPEST_OPENRC`: openrc file content to use when running tempest
 
 ## Pipeline scripts
 

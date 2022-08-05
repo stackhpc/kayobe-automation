@@ -29,6 +29,11 @@ RUN dnf update -y --nobest && \
         diffstat diffutils procps-ng && \
     dnf clean all
 
+# Workaround: rsync: --sparse-block=1024: unknown option
+# Hoepfully they have fixed this issue before this old
+# package is removed.
+RUN dnf install rsync-3.1.3-14.el8 && dnf clean all
+
 RUN python3 -m pip install docker six
 
 ENV KAYOBE_USER=stack

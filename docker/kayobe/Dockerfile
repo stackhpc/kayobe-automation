@@ -26,7 +26,8 @@ ENV container docker
 RUN dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
         libffi-devel sudo which openssh-server e2fsprogs rsync \
-        diffstat diffutils procps-ng && \
+        diffstat diffutils procps-ng debootstrap gdisk util-linux \
+        dosfstools && \
     dnf clean all
 
 # Workaround: rsync: --sparse-block=1024: unknown option

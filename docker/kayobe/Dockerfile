@@ -23,10 +23,11 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-RUN dnf update -y --nobest && \
+RUN dnf install epel-release -y && \
+    dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
         libffi-devel sudo which openssh-server e2fsprogs rsync \
-        diffstat diffutils procps-ng debootstrap gdisk util-linux \
+        diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools && \
     dnf clean all
 

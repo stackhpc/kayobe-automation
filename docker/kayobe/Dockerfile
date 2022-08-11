@@ -28,8 +28,14 @@ RUN dnf install epel-release -y && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
         libffi-devel sudo which openssh-server e2fsprogs rsync \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
-        dosfstools lvm2 && \
+        dosfstools lvm2 kpartx && \
     dnf clean all
+
+# Configure lvm not to use udev for device discovery. This allows you to use
+# lvm in docker.
+# https://serverfault.com/questions/802766/calling-lvcreate-from-inside-the-container-hangs
+RUN sed -i 's/# udev_rules = 1/udev_rules = 0/g' /etc/lvm/lvm.conf && \
+    sed  -i 's/# udev_sync = 1/udev_sync = 0/g' /etc/lvm/lvm.conf
 
 # Workaround: rsync: --sparse-block=1024: unknown option
 # Hoepfully they have fixed this issue before this old

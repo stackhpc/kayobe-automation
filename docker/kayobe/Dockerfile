@@ -28,7 +28,7 @@ RUN dnf install epel-release -y && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
         libffi-devel sudo which openssh-server e2fsprogs rsync \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
-        dosfstools lvm2 kpartx && \
+        dosfstools lvm2 kpartx systemd-udev && \
     dnf clean all
 
 # Configure lvm not to use udev for device discovery. This allows you to use

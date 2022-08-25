@@ -27,7 +27,7 @@ function main {
     if [ ! -f "$PLAYBOOK_PATH" ]; then
         die $LINENO "Playbook path does not exist: $PLAYBOOK_PATH"
     fi
-    run_kayobe playbook run "$PLAYBOOK_PATH"
+    run_kayobe playbook run "$PLAYBOOK_PATH" "${@}"
     pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
 }
 
@@ -36,5 +36,5 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         die $LINENO "Error: You must provide a playbook to run" \
             "Usage: playbook-run.sh <playbook>"
     fi
-    main "$1"
+    main "$1" "${@:2}"
 fi

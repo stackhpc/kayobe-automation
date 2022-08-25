@@ -9,9 +9,9 @@ source "${PARENT}/../functions"
 
 function main {
     kayobe_init
-    run_kayobe overcloud container image pull
+    run_kayobe overcloud container image pull "${@}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
+    main "${@:1}"
 fi

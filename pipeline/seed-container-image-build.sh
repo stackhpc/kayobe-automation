@@ -15,9 +15,9 @@ function main {
         log_info "Images are configured to be pushed"
         push_arg="--push"
     fi
-    run_kayobe seed container image build "$@" $push_arg
+    run_kayobe seed container image build "${@}" $push_arg
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main "$@"
+    main "${@:1}"
 fi

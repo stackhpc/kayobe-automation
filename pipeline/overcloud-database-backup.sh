@@ -9,9 +9,9 @@ source "${PARENT}/../functions"
 
 function main {
     kayobe_init
-    run_kayobe overcloud database backup
+    run_kayobe overcloud database backup "${@}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+    main "${@:1}"
 fi

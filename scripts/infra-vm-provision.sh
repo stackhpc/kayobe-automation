@@ -7,15 +7,12 @@ PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${PARENT}/../functions"
 
-function post_config_init {
-    export KAYOBE_AUTOMATION_PACKAGES="${KAYOBE_AUTOMATION_PACKAGES:-*}"
-}
-
 function main {
     kayobe_init
-    run_kayobe seed host package update --packages "$KAYOBE_AUTOMATION_PACKAGES"
+    run_kayobe infra vm provision "${@}"
+    pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+    main "${@:1}"
 fi

@@ -9,11 +9,7 @@ source "${PARENT}/../functions"
 
 function main {
     kayobe_init
-    args=()
-    if [ "${KAYOBE_AUTOMATION_SKIP_PRECHECKS}" -ne 0 ]; then
-        args+=("--skip-prechecks")
-    fi
-    run_kayobe overcloud service upgrade "${args[@]}"
+    run_kayobe seed service deploy "${@}"
     pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
 }
 

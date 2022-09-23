@@ -9,10 +9,9 @@ source "${PARENT}/../functions"
 
 function main {
     kayobe_init
-    run_kayobe overcloud host configure
-    pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
+    run_kayobe "${@}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+    main "${@:1}"
 fi

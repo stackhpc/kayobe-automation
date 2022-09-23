@@ -13,9 +13,9 @@ function post_config_init {
 
 function main {
     kayobe_init
-    run_kayobe overcloud host package update --packages "$KAYOBE_AUTOMATION_PACKAGES"
+    run_kayobe infra vm host package update --packages "$KAYOBE_AUTOMATION_PACKAGES" "${@}"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+    main "${@:1}"
 fi

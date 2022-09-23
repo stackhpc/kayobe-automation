@@ -9,10 +9,10 @@ source "${PARENT}/../functions"
 
 function main {
     kayobe_init
-    run_kayobe overcloud deployment image build --force-rebuild
-    pull_request "${KAYOBE_AUTOMATION_ENV_KAYOBE_CONFIG_PATH}"
+    run_kayobe infra vm host configure "${@}"
+    pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+    main "${@:1}"
 fi

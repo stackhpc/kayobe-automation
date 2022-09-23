@@ -8,9 +8,8 @@ PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${PARENT}/../functions"
 
 function main {
-    kayobe_init
-    run_kayobe seed hypervisor host configure
-    pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
+    ${PARENT}/overcloud-host-command-run.sh -b --command 'dnf clean all'
+    ${PARENT}/overcloud-host-command-run.sh -b --command 'docker system prune -af'
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then

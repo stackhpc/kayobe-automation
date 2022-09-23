@@ -15,11 +15,15 @@ function pull_request_branch_name {
 }
 
 function main {
-    log_info "Running custom playbook: $1"
+    playbook=$1
+    args=("${@:2}")
+    shift $#
+    log_info "Running custom playbook: $playbook"
+    log_debug "Playbook args: ${args[@]}"
     kayobe_init
     # Use eval so we can do something like: playbook-run.sh '$KAYOBE_CONFIG_PATH/ansible/test.yml'
     # NOTE: KAYOBE_CONFIG_PATH gets defined by kayobe_init
-    local PLAYBOOK_PATH="$(eval echo $1)"
+    local PLAYBOOK_PATH="$(eval echo $playbook)"
     if ! is_absolute_path "$PLAYBOOK_PATH"; then
         # Default to a path relative to repository root
         PLAYBOOK_PATH="$KAYOBE_CONFIG_PATH/../../$PLAYBOOK_PATH"
@@ -27,7 +31,7 @@ function main {
     if [ ! -f "$PLAYBOOK_PATH" ]; then
         die $LINENO "Playbook path does not exist: $PLAYBOOK_PATH"
     fi
-    run_kayobe playbook run "$PLAYBOOK_PATH"
+    run_kayobe playbook run "$PLAYBOOK_PATH" "${args[@]}"
     pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
 }
 
@@ -36,5 +40,5 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
         die $LINENO "Error: You must provide a playbook to run" \
             "Usage: playbook-run.sh <playbook>"
     fi
-    main "$1"
+    main "${@:1}"
 fi

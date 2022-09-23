@@ -27,7 +27,7 @@ RUN dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
         libffi-devel sudo which openssh-server e2fsprogs rsync \
         diffstat diffutils procps-ng debootstrap gdisk util-linux \
-        dosfstools && \
+        dosfstools bash-completion && \
     dnf clean all
 
 # Workaround: rsync: --sparse-block=1024: unknown option
@@ -67,7 +67,7 @@ COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
 
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
-COPY .automation/docker/kayobe/bin/kayobe-automation-workaround-missing .automation.conf/docker*/kayobe/bin/* /usr/local/bin
+COPY .automation/utils/* .automation.conf/docker*/kayobe/bin/* /usr/local/bin
 
 # Control host bootsrap without leaving kayobe-config in the image
 RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \

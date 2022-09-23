@@ -1,0 +1,13 @@
+#!/bin/bash
+
+source ~/kayobe-automation-env/venvs/kayobe/bin/activate
+source ~/kayobe-automation-env/src/kayobe-config/kayobe-env
+source <(kayobe complete)
+
+cd ~/kayobe-automation-env/src/kayobe-config
+
+exec bash --rcfile <(
+	cat ~/.bashrc
+	kayobe complete
+	echo PS1="'(kayobe) '"
+)

@@ -9,6 +9,6 @@ cd ~/kayobe-automation-env/src/kayobe-config
 exec bash --rcfile <(
 	cat ~/.bashrc
 	kayobe complete
-	echo PS1="'(kayobe) '"
+	echo PS1="'[\W] (kayobe-automation)$ '"
 	echo HISTCONTROL=ignorespace
 )

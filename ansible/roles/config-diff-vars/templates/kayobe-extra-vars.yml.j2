@@ -4,4 +4,8 @@
 ansible_connection: local
 kolla_ansible_target_venv: "{{ lookup('env', 'KAYOBE_CONFIG_PATH') }}/../../../../venvs/kolla-ansible/"
 ansible_python_interpreter: /usr/bin/python3
+# Downloading IPA images is slow and the are not checked. Setting this
+# true, means that we will use the dummy IPA images that are created
+# in the config-diff script.
+ipa_build_images: true
 {% endraw %}

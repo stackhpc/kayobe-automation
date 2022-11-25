@@ -28,7 +28,7 @@ RUN dnf install epel-release -y && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
         libffi-devel sudo which openssh-server e2fsprogs rsync \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
-        dosfstools lvm2 kpartx systemd-udev && \
+        dosfstools lvm2 kpartx systemd-udev bash-completion && \
     dnf clean all
 
 # Configure lvm not to use udev for device discovery. This allows you to use
@@ -74,7 +74,7 @@ COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
 
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
-COPY .automation/docker/kayobe/bin/kayobe-automation-workaround-missing .automation.conf/docker*/kayobe/bin/* /usr/local/bin
+COPY .automation/utils/kayobe-automation-activate .automation.conf/docker*/kayobe/bin/* /usr/local/bin
 
 # Control host bootsrap without leaving kayobe-config in the image
 RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \

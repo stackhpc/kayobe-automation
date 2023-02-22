@@ -4,16 +4,14 @@
   gather_facts: false
   vars:
     results_path_local: "{{ lookup('env', 'PWD') }}"
-    rally_image: 'gwee/rally'
+    rally_image: 'stackhpc/docker-rally'
     rally_tag: latest
     rally_image_full: "{{ rally_image }}:{{ rally_tag }}"
     rally_no_sensitive_log: true
     # This ensures you get the latest image if the image is updated
     # and the tag isn't e.g when using the latest tag.
     rally_force_pull: true
-    rally_docker_registry: "{{ kolla_docker_registry }}"
-    rally_docker_registry_username: "{{ kolla_docker_registry_username }}"
-    rally_docker_registry_password: "{{ kolla_docker_registry_password }}"
+    rally_docker_registry: ghcr.io
     load_list_path_remote: "{{ results_path_remote.path }}/tempest-load-list"
     skip_list_path_remote: "{{ results_path_remote.path }}/tempest-skip-list"
     accounts_path_remote: "{{ results_path_remote.path }}/tempest-accounts"
@@ -34,20 +32,9 @@
           # TODO: Change ownership to user in docker container instead.
           mode: 0777
 
-      - name: Login to docker registry
-        docker_login:
-          registry_url: "{{ rally_docker_registry or omit }}"
-          username: "{{ rally_docker_registry_username }}"
-          password: "{{ rally_docker_registry_password }}"
-          reauthorize: yes
-        when:
-          - rally_docker_registry_username is not none
-          - rally_docker_registry_password is not none
-        become: true
-
       - name: Ensure rally image exists on runner
         docker_image:
-          name: "{{ rally_image_full }}"
+          name: "{{ rally_docker_registry }}/{{ rally_image_full }}"
           state: present
           force_source: "{{ rally_force_pull | bool }}"
           source: pull

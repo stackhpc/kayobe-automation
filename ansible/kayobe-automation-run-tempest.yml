@@ -33,7 +33,7 @@
           # We need user in docker container to be able to write to it
           # TODO: Change ownership to user in docker container instead.
           mode: 0777
-      
+
       - name: Login to docker registry
         docker_login:
           registry_url: "{{ rally_docker_registry or omit }}"

@@ -132,7 +132,7 @@ Dependencies: go
 
 Install the git hooks:
 
-    [stack@seed .automation]$ virtualenv ~/will/venv/pre-commit
+    [stack@seed .automation]$ python3 -m venv ~/will/venv/pre-commit
     [stack@seed .automation]$ source ~/will/venv/pre-commit/bin/activate
     (pre-commit) [stack@seed .automation]$ pip install pre-commit
     (pre-commit) [stack@seed .automation]$ pre-commit install

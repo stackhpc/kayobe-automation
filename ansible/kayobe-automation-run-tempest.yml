@@ -12,8 +12,8 @@
     # and the tag isn't e.g when using the latest tag.
     rally_force_pull: true
     rally_docker_registry: ghcr.io
-    rally_docker_registry_username: "{{ kolla_docker_registry_username }}"
-    rally_docker_registry_password: "{{ kolla_docker_registry_password }}"
+    rally_docker_registry_username:
+    rally_docker_registry_password:
     load_list_path_remote: "{{ results_path_remote.path }}/tempest-load-list"
     skip_list_path_remote: "{{ results_path_remote.path }}/tempest-skip-list"
     accounts_path_remote: "{{ results_path_remote.path }}/tempest-accounts"

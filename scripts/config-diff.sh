@@ -61,7 +61,9 @@ function post_config_init {
 }
 
 function redact_file {
-    _ANSIBLE_VERBOSITY=$ANSIBLE_VERBOSITY
+    if [ ! -z ${ANSIBLE_VERBOSITY:+x} ]; then
+        _ANSIBLE_VERBOSITY=$ANSIBLE_VERBOSITY
+    fi
     unset ANSIBLE_VERBOSITY
     if [ ! -f "$1" ]; then
         log_info "Skipping redaction of: $1"
@@ -75,7 +77,9 @@ function redact_file {
         $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) >$1.redact
     fi
     mv $1.redact $1
-    export ANSIBLE_VERBOSITY=$_ANSIBLE_VERBOSITY
+    if [ ! -z ${_ANSIBLE_VERBOSITY:+x} ]; then
+        export ANSIBLE_VERBOSITY=$_ANSIBLE_VERBOSITY
+    fi
 }
 
 function encrypt_file {

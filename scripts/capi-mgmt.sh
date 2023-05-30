@@ -32,36 +32,36 @@ resources:
 - https://github.com/kubernetes-sigs/cluster-api/releases/download/v1.3.3/cluster-api-components.yaml
 - https://github.com/kubernetes-sigs/cluster-api-provider-openstack/releases/download/v0.7.1/infrastructure-components.yaml
 patches:
-- patch: |-
-    - op: replace
-    path: /spec/template/spec/containers/0/args
-    value:
-        - --leader-elect
-        - --metrics-bind-addr=localhost:8080
-target:
-    kind: Deployment
-    namespace: capi-system
-    name: capi-controller-manager
-- patch: |-
-    - op: replace
-    path: /spec/template/spec/containers/0/args
-    value:
-        - --leader-elect
-        - --metrics-bind-addr=localhost:8080
-target:
-    kind: Deployment
-    namespace: capi-kubeadm-bootstrap-system
-    name: capi-kubeadm-bootstrap-controller-manager
-- patch: |-
-    - op: replace
-    path: /spec/template/spec/containers/0/args
-    value:
-        - --leader-elect
-        - --metrics-bind-addr=localhost:8080
-target:
-    kind: Deployment
-    namespace: capi-kubeadm-control-plane-system
-    name: capi-kubeadm-control-plane-controller-manager
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:
+          - --leader-elect
+          - --metrics-bind-addr=localhost:8080
+    target:
+      kind: Deployment
+      namespace: capi-system
+      name: capi-controller-manager
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:
+          - --leader-elect
+          - --metrics-bind-addr=localhost:8080
+    target:
+      kind: Deployment
+      namespace: capi-kubeadm-bootstrap-system
+      name: capi-kubeadm-bootstrap-controller-manager
+  - patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:
+          - --leader-elect
+          - --metrics-bind-addr=localhost:8080
+    target:
+      kind: Deployment
+      namespace: capi-kubeadm-control-plane-system
+      name: capi-kubeadm-control-plane-controller-manager
 EOF
 kubectl apply -k capi
 

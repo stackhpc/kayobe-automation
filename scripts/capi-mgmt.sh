@@ -1,5 +1,8 @@
 #!/bin/bash
 # # Install `kubectl` CLI
+
+sudo dnf clean all && sudo dnf update 
+
 curl -fsLo /tmp/kubectl "https://dl.k8s.io/release/$(curl -fsL https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 sudo install -o root -g root -m 0755 /tmp/kubectl /usr/local/bin/kubectl
 

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.2
 
-FROM quay.io/centos/centos:stream8
+FROM quay.io/centos/centos:stream9
 MAINTAINER "Will Szumski" <will@stackhpc.com>
 
 # Unclear at this time if different environments will change
@@ -25,7 +25,7 @@ ENV container docker
 
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
-    dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
+    dnf install -y gcc git vim python3-pyyaml python3-pip \
         libffi-devel sudo which openssh-server e2fsprogs rsync \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion && \
@@ -41,7 +41,7 @@ RUN sed -i 's/# udev_rules = 1/udev_rules = 0/g' /etc/lvm/lvm.conf && \
 # Hoepfully they have fixed this issue before this old
 # package is removed.
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=2043753
-RUN dnf install -y rsync-3.1.3-14.el8 && dnf clean all
+RUN dnf install -y rsync && dnf clean all
 
 RUN python3 -m pip install docker six
 

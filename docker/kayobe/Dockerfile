@@ -1,6 +1,10 @@
 # syntax=docker/dockerfile:1.2
 
-FROM quay.io/centos/centos:stream8
+# NOTE: Currently supported images:
+# quay.io/centos/centos:stream8
+# rockylinux:9
+ARG BASE_IMAGE="quay.io/centos/centos:stream8"
+FROM ${BASE_IMAGE}
 MAINTAINER "Will Szumski" <will@stackhpc.com>
 
 # Unclear at this time if different environments will change
@@ -22,13 +26,21 @@ ENV container docker
 # VOLUME [ "/sys/fs/cgroup" ]
 
 # CMD ["/usr/sbin/init"]
-
+# Note on CentOS 8 rsync-3.1.3-14.el8 install:
+# Workaround rsync: --sparse-block=1024: unknown option
+# Hopepfully they have fixed this issue before this old
+# package is removed.
+# See: https://bugzilla.redhat.com/show_bug.cgi?id=2043753
+ARG BASE_IMAGE="quay.io/centos/centos:stream8"
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
-    dnf install -y gcc git vim python3-pyyaml python3-virtualenv \
-        libffi-devel sudo which openssh-server e2fsprogs rsync \
+    dnf install -y gcc git vim python3-pyyaml \
+        libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion && \
+    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
+    dnf install -y rsync python3 python3-pip ; else \
+    dnf install -y python3-virtualenv rsync-3.1.3-14.el8 ; fi && \
     dnf clean all
 
 # Configure lvm not to use udev for device discovery. This allows you to use
@@ -36,12 +48,6 @@ RUN dnf install epel-release -y && \
 # https://serverfault.com/questions/802766/calling-lvcreate-from-inside-the-container-hangs
 RUN sed -i 's/# udev_rules = 1/udev_rules = 0/g' /etc/lvm/lvm.conf && \
     sed  -i 's/# udev_sync = 1/udev_sync = 0/g' /etc/lvm/lvm.conf
-
-# Workaround: rsync: --sparse-block=1024: unknown option
-# Hoepfully they have fixed this issue before this old
-# package is removed.
-# See: https://bugzilla.redhat.com/show_bug.cgi?id=2043753
-RUN dnf install -y rsync-3.1.3-14.el8 && dnf clean all
 
 RUN python3 -m pip install docker six
 

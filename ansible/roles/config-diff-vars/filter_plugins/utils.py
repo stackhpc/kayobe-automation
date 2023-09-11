@@ -1,5 +1,10 @@
 import jinja2
 from ansible import errors
+# NOTE: jinja2 3.1.0 dropped contextfilter in favour of pass_context.
+try:
+    from jinja2 import pass_context
+except ImportError:
+    from jinja2 import contextfilter as pass_context
 
 
 def _get_hostvar(context, var_name, inventory_hostname=None):
@@ -56,7 +61,7 @@ def dummy_facts_prefix(facts, inject_facts):
 def interface_string(interface):
     return "\"{{ lookup('vars', inventory_hostname | replace('-', '_') ~ '_' ~ '" + interface + "') }}\""
 
-@jinja2.contextfilter
+@pass_context
 def ip_mappings(context, hosts):
     hosts = set(hosts)
     result = {}
@@ -74,7 +79,7 @@ def ip_mappings(context, hosts):
             })
     return result
 
-@jinja2.contextfilter
+@pass_context
 def dummy_facts_interfaces(context, host):
    result = {}
    mappings = ip_mappings(context, [host]).get(host, [])

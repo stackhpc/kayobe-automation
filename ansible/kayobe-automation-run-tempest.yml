@@ -101,7 +101,7 @@
            -v {{ accounts_path_remote }}:/home/rally/tempest-accounts:ro
            {% endif -%}
            --network host
-           {{ rally_image_full }}
+           {{ rally_docker_registry }}/{{ rally_image_full }}
         environment:
           TEMPEST_PATTERN: "{{ lookup('env', 'TEMPEST_PATTERN') }}"
           TEMPEST_VERSION: "{{ lookup('env', 'TEMPEST_VERSION') }}"

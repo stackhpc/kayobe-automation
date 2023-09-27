@@ -360,6 +360,7 @@ function github_pull_request {
         --user "${KAYOBE_AUTOMATION_PR_GITHUB_USER}:${KAYOBE_AUTOMATION_PR_AUTH_TOKEN}" \
         --header "Accept: application/vnd.github.v3+json" \
         --header "Content-Type: application/json" \
+        --fail \
         --data "${body}" | jq "."
 
     log_info "Pull request created sucessfully"

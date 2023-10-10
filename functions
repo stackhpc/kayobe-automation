@@ -595,11 +595,14 @@ function install_kayobe_venv {
 function create_kayobe_environment {
     local env=$1
     local kayobe_config_source_path=${2:-$KAYOBE_CONFIG_SOURCE_PATH}
+    local allow_unclean_kayobe_config=${KAYOBE_AUTOMATION_ALLOW_UNCLEAN_KAYOBE_CONFIG:-false}
     mkdir -p "$env"/{src/kayobe,src/kayobe-config,venvs/kayobe}
 
-    # Ensure we have an unmodified copy of kayobe-config
-    if [[ $(realpath "$kayobe_config_source_path") != $(realpath "$env/src/kayobe-config") ]]; then
-        clean_copy "$kayobe_config_source_path" "$env/src/kayobe-config"
+    if [ "$allow_unclean_kayobe_config" != "true" ]; then
+        # Ensure we have an unmodified copy of kayobe-config
+        if [[ $(realpath "$kayobe_config_source_path") != $(realpath "$env/src/kayobe-config") ]]; then
+            clean_copy "$kayobe_config_source_path" "$env/src/kayobe-config"
+        fi
     fi
 
     if [ -f "$kayobe_config_source_path/requirements.txt" ]; then

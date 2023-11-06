@@ -6,7 +6,7 @@ MAINTAINER "Will Szumski" <will@stackhpc.com>
 # Unclear at this time if different environments will change
 # control host bootstrap.
 ARG KAYOBE_ENVIRONMENT=""
-ARG KAYOBE_DOCKER_SSH_CONFIG_PATH=".automation/docker/kayobe/ssh_config"
+#ARG KAYOBE_DOCKER_SSH_CONFIG_PATH=".automation/docker/kayobe/ssh_config"
 
 ENV container docker
 # NOTE: systemd requires privileged container
@@ -70,7 +70,7 @@ RUN echo export https_proxy=$https_proxy >> $HOME/.bashrc && \
   echo export http_proxy=$http_proxy >> $HOME/.bashrc
 
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
-COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
+COPY --chown=stack:stack ssh_config /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
 
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.

@@ -74,7 +74,7 @@ COPY --chown=stack:stack ssh_config /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
 
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
-COPY .utils/kayobe-automation-activate .automation.conf/docker*/kayobe/bin/* /usr/local/bin
+COPY utils/kayobe-automation-activate .automation.conf/docker*/kayobe/bin/* /usr/local/bin
 
 # Control host bootsrap without leaving kayobe-config in the image
 RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \

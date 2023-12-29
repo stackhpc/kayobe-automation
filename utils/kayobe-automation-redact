@@ -6,17 +6,20 @@ import base64
 import sys
 
 annotation_exceptions = {
-    'prometheus_bcrypt_salt': 'prometheusbcryptsalt'
+    'prometheus_bcrypt_salt': {'original': 'prometheusbcryptsalt.o', 'changed': 'prometheusbcryptsalt.c'},
 }
 
 def annotate(ctx, value):
     if not isinstance(value, str):
-      return value
+        return value
     path_str = ctx['path'][0]
     if path_str in annotation_exceptions:
-      return f"{annotation_exceptions[path_str]}.{value}"
+        if isinstance(annotation_exceptions[path_str], str):
+            return f"{annotation_exceptions[path_str]}.{value}"
+        else:
+            return annotation_exceptions[path_str][value]
     else:
-      return f"{path_str}.{value}"
+        return f"{path_str}.{value}"
 
 def redact_int(ctx, x):
     # For numbers we can't indicate change with a string, so use sentinal values

@@ -10,13 +10,13 @@ annotation_exceptions = {
 }
 
 def annotate(ctx, value):
-  if not isinstance(value, str):
-    return value
-  path_str = map(str, ctx['path'])
-  if path_str in annotation_exceptions:
-    return f"{'.'.join(annotation_exceptions['prometheus_bcrypt_salt'])}.{value}"
-  else:
-    return f"{'.'.join(path_str)}.{ value }"
+    if not isinstance(value, str):
+      return value
+    path_str = ctx['path'][0]
+    if path_str in annotation_exceptions:
+      return f"{annotation_exceptions[path_str]}.{value}"
+    else:
+      return f"{path_str}.{value}"
 
 def redact_int(ctx, x):
     # For numbers we can't indicate change with a string, so use sentinal values

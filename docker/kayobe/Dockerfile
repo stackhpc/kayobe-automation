@@ -7,6 +7,11 @@ ARG BASE_IMAGE="quay.io/centos/centos:stream8"
 FROM ${BASE_IMAGE}
 MAINTAINER "Will Szumski" <will@stackhpc.com>
 
+ARG http_proxy
+ARG https_proxy
+ENV http_proxy $http_proxy
+ENV https_proxy $https_proxy
+
 # Unclear at this time if different environments will change
 # control host bootstrap.
 ARG KAYOBE_ENVIRONMENT=""

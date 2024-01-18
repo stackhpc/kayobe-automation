@@ -41,7 +41,7 @@ RUN sed -i 's/# udev_rules = 1/udev_rules = 0/g' /etc/lvm/lvm.conf && \
 # Hoepfully they have fixed this issue before this old
 # package is removed.
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=2043753
-RUN dnf install -y rsync-3.1.3-14.el8 && dnf clean all
+# RUN dnf install -y rsync-3.1.3-14.el8 && dnf clean all
 
 RUN python3 -m pip install docker six
 

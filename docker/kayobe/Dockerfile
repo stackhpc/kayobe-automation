@@ -5,6 +5,7 @@
 # rockylinux:9
 ARG BASE_IMAGE="quay.io/centos/centos:stream8"
 FROM ${BASE_IMAGE}
+LABEL maintainer="Will Szumski will@stackhpc.com"
 
 # Unclear at this time if different environments will change
 # control host bootstrap.

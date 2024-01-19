@@ -5,7 +5,7 @@
 # rockylinux:9
 ARG BASE_IMAGE="quay.io/centos/centos:stream8"
 FROM ${BASE_IMAGE}
-MAINTAINER "Will Szumski" <will@stackhpc.com>
+LABEL maintainer="Will Szumski will@stackhpc.com"
 
 # Unclear at this time if different environments will change
 # control host bootstrap.
@@ -26,21 +26,17 @@ ENV container docker
 # VOLUME [ "/sys/fs/cgroup" ]
 
 # CMD ["/usr/sbin/init"]
-# Note on CentOS 8 rsync-3.1.3-14.el8 install:
-# Workaround rsync: --sparse-block=1024: unknown option
-# Hopepfully they have fixed this issue before this old
-# package is removed.
-# See: https://bugzilla.redhat.com/show_bug.cgi?id=2043753
+
 ARG BASE_IMAGE="quay.io/centos/centos:stream8"
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml \
         libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
-        dosfstools lvm2 kpartx systemd-udev bash-completion && \
+        dosfstools lvm2 kpartx systemd-udev bash-completion rsync && \
     if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
-    dnf install -y rsync python3 python3-pip iproute ; else \
-    dnf install -y python3-virtualenv rsync-3.1.3-14.el8 ; fi && \
+    dnf install -y python3 python3-pip iproute ; else \
+    dnf install -y python3-virtualenv ; fi && \
     dnf clean all
 
 # Configure lvm not to use udev for device discovery. This allows you to use

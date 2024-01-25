@@ -48,7 +48,7 @@ RUN sed -i 's/# udev_rules = 1/udev_rules = 0/g' /etc/lvm/lvm.conf && \
 RUN python3 -m pip install docker six
 
 ENV KAYOBE_USER=stack
-ARG KAYOBE_USER_UID=1000
+ARG KAYOBE_USER_UID=1001
 ARG KAYOBE_USER_GID=1000
 
 RUN groupadd -g $KAYOBE_USER_GID -o stack &&  \

@@ -78,6 +78,9 @@ RUN chmod 600 /stack/.ssh/config
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
 COPY .automation/utils/kayobe-automation-activate .automation.conf/docker*/kayobe/bin/* /usr/local/bin/
 
+# Allow an ansible.cfg in kayobe-config to be used for control host bootrap
+ARG ANSIBLE_CONFIG=/stack/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible.cfg
+
 # Control host bootsrap without leaving kayobe-config in the image
 RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \
   sudo chown -Rf stack:stack /tmp/src && \

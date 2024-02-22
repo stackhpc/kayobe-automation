@@ -2,8 +2,8 @@
 
 # NOTE: Currently supported images:
 # quay.io/rockylinux/rockylinux:8
-# rockylinux:9
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
+# quay.io/rockylinux/rockylinux:9
+ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
 
@@ -27,7 +27,7 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
+ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
 ARG USE_PYTHON_312="false"
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \

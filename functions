@@ -554,10 +554,10 @@ function setup_ssh_agent {
 function inject_ssh_keys {
     # These are read when generating kolla passwords
     if [ ! -z ${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY:+x} ]; then
-        echo "${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY}" >"~/.ssh/${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}"
-        chmod 600 "~/.ssh/${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}"
-        ssh-keygen -y -f "~/.ssh/${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}" >"~/.ssh/${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}.pub"
-        chmod 600 "~/.ssh/${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}.pub"
+        echo "${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY}" >~/.ssh/"${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}"
+        chmod 600 ~/.ssh/"${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}"
+        ssh-keygen -y -f ~/.ssh/"${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}" >~/.ssh/"${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}.pub"
+        chmod 600 ~/.ssh/"${KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME}.pub"
     fi
 }
 

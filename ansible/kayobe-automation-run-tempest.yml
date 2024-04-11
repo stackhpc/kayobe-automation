@@ -26,6 +26,13 @@
           suffix: rally-results
         register: results_path_remote
 
+      - name: Create temporary CA certificate directory
+        ansible.builtin.tempfile:
+          state: directory
+          suffix: rally-cacert
+        register: cacert_path_remote
+        when: tempest_cacert is defined
+
       - name: Ensure docker user has permissions to write to results directory
         file:
           path: "{{ results_path_remote.path }}"
@@ -80,6 +87,15 @@
         become: true
         when: tempest_accounts_path is defined
 
+      - name: Copy tempest CA certificate to remote host
+        copy:
+          src: "{{ tempest_cacert }}"
+          dest: "{{ cacert_path_remote.path }}/"
+          owner: "65500"
+          group: "1000"
+        become: true
+        when: tempest_cacert is defined
+
       - name: Run tempest
         command: |-
            docker run --rm --entrypoint=/usr/bin/rally-verify-wrapper.sh
@@ -100,6 +116,9 @@
            {% endif -%}
            {% if tempest_accounts_path is defined -%}
            -v {{ accounts_path_remote }}:/home/rally/tempest-accounts:ro
+           {% endif -%}
+           {% if tempest_cacert is defined -%}
+           -v {{ cacert_path_remote.path }}:/usr/local/share/ca-certificates:ro
            {% endif -%}
            --network host
            {{ rally_image_full }}
@@ -148,3 +167,9 @@
             path: "{{ results_path_remote.path }}"
             state: absent
           when: results_path_remote.path is defined
+
+        - name: cleanup CA certificate
+          file:
+            path: "{{ cacert_path_remote.path }}"
+            state: absent
+          when: cacert_path_remote.path is defined

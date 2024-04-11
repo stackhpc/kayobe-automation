@@ -30,7 +30,6 @@ function pre_config_init {
 }
 
 function post_config_init {
-    # Overrides from config.sh
     KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=(
         "etc/kayobe/kolla/passwords.yml"
         "etc/kayobe/secrets.yml"
@@ -39,17 +38,8 @@ function post_config_init {
         ${KAYOBE_CONFIG_SECRET_PATHS_EXTRA[@]}
     )
     KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
-    # TODO: could auto detect which files? e.g. "grep -irl "ANSIBLE_VAULT;1" etc/kayobe/kolla/config"
-    KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT=(
-        "etc/kayobe/kolla/config/octavia/server_ca.key.pem"
-        "etc/kayobe/kolla/config/octavia/client.cert-and-key.pem"
-        "etc/kayobe/kolla/config/octavia/client_ca.key.pem"
-        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/client_ca.key.pem"
-        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/server_ca.key.pem"
-        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/config/octavia/client.cert-and-key.pem"
-        ${KAYOBE_CONFIG_VAULTED_FILES_PATHS_EXTRA[@]}
-    )
-    KAYOBE_CONFIG_VAULTED_FILES_PATHS=("${KAYOBE_CONFIG_VAULTED_FILES_PATHS[@]:-${KAYOBE_CONFIG_VAULTED_FILES_PATHS_DEFAULT[@]}}")
+
+    find_redacted_files "/stack/kayobe-automation-env/src/kayobe-config/etc/kayobe"
 
     # Some values are currently determined dynamically from container versions
     export KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY="${KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY:-td-agent}"
@@ -57,7 +47,25 @@ function post_config_init {
 
     export KAYOBE_AUTOMATION_CONFIG_DIFF_INJECT_FACTS="${KAYOBE_AUTOMATION_CONFIG_DIFF_INJECT_FACTS=-0}"
     export KAYOBE_AUTOMATION_CONFIG_DIFF_AUTO_UNSET_ENVIRONMENT="${KAYOBE_AUTOMATION_CONFIG_DIFF_AUTO_UNSET_ENVIRONMENT=-0}"
+}
 
+function find_redacted_files {
+    KAYOBE_CONFIG_VAULTED_FILES_PATHS=()
+    local directory="$1"
+
+    echo $directory
+
+    # Search for vaulted files recursively in the directory
+    while IFS= read -r -d '' file; do
+        if grep -q "ANSIBLE_VAULT;1" "$file"; then
+            truncated_path="${file#"$directory/"}"
+            vaulted_file="etc/kayobe/$truncated_path"
+            if ! [[ "${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[*]}" =~ "$vaulted_file" ]]; then
+                KAYOBE_CONFIG_VAULTED_FILES_PATHS+=("etc/kayobe/$truncated_path")
+            fi
+        fi
+    done < <(find "$directory" -type f -print0)
+    echo ${KAYOBE_CONFIG_VAULTED_FILES_PATHS[*]}
 }
 
 function redact_file {
@@ -254,6 +262,7 @@ function main {
     # Perform same steps as above, but for the source branch
     # Merge in the target branch so that we don't see changes that were added since we branched.
     merge "$source_kayobe_config_dir" $1
+    find_redacted_files "$source_kayobe_config_dir/etc/kayobe"
     create_kayobe_environment "$environment_path" "$source_kayobe_config_dir"
     # Supplying a reference kayobe-config will do a diff on the secrets
     redact_config_dir "$environment_path" "$target_kayobe_config_dir"

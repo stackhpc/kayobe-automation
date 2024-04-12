@@ -232,12 +232,6 @@ function main {
 
     kayobe_init
 
-    # We need to use the same path for source and target to avoid noise in the diff output.
-    # Example: https://github.com/openstack/kolla-ansible/blob/5e638b757bdda9fbddf0fe0be5d76caa3419af74/ansible/roles/common/templates/td-agent.conf.j2#L9
-    environment_path=/tmp/kayobe-env
-
-    local ANSIBLE_VAULT="$environment_path/venvs/kayobe/bin/ansible-vault"
-
     # These directories will contain the generated output.
     target_dir=$(mktemp -d --suffix -configgen-target)
     source_dir=$(mktemp -d --suffix -configgen-source)
@@ -247,27 +241,35 @@ function main {
     clean_copy "$KAYOBE_CONFIG_SOURCE_PATH" "$source_kayobe_config_dir"
     clean_copy "$KAYOBE_CONFIG_SOURCE_PATH" "$target_kayobe_config_dir"
 
-    # Checkout the git reference provided as an argument to this script
-    checkout "$target_kayobe_config_dir" $1
-    create_kayobe_environment "$environment_path" "$target_kayobe_config_dir"
-    redact_config_dir "$environment_path"
-    # Encryption expected on passwords.yml due to lookup in kayobe, see:
-    # https://github.com/openstack/kayobe/blob/869185ea7be5d6b5b21c964a620839d5475196fd/ansible/roles/kolla-ansible/library/kolla_passwords.py#L81
-    encrypt_config_dir "$environment_path"
-    generate_config "$environment_path" "$target_dir"
+    function generate_target_config {
+        target_environment_path=/tmp/target-kayobe-env
+        export ANSIBLE_LOG_PATH=/tmp/target-kayobe.log
+        local ANSIBLE_VAULT="$target_environment_path/venvs/kayobe/bin/ansible-vault"
+        # Checkout the git reference provided as an argument to this script
+        checkout "$target_kayobe_config_dir" $1
+        create_kayobe_environment "$target_environment_path" "$target_kayobe_config_dir"
+        redact_config_dir "$target_environment_path"
+        encrypt_config_dir "$target_environment_path"
+        generate_config "$target_environment_path" "$target_dir"
+    }
 
-    # Move it out the way so that we can use the same path
-    mv "$environment_path" "$environment_path-$(date '+%Y-%m-%d-%H.%M.%S')"
+    function generate_source_config {
+        source_environment_path=/tmp/source-kayobe-env
+        export ANSIBLE_LOG_PATH=/tmp/source-kayobe.log
+        local ANSIBLE_VAULT="$source_environment_path/venvs/kayobe/bin/ansible-vault"
+        # Perform same steps as above, but for the source branch
+        # Merge in the target branch so that we don't see changes that were added since we branched.
+        merge "$source_kayobe_config_dir" $1
+        find_redacted_files "$source_kayobe_config_dir/etc/kayobe"
+        create_kayobe_environment "$source_environment_path" "$source_kayobe_config_dir"
+        redact_config_dir "$source_environment_path" "$target_kayobe_config_dir"
+        encrypt_config_dir "$source_environment_path"
+        generate_config "$source_environment_path" "$source_dir"
+    }
 
-    # Perform same steps as above, but for the source branch
-    # Merge in the target branch so that we don't see changes that were added since we branched.
-    merge "$source_kayobe_config_dir" $1
-    find_redacted_files "$source_kayobe_config_dir/etc/kayobe"
-    create_kayobe_environment "$environment_path" "$source_kayobe_config_dir"
-    # Supplying a reference kayobe-config will do a diff on the secrets
-    redact_config_dir "$environment_path" "$target_kayobe_config_dir"
-    encrypt_config_dir "$environment_path"
-    generate_config "$environment_path" "$source_dir"
+    generate_target_config $1 >/dev/null 2>&1 &
+    generate_source_config $1 &
+    wait < <(jobs -p)
 
     # diff gives non-zero exit status if there is a difference
     if sudo_if_available diff -Nur $target_dir $source_dir >/tmp/kayobe-config-diff; then

@@ -14,6 +14,10 @@
     rally_docker_registry: ghcr.io
     rally_docker_registry_username:
     rally_docker_registry_password:
+    # Set to true to build the docker-rally image locally.
+    docker_rally_build: false
+    docker_rally_src_repo: https://github.com/stackhpc/docker-rally
+    docker_rally_src_version: HEAD
     load_list_path_remote: "{{ results_path_remote.path }}/tempest-load-list"
     skip_list_path_remote: "{{ results_path_remote.path }}/tempest-skip-list"
     accounts_path_remote: "{{ results_path_remote.path }}/tempest-accounts"
@@ -52,13 +56,40 @@
           - rally_docker_registry_password is not none
         become: true
 
-      - name: Ensure rally image exists on runner
+      - when: docker_rally_build | bool
+        block:
+          - name: Create temporary source directory
+            ansible.builtin.tempfile:
+              state: directory
+              suffix: docker-rally
+            register: src_path_remote
+
+          - name: Clone docker-rally repository
+            git:
+              depth: 1
+              dest: "{{ src_path_remote.path }}"
+              repo: "{{ docker_rally_src_repo }}"
+              single_branch: true
+              version: "{{ docker_rally_src_version }}"
+
+          - name: Ensure rally image exists on runner (build)
+            docker_image:
+              build:
+                network: host
+                path: "{{ src_path_remote.path }}"
+              name: "{{ rally_image_full }}"
+              state: present
+              source: build
+            become: true
+
+      - name: Ensure rally image exists on runner (pull)
         docker_image:
           name: "{{ rally_image_full }}"
           state: present
           force_source: "{{ rally_force_pull | bool }}"
           source: pull
         become: true
+        when: not docker_rally_build | bool
 
       - name: Copy tempest load list to remote host
         copy:
@@ -173,3 +204,9 @@
             path: "{{ cacert_path_remote.path }}"
             state: absent
           when: cacert_path_remote.path is defined
+
+        - name: cleanup source
+          file:
+            path: "{{ src_path_remote.path }}"
+            state: absent
+          when: src_path_remote.path is defined

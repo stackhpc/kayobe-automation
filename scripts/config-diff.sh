@@ -241,6 +241,23 @@ function main {
     clean_copy "$KAYOBE_CONFIG_SOURCE_PATH" "$source_kayobe_config_dir"
     clean_copy "$KAYOBE_CONFIG_SOURCE_PATH" "$target_kayobe_config_dir"
 
+    function normalize_file_text() {
+        local file="$1"
+        local text="$2"
+
+        sed -i "s#/tmp/$text/\(.*\)#/tmp/\1#g" "$file"
+    }
+
+    function normalize_files_in_folder() {
+        local folder="$1"
+        local text="$2"
+
+        # Find all files in the folder and its subfolders and loop through them
+        find "$folder" -type f -print0 | while IFS= read -r -d '' file; do
+            normalize_file_text "$file" "$text"
+        done
+    }
+
     function generate_target_config {
         target_environment_path=/tmp/target-kayobe-env
         export ANSIBLE_LOG_PATH=/tmp/target-kayobe.log
@@ -251,6 +268,7 @@ function main {
         redact_config_dir "$target_environment_path"
         encrypt_config_dir "$target_environment_path"
         generate_config "$target_environment_path" "$target_dir"
+        normalize_files_in_folder "$target_environment_path" "target-kayobe-env"
     }
 
     function generate_source_config {
@@ -265,6 +283,7 @@ function main {
         redact_config_dir "$source_environment_path" "$target_kayobe_config_dir"
         encrypt_config_dir "$source_environment_path"
         generate_config "$source_environment_path" "$source_dir"
+        normalize_files_in_folder "$source_environment_path" "source-kayobe-env"
     }
 
     generate_target_config $1 >/dev/null 2>&1 &

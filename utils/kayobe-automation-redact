@@ -10,10 +10,6 @@ annotation_exceptions = {
 }
 
 def annotate(ctx, value):
-  if not isinstance(value, str):
-    return value
-  path_str = map(str, ctx['path'])
-  return f"{'.'.join(path_str)}.{ value }"
     if not isinstance(value, str):
         return value
     path_str = *map(str, ctx['path']),

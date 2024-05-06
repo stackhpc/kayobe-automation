@@ -17,7 +17,7 @@ def annotate(ctx, value):
         if isinstance(annotation_exceptions[path_str[0]], str):
             return f"{annotation_exceptions[path_str[0]]}.{value}"
         else:
-            return annotation_exceptions[path_str[0]][value]
+            return annotation_exceptions[path_str[0]]
     else:
         return f"{'_'.join(path_str)}.{value}"
 

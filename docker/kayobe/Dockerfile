@@ -3,7 +3,7 @@
 # NOTE: Currently supported images:
 # quay.io/centos/centos:stream8
 # rockylinux:9
-ARG BASE_IMAGE="quay.io/centos/centos:stream8"
+ARG BASE_IMAGE="rockylinux:9"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
 
@@ -27,7 +27,7 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-ARG BASE_IMAGE="quay.io/centos/centos:stream8"
+ARG BASE_IMAGE="rockylinux:9"
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml \

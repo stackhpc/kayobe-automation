@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1.2
 
 # NOTE: Currently supported images:
-# quay.io/centos/centos:stream8
+# quay.io/rockylinux/rockylinux:8
 # rockylinux:9
-ARG BASE_IMAGE="quay.io/centos/centos:stream8"
+ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
 
@@ -27,10 +27,10 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-ARG BASE_IMAGE="quay.io/centos/centos:stream8"
+ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
-    dnf install -y gcc git vim python3-pyyaml \
+    dnf install -y gcc git vim python3-pyyaml findutils\
         libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion rsync && \

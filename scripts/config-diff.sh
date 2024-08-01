@@ -30,7 +30,7 @@ function pre_config_init {
 }
 
 function post_config_init {
-    find_redacted_files "/stack/kayobe-automation-env/src/kayobe-config/etc/kayobe"
+    find_redacted_files "/src/etc/kayobe"
 
     # Some values are currently determined dynamically from container versions
     export KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY="${KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY:-td-agent}"

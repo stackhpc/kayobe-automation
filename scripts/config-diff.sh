@@ -78,6 +78,28 @@ function find_redacted_files {
     done < <(find "$directory" -type f -print0)
 }
 
+function redact_file {
+    if [ ! -z ${ANSIBLE_VERBOSITY:+x} ]; then
+        _ANSIBLE_VERBOSITY=$ANSIBLE_VERBOSITY
+    fi
+    unset ANSIBLE_VERBOSITY
+    if [ ! -f "$1" ]; then
+        log_info "Skipping redaction of: $1"
+        return
+    fi
+    log_info Redacting $1 with reference ${2:-None}
+    export KAYOBE_AUTOMATION_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD"
+    if [ "$2" != "" ] && [ -e "$2" ]; then
+        $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $2) >$1.redact
+    else
+        $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) >$1.redact
+    fi
+    mv $1.redact $1
+    if [ ! -z ${_ANSIBLE_VERBOSITY:+x} ]; then
+        export ANSIBLE_VERBOSITY=$_ANSIBLE_VERBOSITY
+    fi
+}
+
 function encrypt_file {
     if [ ! -f "$1" ]; then
         return

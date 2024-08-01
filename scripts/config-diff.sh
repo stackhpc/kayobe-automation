@@ -30,15 +30,6 @@ function pre_config_init {
 }
 
 function post_config_init {
-    KAYOBE_CONFIG_SECRET_PATHS_DEFAULT=(
-        "etc/kayobe/kolla/passwords.yml"
-        "etc/kayobe/secrets.yml"
-        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/secrets.yml"
-        "etc/kayobe/environments/$KAYOBE_ENVIRONMENT/kolla/passwords.yml"
-        ${KAYOBE_CONFIG_SECRET_PATHS_EXTRA[@]}
-    )
-    KAYOBE_CONFIG_SECRET_PATHS=("${KAYOBE_CONFIG_SECRET_PATHS[@]:-${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[@]}}")
-
     find_redacted_files "/stack/kayobe-automation-env/src/kayobe-config/etc/kayobe"
 
     # Some values are currently determined dynamically from container versions
@@ -51,43 +42,40 @@ function post_config_init {
 
 function find_redacted_files {
     KAYOBE_CONFIG_VAULTED_FILES_PATHS=()
+    KAYOBE_CONFIG_SECRET_PATHS=()
     local directory="$1"
 
-    echo $directory
+    # Define forbidden paths patterns
+    KAYOBE_CONFIG_FORBIDDEN_ENVIRONMENTS=(
+        "aufn-ceph"
+        "ci-aio"
+        "ci-builder"
+        "ci-multinode")
 
     # Search for vaulted files recursively in the directory
     while IFS= read -r -d '' file; do
-        if grep -q "ANSIBLE_VAULT;1" "$file"; then
+        # Check if the file path contains any forbidden path patterns
+        local ignore_file=false
+        for pattern in "${KAYOBE_CONFIG_FORBIDDEN_ENVIRONMENTS[@]}"; do
+            if [[ "$file" == *"environments/${pattern}"* ]]; then
+                ignore_file=true
+                break
+            fi
+        done
+        # Continue to the next file if this one should be ignored
+        if [ "$ignore_file" = true ]; then
+            continue
+        fi
+        if head -n 1 "$file" | grep -q "ANSIBLE_VAULT;1"; then
             truncated_path="${file#"$directory/"}"
             vaulted_file="etc/kayobe/$truncated_path"
-            if ! [[ "${KAYOBE_CONFIG_SECRET_PATHS_DEFAULT[*]}" =~ "$vaulted_file" ]]; then
-                KAYOBE_CONFIG_VAULTED_FILES_PATHS+=("etc/kayobe/$truncated_path")
+            if [[ "$vaulted_file" == *.yml ]]; then
+            KAYOBE_CONFIG_SECRET_PATHS+=("etc/kayobe/$truncated_path")
+            else
+            KAYOBE_CONFIG_VAULTED_FILES_PATHS+=("etc/kayobe/$truncated_path")
             fi
         fi
     done < <(find "$directory" -type f -print0)
-    echo ${KAYOBE_CONFIG_VAULTED_FILES_PATHS[*]}
-}
-
-function redact_file {
-    if [ ! -z ${ANSIBLE_VERBOSITY:+x} ]; then
-        _ANSIBLE_VERBOSITY=$ANSIBLE_VERBOSITY
-    fi
-    unset ANSIBLE_VERBOSITY
-    if [ ! -f "$1" ]; then
-        log_info "Skipping redaction of: $1"
-        return
-    fi
-    log_info Redacting $1 with reference ${2:-None}
-    export KAYOBE_AUTOMATION_VAULT_PASSWORD="$KAYOBE_VAULT_PASSWORD"
-    if [ "$2" != "" ] && [ -e "$2" ]; then
-        $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $2) >$1.redact
-    else
-        $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-redact <($ANSIBLE_VAULT view --vault-password-file $KAYOBE_AUTOMATION_UTILS_PATH/kayobe-automation-vault-helper $1) >$1.redact
-    fi
-    mv $1.redact $1
-    if [ ! -z ${_ANSIBLE_VERBOSITY:+x} ]; then
-        export ANSIBLE_VERBOSITY=$_ANSIBLE_VERBOSITY
-    fi
 }
 
 function encrypt_file {

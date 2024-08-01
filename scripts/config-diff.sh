@@ -70,9 +70,9 @@ function find_redacted_files {
             truncated_path="${file#"$directory/"}"
             vaulted_file="etc/kayobe/$truncated_path"
             if [[ "$vaulted_file" == *.yml ]]; then
-            KAYOBE_CONFIG_SECRET_PATHS+=("etc/kayobe/$truncated_path")
+                KAYOBE_CONFIG_SECRET_PATHS+=("etc/kayobe/$truncated_path")
             else
-            KAYOBE_CONFIG_VAULTED_FILES_PATHS+=("etc/kayobe/$truncated_path")
+                KAYOBE_CONFIG_VAULTED_FILES_PATHS+=("etc/kayobe/$truncated_path")
             fi
         fi
     done < <(find "$directory" -type f -print0)

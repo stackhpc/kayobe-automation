@@ -88,7 +88,7 @@ def dummy_facts_interfaces(context, host):
        interface = mapping['interface']
        interfaces.append(interface)
        ip = mapping['ip']
-       key = "ansible_%s" % interface
+       key = f"ansible_{interface.replace('-', '_')}"
        value = {"ipv4": {"address": ip}}
        result[key] = value
    result['interfaces'] = result.get('interfaces',[]) + interfaces

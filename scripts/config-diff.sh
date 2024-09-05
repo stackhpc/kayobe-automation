@@ -255,7 +255,7 @@ function main {
         local file="$1"
         local text="$2"
 
-        sed -i "s#/tmp/$text/\(.*\)#/tmp/\1#g" "$file"
+        sudo_if_available sed -i "s#/tmp/$text/\(.*\)#/tmp/\1#g" "$file"
     }
 
     function normalise_files_in_folder() {
@@ -263,7 +263,7 @@ function main {
         local text="$2"
 
         # Find all files in the folder and its subfolders and loop through them
-        find "$folder" -type f -print0 | while IFS= read -r -d '' file; do
+        sudo_if_available find "$folder" -type f -print0 | while IFS= read -r -d '' file; do
             normalise_file_text "$file" "$text"
         done
     }

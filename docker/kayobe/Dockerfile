@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.2
 
-FROM quay.io/centos/centos:stream8
+FROM quay.io/generic/rocky9
 MAINTAINER "Will Szumski" <will@stackhpc.com>
 
 ENV container docker
@@ -18,9 +18,9 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-RUN sed -i -e 's/^mirrorlist/#mirrorlist/g' \
-        -e 's/^#baseurl/baseurl/g' \
-        -e 's/mirror\.centos\.org/vault.centos.org/g' /etc/yum.repos.d/CentOS-Stream-*.repo
+# RUN sed -i -e 's/^mirrorlist/#mirrorlist/g' \
+#         -e 's/^#baseurl/baseurl/g' \
+#         -e 's/mirror\.centos\.org/vault.centos.org/g' /etc/yum.repos.d/CentOS-Stream-*.repo
 
 RUN dnf update -y && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv libffi-devel sudo which openssh-server \

@@ -23,11 +23,10 @@ ENV container docker
 #         -e 's/mirror\.centos\.org/vault.centos.org/g' /etc/yum.repos.d/CentOS-Stream-*.repo
 
 RUN dnf update -y && \
-    dnf install -y gcc git vim python3-pyyaml libffi-devel sudo which openssh-server diffstat diffutils && \
+    dnf install -y dnf-plugins-core gcc git vim python3-pyyaml libffi-devel sudo which openssh-server diffstat diffutils && \
     dnf clean all
 
-RUN dnf install dnf-plugins-core && \
-    dnf config-manager --set-enabled crb && \
+RUN dnf config-manager --set-enabled crb && \
     dnf install epel-release && \
     dnf clean all
 

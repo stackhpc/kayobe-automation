@@ -22,17 +22,17 @@ ENV container docker
 #         -e 's/^#baseurl/baseurl/g' \
 #         -e 's/mirror\.centos\.org/vault.centos.org/g' /etc/yum.repos.d/CentOS-Stream-*.repo
 
-RUN dnf install dnf-plugins-core \
+RUN dnf update -y && \
+    dnf install -y gcc git vim python3-pyyaml libffi-devel sudo which openssh-server \
+        diffstat diffutils && \
+    dnf clean all
+
+RUN dnf install dnf-plugins-core
     dnf config-manager --set-enabled crb \
     dnf install epel-release \
     dnf clean all
 
-RUN dnf update -y && \
-    dnf install -y gcc git vim python3-pyyaml python3-virtualenv libffi-devel sudo which openssh-server \
-        diffstat diffutils && \
-    dnf clean all
-
-RUN dnf install -y socat && dnf clean all
+RUN dnf install -y python3-virtualenv socat && dnf clean all
 
 ENV KAYOBE_USER=stack
 ARG KAYOBE_USER_UID=1000

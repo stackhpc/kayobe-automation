@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.2
 
-FROM quay.io/rockylinux/rockylinux:9
+FROM quay.io/rockylinux/rockylinux:9.2
 MAINTAINER "Will Szumski" <will@stackhpc.com>
 
 ENV container docker

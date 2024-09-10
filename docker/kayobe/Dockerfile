@@ -22,9 +22,10 @@ ENV container docker
 #         -e 's/^#baseurl/baseurl/g' \
 #         -e 's/mirror\.centos\.org/vault.centos.org/g' /etc/yum.repos.d/CentOS-Stream-*.repo
 
-RUN dnf install 'dnf-command(config-manager)' \
-    dnf config-manager --set-enabled epel \
-    dnf update -y && \
+RUN dnf install 'dnf-command(config-manager)' && \
+    dnf config-manager --set-enabled epel
+
+RUN dnf update -y && \
     dnf install -y gcc git vim python3-pyyaml python3-virtualenv libffi-devel sudo which openssh-server \
         diffstat diffutils && \
     dnf clean all

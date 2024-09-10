@@ -27,7 +27,7 @@ RUN dnf update -y && \
         diffstat diffutils && \
     dnf clean all
 
-RUN dnf install dnf-plugins-core
+RUN dnf install dnf-plugins-core \
     dnf config-manager --set-enabled crb \
     dnf install epel-release \
     dnf clean all

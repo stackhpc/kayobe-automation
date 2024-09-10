@@ -27,7 +27,7 @@ RUN dnf update -y && \
     dnf clean all
 
 RUN dnf config-manager --set-enabled crb && \
-    dnf install epel-release && \
+    dnf install -y epel-release && \
     dnf clean all
 
 RUN dnf install -y python3-virtualenv socat && dnf clean all

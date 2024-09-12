@@ -93,5 +93,5 @@ RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bi
 # Symlinking to /src would create a link within the empty directory
 RUN sudo rmdir /src || true
 
-ENV ANSIBLE_ROLES_PATH="/stack/.ansible/kayobe-automation-roles:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles"
-ENV ANSIBLE_COLLECTIONS_PATH="/stack/.ansible/kayobe-automation-collections:~/.ansible/collections:/usr/share/ansible/collections"
+ENV ANSIBLE_ROLES_PATH="/stack/.ansible/kayobe-automation-roles:/stack/kayobe-automation-env/src/kayobe/ansible/roles:~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles"
+ENV ANSIBLE_COLLECTIONS_PATH="/stack/.ansible/kayobe-automation-collections:/stack/kayobe-automation-env/src/kayobe/ansible/collections:~/.ansible/collections:/usr/share/ansible/collections"

@@ -130,7 +130,8 @@ function redact_config_dir {
     for item in "${KAYOBE_CONFIG_VAULTED_FILES_PATHS[@]}"; do
         # skip if file doesn't exist
         if [ -f "$1/src/kayobe-config/$item" ]; then
-            md5sum "$1/src/kayobe-config/$item" | cut -d " " -f 1 >"$1/src/kayobe-config/$item"
+            item_hash=$(md5sum "$1/src/kayobe-config/$item")
+            echo $item_hash | awk '{ print $1;}' >"$1/src/kayobe-config/$item"
         fi
     done
 }

@@ -290,7 +290,7 @@ function main {
         merge "$source_kayobe_config_dir" $1
         find_redacted_files "$source_kayobe_config_dir/etc/kayobe"
         create_kayobe_environment "$source_environment_path" "$source_kayobe_config_dir"
-        redact_config_dir "$source_environment_path" "$target_kayobe_config_dir"
+        redact_config_dir "$source_environment_path"
         encrypt_config_dir "$source_environment_path"
         generate_config "$source_environment_path" "$source_dir"
         normalise_files_in_folder "$source_dir" "source-kayobe-env"

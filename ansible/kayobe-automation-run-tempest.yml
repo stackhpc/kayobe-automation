@@ -139,8 +139,8 @@
            --env TEMPEST_CONF_OVERRIDES="$TEMPEST_CONF_OVERRIDES"
            --env TEMPEST_NO_PROXY_EXTRA
            --env RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES
-           --env HTTP_PROXY
-           --env HTTPS_PROXY
+           --env HTTP_PROXY="$TEMPEST_NO_PROXY"
+           --env HTTPS_PROXY="$TEMPEST_HTTPS_PROXY"
            --env NO_PROXY
            {% if tempest_load_list_path is defined -%}
            -v {{ load_list_path_remote }}:/home/rally/tempest-load-list:rw
@@ -165,9 +165,9 @@
           TEMPEST_OPENRC: "{{ lookup('env', 'TEMPEST_OPENRC') }}"
           TEMPEST_CONF_OVERRIDES: "{{ lookup('env', 'TEMPEST_CONF_OVERRIDES') }}"
           TEMPEST_NO_PROXY_EXTRA: "{{ lookup('env', 'TEMPEST_NO_PROXY_EXTRA') }}"
-          NO_PROXY: localhost,127.0.0.1,127.0.0.2,.srv.scp,.prim.scp,.mgmt.scp,.astrazeneca.net,astrazeneca.net,.s3.eu-west-1.amazonaws.com,10.96.79.253,10.96.76.23,10.96.78.11,semlscpadmin01,10.96.76.22
-          HTTP_PROXY: http://usprivatezen.astrazeneca.net:9480
-          HTTPS_PROXY: http://usprivatezen.astrazeneca.net:9480
+          TEMPEST_NO_PROXY: "{{ lookup('env', 'TEMPEST_NO_PROXY') }}"
+          TEMPEST_HTTP_PROXY: "{{ lookup('env', 'TEMPEST_HTTP_PROXY') }}"
+          TEMPEST_HTTPS_PROXY: "{{ lookup('env', 'TEMPEST_HTTPS_PROXY') }}"
           RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES: "{{ lookup('env', 'RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES') }}"
         no_log: false
         register: docker_result

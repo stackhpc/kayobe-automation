@@ -139,9 +139,15 @@
            --env TEMPEST_CONF_OVERRIDES="$TEMPEST_CONF_OVERRIDES"
            --env TEMPEST_NO_PROXY_EXTRA
            --env RALLY_CONF_ENABLE_CREATE_TEMPEST_RESOURCES
-           {% if lookup('env', 'TEMPEST_HTTP_PROXY') %}--env HTTP_PROXY="$TEMPEST_HTTP_PROXY"{% endif %}
-           {% if lookup('env', 'TEMPEST_HTTPS_PROXY') %}--env HTTPS_PROXY="$TEMPEST_HTTPS_PROXY"{% endif %}
-           {% if lookup('env', 'TEMPEST_NO_PROXY') %}--env NO_PROXY="$TEMPEST_NO_PROXY"{% endif %}
+           {% if lookup('env', 'TEMPEST_HTTP_PROXY') %}
+           --env HTTP_PROXY="$TEMPEST_HTTP_PROXY"
+           {% endif %}
+           {% if lookup('env', 'TEMPEST_HTTPS_PROXY') %}
+           --env HTTPS_PROXY="$TEMPEST_HTTPS_PROXY"
+           {% endif %}
+           {% if lookup('env', 'TEMPEST_NO_PROXY') %}
+           --env NO_PROXY="$TEMPEST_NO_PROXY"
+           {% endif %}
            {% if tempest_load_list_path is defined -%}
            -v {{ load_list_path_remote }}:/home/rally/tempest-load-list:rw
            {% endif -%}

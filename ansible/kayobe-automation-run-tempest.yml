@@ -7,7 +7,7 @@
     rally_image: 'stackhpc/docker-rally'
     rally_tag: v1.5.0
     rally_image_full: "{{ rally_docker_registry }}/{{ rally_image }}:{{ rally_tag }}"
-    rally_no_sensitive_log: true
+    rally_no_sensitive_log: false
     # This ensures you get the latest image if the image is updated
     # and the tag isn't e.g when using the latest tag.
     rally_force_pull: true

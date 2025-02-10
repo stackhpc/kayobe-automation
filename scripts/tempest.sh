@@ -89,6 +89,10 @@ function main {
         args+=("-e" "rally_docker_registry_password=$KAYOBE_AUTOMATION_RALLY_DOCKER_REGISTRY_PASSWORD")
     fi
 
+    if [ ! -z ${KAYOBE_AUTOMATION_RALLY_NO_SENSITIVE_LOG:+x} ]; then
+        args+=("-e" "rally_no_sensitive_log=$KAYOBE_AUTOMATION_RALLY_NO_SENSITIVE_LOG")
+    fi
+
     args+=("${@}")
 
     mkdir -p $HOME/tempest-artifacts || true

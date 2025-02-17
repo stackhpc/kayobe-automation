@@ -27,9 +27,16 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
+
+
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
+ARG USE_PYTHON_312="false"
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
+    if [ "$USE_PYTHON_312" ] ; then \
+        dnf -y install python3.12 && \
+        ln -sf /bin/python3.12 /bin/python3 && \
+        python3 -m ensurepip ; fi && \
     dnf install -y gcc git vim python3-pyyaml findutils\
         libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \

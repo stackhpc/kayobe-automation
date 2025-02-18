@@ -27,8 +27,6 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-
-
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
 ARG USE_PYTHON_312="false"
 RUN dnf install epel-release -y && \

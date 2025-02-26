@@ -31,7 +31,7 @@ ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
 ARG USE_PYTHON_312="false"
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
-    if [ "$USE_PYTHON_312" ] ; then \
+    if [ "$USE_PYTHON_312" = "true" ] ; then \
         dnf -y install python3.12 && \
         ln -sf /bin/python3.12 /bin/python3 && \
         python3 -m ensurepip ; fi && \

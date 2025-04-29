@@ -275,6 +275,7 @@ function main {
         local ANSIBLE_VAULT="$target_environment_path/venvs/kayobe/bin/ansible-vault"
         # Checkout the git reference provided as an argument to this script
         checkout "$target_kayobe_config_dir" $1
+        find_redacted_files "$target_environment_path/etc/kayobe"
         create_kayobe_environment "$target_environment_path" "$target_kayobe_config_dir"
         redact_config_dir "$target_environment_path"
         encrypt_config_dir "$target_environment_path"

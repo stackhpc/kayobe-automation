@@ -27,8 +27,8 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-RUN echo "$PROXY_CA" >> /etc/pki/ca-trust/source/anchors/ZscalerRootCertificate-2048-SHA256.pem && \
-    update-ca-trust
+COPY ZscalerRootCertificate-2048-SHA256.pem /etc/pki/ca-trust/source/anchors/ZscalerRootCertificate-2048-SHA256.pem
+RUN update-ca-trust
 
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
 ARG USE_PYTHON_312="false"

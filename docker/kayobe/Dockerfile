@@ -28,6 +28,11 @@ ENV container docker
 # CMD ["/usr/sbin/init"]
 
 RUN echo "sslverify=0" >> /etc/dnf/dnf.conf
+RUN cat >> /home/stack/.pip/pip.conf<< EOF
+[global]
+proxy = http://192.168.121.250:3127/
+HTTP_PROXY=http://192.168.121.250:3127/
+EOF
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
 ARG USE_PYTHON_312="false"
 RUN dnf install epel-release -y && \

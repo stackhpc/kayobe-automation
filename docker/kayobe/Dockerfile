@@ -27,6 +27,7 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
+RUN echo "sslverify=0" >> /etc/dnf/dnf.conf
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
 ARG USE_PYTHON_312="false"
 RUN dnf install epel-release -y && \

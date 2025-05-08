@@ -10,9 +10,9 @@ LABEL maintainer="Will Szumski will@stackhpc.com"
 # Unclear at this time if different environments will change
 # control host bootstrap.
 ARG KAYOBE_ENVIRONMENT=""
-ENV container docker
-
 ARG KAYOBE_DOCKER_SSH_CONFIG_PATH=".automation/docker/kayobe/ssh_config"
+
+ENV container docker
 # NOTE: systemd requires privileged container
 # RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \
 # systemd-tmpfiles-setup.service ] || rm -f $i; done); \

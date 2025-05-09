@@ -27,7 +27,7 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-COPY ZscalerRootCertificate-2048-SHA256.pem /etc/pki/ca-trust/source/anchors/ZscalerRootCertificate-2048-SHA256.pem
+COPY .automation/docker/kayobe/ZscalerRootCertificate-2048-SHA256.pem /etc/pki/ca-trust/source/anchors/ZscalerRootCertificate-2048-SHA256.pem
 RUN update-ca-trust extract
 
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
@@ -85,7 +85,7 @@ COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
 
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
-COPY ../../utils/kayobe-automation-activate ../../docker*/kayobe/bin/* /usr/local/bin/
+COPY .automation/utils/kayobe-automation-activate .automation.conf/docker*/kayobe/bin/* /usr/local/bin/
 
 # Control host bootsrap without leaving kayobe-config in the image
 RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \

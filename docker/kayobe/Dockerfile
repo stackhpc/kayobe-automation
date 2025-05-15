@@ -68,7 +68,7 @@ RUN echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 RUN echo export https_proxy=$https_proxy >> /etc/environment && \
   echo export http_proxy=$http_proxy >> /etc/environment && \
-  echo export PIP_CERT=/etc/pki/tls/certs/ca-bundle.trust.crt >> /etc/environment
+  echo export PIP_CERT=/etc/pki/ca-trust/source/anchors/ZscalerRootCertificate-2048-SHA256.pem >> /etc/environment
 RUN echo export https_proxy=$https_proxy >> /root/.bashrc && \
   echo export http_proxy=$http_proxy >> /root/.bashrc
 

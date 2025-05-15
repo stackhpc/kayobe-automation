@@ -67,7 +67,8 @@ RUN groupadd -g $KAYOBE_USER_GID -o stack &&  \
 RUN echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 RUN echo export https_proxy=$https_proxy >> /etc/environment && \
-  echo export http_proxy=$http_proxy >> /etc/environment
+  echo export http_proxy=$http_proxy >> /etc/environment && \
+  echo PIP_CERT=/etc/pki/tls/certs/ca-bundle.trust.crt >> /etc/environment
 RUN echo export https_proxy=$https_proxy >> /root/.bashrc && \
   echo export http_proxy=$http_proxy >> /root/.bashrc
 

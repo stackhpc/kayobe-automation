@@ -80,6 +80,9 @@ USER stack
 RUN echo export https_proxy=$https_proxy >> $HOME/.bashrc && \
   echo export http_proxy=$http_proxy >> $HOME/.bashrc
 
+RUN echo "[global]" >> $HOME/.pip/pip.conf && \
+  echo "proxy = $https_proxy" >> $HOME/.pip/pip.conf
+
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
 COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config

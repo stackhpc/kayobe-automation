@@ -3,6 +3,14 @@
 # NOTE: Currently supported images:
 # quay.io/rockylinux/rockylinux:8
 # rockylinux:9
+ENV PIP_CERT=/etc/pki/tls/certs/ca-bundle.trust.crt
+ENV HTTP_PROXY=http://192.168.121.250:3127
+ENV HTTPS_PROXY=http://192.168.121.250:3127
+ENV NO_PROXY=localhost,127.0.0.1,10.1.1.1,192.168.121.111,192.168.124.111,192.168.121.112,192.168.124.112,192.168.121.113,192.168.124.113,192.168.121.114,192.168.124.114,192.168.121.115,192.168.124.115,192.168.121.116,192.168.121.25,192.168.124.116,192.168.121.117,192.168.124.117,192.168.121.118,192.168.124.118,192.168.121.250,192.168.121.253,192.168.121.254,192.168.121.11,192.168.121.12,192.168.121.13,192.168.121.16,192.168.121.31,192.168.121.33,192.168.121.34,192.168.121.36,192.168.121.37,192.168.121.23,192.168.121.24,192.168.123.15,192.168.123.16,192.168.123.17,192.168.123.18,192.168.123.19,192.168.123.20,192.168.123.21,192.168.123.22,192.168.134.11,192.168.134.12,192.168.134.13,192.168.134.14,192.168.134.15,192.168.134.16,192.168.134.17,192.168.134.18,192.168.134.10,192.168.123.249,10.69.176.85,dashboard.pengu-cloud.cymru.nhs.uk,identity.pengu-cloud.cymru.nhs.uk,image.pengu-cloud.cymru.nhs.uk,compute.pengu-cloud.cymru.nhs.uk,vnc.pengu-cloud.cymru.nhs.uk,block-storage.pengu-cloud.cymru.nhs.uk,network.pengu-cloud.cymru.nhs.uk,key-manager.pengu-cloud.cymru.nhs.uk,placement.pengu-cloud.cymru.nhs.uk,opensearch-dashboards.pengu-cloud.cymru.nhs.uk,alertmanager.pengu-cloud.cymru.nhs.uk,grafana.pengu-cloud.cymru.nhs.uk,load-balancer.pengu-cloud.cymru.nhs.uk
+ENV http_proxy=http://192.168.121.250:3127
+ENV https_proxy=http://192.168.121.250:3127
+ENV no_proxy=localhost,127.0.0.1,10.1.1.1,192.168.121.111,192.168.124.111,192.168.121.112,192.168.124.112,192.168.121.113,192.168.124.113,192.168.121.114,192.168.124.114,192.168.121.115,192.168.124.115,192.168.121.116,192.168.121.25,192.168.124.116,192.168.121.117,192.168.124.117,192.168.121.118,192.168.124.118,192.168.121.250,192.168.121.253,192.168.121.254,192.168.121.11,192.168.121.12,192.168.121.13,192.168.121.16,192.168.121.31,192.168.121.33,192.168.121.34,192.168.121.36,192.168.121.37,192.168.121.23,192.168.121.24,192.168.123.15,192.168.123.16,192.168.123.17,192.168.123.18,192.168.123.19,192.168.123.20,192.168.123.21,192.168.123.22,192.168.134.11,192.168.134.12,192.168.134.13,192.168.134.14,192.168.134.15,192.168.134.16,192.168.134.17,192.168.134.18,192.168.134.10,192.168.123.249,10.69.176.85,dashboard.pengu-cloud.cymru.nhs.uk,identity.pengu-cloud.cymru.nhs.uk,image.pengu-cloud.cymru.nhs.uk,compute.pengu-cloud.cymru.nhs.uk,vnc.pengu-cloud.cymru.nhs.uk,block-storage.pengu-cloud.cymru.nhs.uk,network.pengu-cloud.cymru.nhs.uk,key-manager.pengu-cloud.cymru.nhs.uk,placement.pengu-cloud.cymru.nhs.uk,opensearch-dashboards.pengu-cloud.cymru.nhs.uk,alertmanager.pengu-cloud.cymru.nhs.uk,grafana.pengu-cloud.cymru.nhs.uk,load-balancer.pengu-cloud.cymru.nhs.uk
+
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:8"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
@@ -69,7 +77,7 @@ RUN echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 RUN echo export https_proxy=$https_proxy >> /etc/environment && \
     echo export http_proxy=$http_proxy >> /etc/environment && \
-    echo export PIP_CERT=/etc/pki/ca-trust/source/anchors/ZscalerRootCertificate-2048-SHA256.pem >> /etc/environment
+    echo export PIP_CERT=/etc/pki/tls/certs/ca-bundle.trust.crt >> /etc/environment
 RUN echo export https_proxy=$https_proxy >> /root/.bashrc && \
     echo export http_proxy=$http_proxy >> /root/.bashrc
 
@@ -86,12 +94,6 @@ RUN mkdir /stack/.pip && chmod 700 /stack/.pip
 
 RUN echo "[global]" >> /stack/.pip/pip.conf && \
     echo "proxy = $https_proxy" >> /stack/.pip/pip.conf
-
-#RUN echo "[global]" >> /etc/pip.conf && \
-#    echo "trusted-host = pypi.python.org" >> /etc/pip.conf && \
-#    echo "               pypi.org" >> /etc/pip.conf && \
-#    echo "               files.pythonhosted.org" >> /etc/pip.conf
-#    echo "               releases.openstack.org" >> /etc/pip.conf
 
 COPY $KAYOBE_DOCKER_PIP_CONFIG_PATH /etc/pip.conf
 

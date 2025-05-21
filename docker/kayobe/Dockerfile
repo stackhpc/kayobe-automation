@@ -11,6 +11,7 @@ LABEL maintainer="Will Szumski will@stackhpc.com"
 # control host bootstrap.
 ARG KAYOBE_ENVIRONMENT=""
 ARG KAYOBE_DOCKER_SSH_CONFIG_PATH=".automation/docker/kayobe/ssh_config"
+ARG KAYOBE_DOCKER_PIP_CONFIG_PATH=".automation/docker/kayobe/pip.conf"
 
 ENV container docker
 # NOTE: systemd requires privileged container
@@ -92,13 +93,7 @@ RUN echo "[global]" >> /stack/.pip/pip.conf && \
 #    echo "               files.pythonhosted.org" >> /etc/pip.conf
 #    echo "               releases.openstack.org" >> /etc/pip.conf
 
-RUN tee /etc/pip.conf > /dev/null <<EOF
-[global]
-trusted-host = pypi.python.org
-               pypi.org
-               files.pythonhosted.org
-               releases.openstack.org
-EOF
+COPY $KAYOBE_DOCKER_PIP_CONFIG_PATH /etc/pip.conf
 
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
 COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config

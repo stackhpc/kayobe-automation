@@ -34,8 +34,10 @@ RUN dnf install epel-release -y && \
     if [ "$USE_PYTHON_312" = "true" ] ; then \
         dnf -y install python3.12 && \
         ln -sf /bin/python3.12 /bin/python3 && \
-        python3 -m ensurepip ; fi && \
-    dnf install -y gcc git vim python3-pyyaml findutils\
+        python3 -m ensurepip && \
+        dnf -y install python3.12-pyyaml ; else \
+        dnf -y install python3-pyyaml ; fi && \
+    dnf install -y gcc git vim  findutils\
         libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion rsync \

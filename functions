@@ -679,6 +679,10 @@ function run_kayobe {
         kayobe_limit=(--limit "$KAYOBE_LIMIT")
     fi
 
+    # Prevent Kayobe from complaining that you are running from
+    # a repository that is not $KAYOBE_CONFIG_PATH
+    cd $KAYOBE_CONFIG_PATH
+
     kayobe "${@}" "${kayobe_limit[@]}" "${kayobe_tags[@]}" "${kolla_limit[@]}" "${kolla_tags[@]}" ${KAYOBE_EXTRA_ARGS}
 }
 

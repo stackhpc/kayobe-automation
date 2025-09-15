@@ -205,6 +205,9 @@ function generate_config {
 
     export KAYOBE_VAULT_PASSWORD=dummy-password
 
+    # Prevent Kayobe from complaining that you are running from
+    # a repository that is not $KAYOBE_CONFIG_PATH
+    cd $KAYOBE_CONFIG_PATH
     kayobe control host bootstrap
     log_info "Generating config to $output_dir"
     kayobe playbook run "$kayobe_ansible_path/kayobe-automation-prepare-config-diff.yml"

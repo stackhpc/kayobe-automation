@@ -21,7 +21,7 @@ Check out your kayobe-config repository and add the submodule.
     git commit -m "Add kayobe-automation"
 
 Where `0.0.1` is the tag of the release you want to use. The submodule will act
-like a separate git respository, so if you make any changes you will to change
+like a separate git repository, so if you make any changes you will need to change
 into `.automation` directory and commit those separately.
 
 You can change the branch at a later date with:
@@ -54,17 +54,17 @@ Use the examples in examples/\* for inspiration.
 
 `KAYOBE_AUTOMATION_CONFIG_PATH`: Path to kayobe-automation configuration directory. Defaults to `.automation.conf` in the kayobe-config root directory.
 
-`KAYOBE_AUTOMATION_SSH_PRIVATE_KEY`: Private key used to login to kayobe managed hosts
+`KAYOBE_AUTOMATION_SSH_PRIVATE_KEY`: Private key used to login to kayobe-managed hosts
 
-`KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME` Name of private key used to login to kayobe managed hosts. Defaults to id_rsa.
+`KAYOBE_AUTOMATION_SSH_PRIVATE_KEY_NAME` Name of private key used to login to kayobe-managed hosts. Defaults to `id_rsa`.
 
 `KAYOBE_AUTOMATION_LOG_LEVEL`: Verbosity of logging. Choose one of: `debug`, `info`, `warn`, `error`
 
 `KAYOBE_VAULT_PASSWORD`: Kayobe vault password.
 
-`KAYOBE_AUTOMATION_PR_AUTH_TOKEN`: (Required when `KAYOBE_AUTOMATION_PR_TYPE` is set) Auth token to use when submitting pull-requests. Typically you need to create a service account and generate a person access token.
+`KAYOBE_AUTOMATION_PR_AUTH_TOKEN`: (Required when `KAYOBE_AUTOMATION_PR_TYPE` is set) Auth token to use when submitting pull-requests. Typically you need to create a service account and generate a personal access token.
 
-`TEMPEST_OPENRC`: openrc file content to use when running tempest
+`TEMPEST_OPENRC`: OpenRC file content to use when running Tempest
 
 ## Pipeline scripts
 

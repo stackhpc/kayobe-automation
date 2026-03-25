@@ -36,9 +36,9 @@ RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml \
         libffi-devel sudo which openssh-server e2fsprogs \
-        diffstat diffutils debootstrap --nobest procps-ng gdisk util-linux \
+        diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion && \
-    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 10" /etc/os-release)" ] ; then \
+    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
     dnf install -y rsync python3 python3-pip ; else \
     dnf install -y python3-virtualenv rsync-3.1.3-14.el8 ; fi && \
     dnf clean all
@@ -78,6 +78,8 @@ RUN echo export https_proxy=$https_proxy >> $HOME/.bashrc && \
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
 COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
+RUN chmod 600 /etc/shadow
+RUN chmod 600 /etc/gshadow
 
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
 COPY .automation/utils/kayobe-automation-activate .automation.conf/docker*/kayobe/bin/* /usr/local/bin

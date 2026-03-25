@@ -38,7 +38,7 @@ RUN dnf install epel-release -y && \
         libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion && \
-    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
+    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 10" /etc/os-release)" ] ; then \
     dnf install -y rsync python3 python3-pip ; else \
     dnf install -y python3-virtualenv rsync-3.1.3-14.el8 ; fi && \
     dnf clean all

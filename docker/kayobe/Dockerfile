@@ -49,6 +49,9 @@ RUN dnf install epel-release -y && \
 RUN sed -i 's/# udev_rules = 1/udev_rules = 0/g' /etc/lvm/lvm.conf && \
     sed  -i 's/# udev_sync = 1/udev_sync = 0/g' /etc/lvm/lvm.conf
 
+# Due to broken shadow permissions in Noble set them manually
+RUN chmod 600 /etc/shadow && chmod 600 /etc/gshadow
+
 RUN python3 -m pip install docker six
 
 ENV KAYOBE_USER=stack
@@ -78,9 +81,6 @@ RUN echo export https_proxy=$https_proxy >> $HOME/.bashrc && \
 RUN mkdir /stack/.ssh && chmod 700 /stack/.ssh
 COPY --chown=stack:stack $KAYOBE_DOCKER_SSH_CONFIG_PATH /stack/.ssh/config
 RUN chmod 600 /stack/.ssh/config
-
-# Due to broken shadow permissions in Noble set them manually
-RUN chmod 600 /etc/shadow && chmod 600 /etc/gshadow
 
 # Copy custom binaries into image. The wildcard worksaround the check on the parent directory existing.
 COPY .automation/utils/kayobe-automation-activate .automation.conf/docker*/kayobe/bin/* /usr/local/bin

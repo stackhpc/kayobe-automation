@@ -36,7 +36,7 @@ RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml \
         libffi-devel sudo which openssh-server e2fsprogs \
-        diffstat diffutils debootstrap procps-ng gdisk util-linux \
+        diffstat diffutils debootstrap --nobest procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion && \
     if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 10" /etc/os-release)" ] ; then \
     dnf install -y rsync python3 python3-pip ; else \

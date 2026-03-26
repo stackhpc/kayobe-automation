@@ -35,7 +35,7 @@ ARG BASE_IMAGE="quay.io/centos/centos:stream8"
 RUN dnf install epel-release -y && \
 #    dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml \
-        libffi-devel sudo which openssh-server e2fsprogs shadow-utils \
+        libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion && \
     if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \

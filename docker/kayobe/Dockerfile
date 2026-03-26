@@ -48,9 +48,6 @@ RUN dnf install epel-release -y && \
 RUN sed -i 's/# udev_rules = 1/udev_rules = 0/g' /etc/lvm/lvm.conf && \
     sed  -i 's/# udev_sync = 1/udev_sync = 0/g' /etc/lvm/lvm.conf
 
-# Due to broken shadow permissions in Noble set them manually
-RUN ls -la /etc/shadow && chmod 600 /etc/shadow && ls -la /etc/gshadow && chmod 600 /etc/gshadow
-
 RUN python3 -m pip install docker six
 
 ENV KAYOBE_USER=stack

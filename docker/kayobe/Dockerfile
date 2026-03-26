@@ -33,7 +33,7 @@ ENV container docker
 # See: https://bugzilla.redhat.com/show_bug.cgi?id=2043753
 ARG BASE_IMAGE="quay.io/centos/centos:stream8"
 RUN dnf install epel-release -y && \
-    dnf update -y --nobest && \
+#    dnf update -y --nobest && \
     dnf install -y gcc git vim python3-pyyaml \
         libffi-devel sudo which openssh-server e2fsprogs shadow-utils \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \

@@ -22,6 +22,14 @@
     skip_list_path_remote: "{{ results_path_remote.path }}/tempest-skip-list"
     accounts_path_remote: "{{ results_path_remote.path }}/tempest-accounts"
   tasks:
+    # This playbook copies files to temporary directories.  They must be on the
+    # host rather than in the Kayobe container in order to be accessible by the
+    # docker-rally container.
+    - name: Assert that we are not using a local connection
+      assert:
+        that: ansible_connection != 'local'
+        fail_msg: This playbook is not compatible with the local connection plugin
+
     - block:
 
       - name: Create temporary results directory

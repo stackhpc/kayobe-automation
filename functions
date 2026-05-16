@@ -569,7 +569,7 @@ function install_venv {
     fi
     if [[ ! -f "${venv_path}/bin/activate" ]]; then
         echo "Creating virtual environment in ${venv_path}"
-        python3 -m venv "${venv_path}"
+        python3.11 -m venv "${venv_path}"
         # NOTE: Virtualenv's activate and deactivate scripts reference an
         # unbound variable.
         set +u

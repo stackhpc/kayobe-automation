@@ -3,7 +3,7 @@
 # NOTE: Currently supported images:
 # quay.io/rockylinux/rockylinux:8
 # quay.io/rockylinux/rockylinux:9
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9.4"
+ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9.3"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
 
@@ -27,11 +27,9 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9.4"
+ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9.3"
 ARG USE_PYTHON_312="true"
 RUN dnf install epel-release -y && \
-    dnf config-manager --save --setopt=*.releasever=9.4 && \
-    dnf update -y --nobest && \
     if [ "$USE_PYTHON_312" = "true" ] ; then \
         dnf -y install python3.12 && \
         ln -sf /bin/python3.12 /bin/python3 && \

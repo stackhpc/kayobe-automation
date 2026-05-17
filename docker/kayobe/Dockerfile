@@ -30,7 +30,8 @@ ENV container docker
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9.4"
 ARG USE_PYTHON_312="true"
 RUN dnf install epel-release -y && \
-    dnf --releasever=9.4 -y update --nobest && \
+    dnf config-manager --save --setopt=*.releasever=9.4 && \
+    dnf update -y --nobest && \
     if [ "$USE_PYTHON_312" = "true" ] ; then \
         dnf -y install python3.12 && \
         ln -sf /bin/python3.12 /bin/python3 && \

@@ -3,7 +3,7 @@
 # NOTE: Currently supported images:
 # quay.io/rockylinux/rockylinux:8
 # quay.io/rockylinux/rockylinux:9
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
+ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9.4"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
 

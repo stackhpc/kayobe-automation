@@ -28,7 +28,7 @@ ENV container docker
 # CMD ["/usr/sbin/init"]
 
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
-ARG USE_PYTHON_312="false"
+ARG USE_PYTHON_312="true"
 RUN dnf install epel-release -y && \
     dnf update -y --nobest && \
     if [ "$USE_PYTHON_312" = "true" ] ; then \

@@ -44,6 +44,7 @@ RUN dnf install epel-release -y && \
     if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
     dnf install -y python3 python3-pip iproute ; else \
     dnf install -y python3-virtualenv ; fi && \
+    ln -sf /bin/python3.12 /bin/python3 && \
     dnf clean all
 
 # Configure lvm not to use udev for device discovery. This allows you to use

@@ -30,6 +30,9 @@ ENV container docker
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9.4"
 ARG USE_PYTHON_312="true"
 RUN dnf install epel-release -y && \
+    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
+        dnf install -y python3 python3-pip iproute ; else \
+        dnf install -y python3-virtualenv ; fi && \
     if [ "$USE_PYTHON_312" = "true" ] ; then \
         dnf -y install python3.12 && \
         ln -sf /bin/python3.12 /bin/python3 && \
@@ -41,11 +44,7 @@ RUN dnf install epel-release -y && \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion rsync \
         python3-libselinux jq && \
-    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
-    dnf install -y python3 python3-pip iproute ; else \
-    dnf install -y python3-virtualenv ; fi && \
-    ln -sf /bin/python3.12 /bin/python3 && \
-    dnf clean all
+        dnf clean all
 
 # Configure lvm not to use udev for device discovery. This allows you to use
 # lvm in docker.

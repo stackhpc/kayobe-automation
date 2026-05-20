@@ -3,7 +3,7 @@
 # NOTE: Currently supported images:
 # quay.io/rockylinux/rockylinux:8
 # quay.io/rockylinux/rockylinux:9
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
+ARG BASE_IMAGE="docker.io/library/ubuntu:noble"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
 
@@ -27,25 +27,32 @@ ENV container docker
 
 # CMD ["/usr/sbin/init"]
 
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
+ARG BASE_IMAGE="docker.io/library/ubuntu:noble"
 ARG USE_PYTHON_312="false"
-RUN dnf install epel-release -y && \
-    dnf update -y --nobest && \
-    if [ "$USE_PYTHON_312" = "true" ] ; then \
-        dnf -y install python3.12 && \
-        ln -sf /bin/python3.12 /bin/python3 && \
-        python3 -m ensurepip && \
-        dnf -y install python3.12-pyyaml ; else \
-        dnf -y install python3-pyyaml ; fi && \
-    dnf install -y gcc git vim  findutils\
-        libffi-devel sudo which openssh-server e2fsprogs \
-        diffstat diffutils debootstrap procps-ng gdisk util-linux \
-        dosfstools lvm2 kpartx systemd-udev bash-completion rsync \
-        python3-libselinux jq && \
-    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
-    dnf install -y python3 python3-pip iproute ; else \
-    dnf install -y python3-virtualenv ; fi && \
-    dnf clean all
+RUN function is_dnf {
+    test -e /usr/bin/dnf
+    }
+    if is_dnf; then
+        dnf install epel-release -y && \
+        dnf update -y --nobest && \
+        if [ "$USE_PYTHON_312" = "true" ] ; then \
+            dnf -y install python3.12 && \
+            ln -sf /bin/python3.12 /bin/python3 && \
+            python3 -m ensurepip && \
+            dnf -y install python3.12-pyyaml ; else \
+            dnf -y install python3-pyyaml ; fi && \
+            dnf install -y gcc git vim  findutils\
+            libffi-devel sudo which openssh-server e2fsprogs \
+            diffstat diffutils debootstrap procps-ng gdisk util-linux \
+            dosfstools lvm2 kpartx systemd-udev bash-completion rsync \
+            python3-libselinux jq && \
+        if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
+        dnf install -y python3 python3-pip iproute ; else \
+        dnf install -y python3-virtualenv ; fi && \
+        dnf clean all
+    else
+        apt install -y python3 python3-pip iproute2 python3-venv
+    fi
 
 # Configure lvm not to use udev for device discovery. This allows you to use
 # lvm in docker.

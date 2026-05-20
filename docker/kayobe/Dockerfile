@@ -39,7 +39,7 @@ RUN dnf install epel-release -y && \
         python3 -m ensurepip && \
         dnf -y install python3.12-pyyaml ; else \
         dnf -y install python3-pyyaml ; fi && \
-    dnf install -y gcc git vim  findutils\
+    dnf install -y git vim  findutils\
         libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion rsync \

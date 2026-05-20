@@ -26,6 +26,9 @@ RUN apt-get update && \
         python3-apt iproute2 && \
     apt-get clean
 
+# Create the privilege separation directory required by Ubuntu's sshd
+RUN mkdir -p /run/sshd && chmod 0755 /run/sshd
+
 # Configure lvm not to use udev for device discovery. This allows you to use
 # lvm in docker.
 # https://serverfault.com/questions/802766/calling-lvcreate-from-inside-the-container-hangs

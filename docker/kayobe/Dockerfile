@@ -28,7 +28,9 @@ ENV container docker
 # CMD ["/usr/sbin/init"]
 
 ARG BASE_IMAGE="docker.io/library/ubuntu:noble"
-RUN apt install -y python3 python3-pip iproute2 python3-venv lvm2 debootstrap gdisk
+RUN apt update && \
+    apt install -y python3 python3-pip iproute2 python3-venv lvm2 debootstrap gdisk && \
+    apt clean
 
 
 # Configure lvm not to use udev for device discovery. This allows you to use

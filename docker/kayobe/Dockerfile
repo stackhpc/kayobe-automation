@@ -23,7 +23,7 @@ RUN apt-get update && \
         util-linux dosfstools lvm2 kpartx udev \
         bash-completion rsync jq python3 \
         python3-pip python3-yaml python3-venv \
-        python3-apt iproute2 && \
+        python3-apt libnss-myhostname iproute2 && \
     apt-get clean
 
 # Create the privilege separation directory required by Ubuntu's sshd

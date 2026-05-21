@@ -30,7 +30,7 @@ function pre_config_init {
 }
 
 function post_config_init {
-    find_redacted_files "/src/etc/kayobe"
+    find_redacted_files "$KAYOBE_CONFIG_SOURCE_PATH/etc/kayobe"
 
     # Some values are currently determined dynamically from container versions
     export KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY="${KAYOBE_AUTOMATION_CONFIG_DIFF_FLUENTD_BINARY:-td-agent}"
@@ -279,6 +279,7 @@ function main {
         # Checkout the git reference provided as an argument to this script
         checkout "$target_kayobe_config_dir" $1
         create_kayobe_environment "$target_environment_path" "$target_kayobe_config_dir"
+        find_redacted_files "$target_kayobe_config_dir/etc/kayobe"
         redact_config_dir "$target_environment_path"
         encrypt_config_dir "$target_environment_path"
         generate_config "$target_environment_path" "$target_dir"

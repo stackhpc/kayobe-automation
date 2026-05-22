@@ -34,7 +34,7 @@ ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
-ARG USE_PYTHON_312="false"
+ARG USE_PYTHON_312="true"
 RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
         dnf install epel-release -y && \
         dnf update -y --nobest && \

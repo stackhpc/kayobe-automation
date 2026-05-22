@@ -50,8 +50,7 @@ RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
             libffi-devel sudo which openssh-server e2fsprogs \
             diffstat diffutils debootstrap procps-ng gdisk util-linux \
             dosfstools lvm2 kpartx systemd-udev bash-completion rsync \
-            python3-libselinux jq python3 python3-pip iproute \
-            python3-virtualenv && \
+            python3-libselinux jq python3 python3-pip iproute && \
         dnf clean all ; \
     fi
 RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu 24.04.4 LTS" /etc/os-release)" ] ; then \

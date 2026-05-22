@@ -37,33 +37,35 @@ ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
 ARG USE_PYTHON_312="false"
 RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
         dnf install epel-release -y && \
-        dnf update -y --nobest ; fi
-    if [ "$USE_PYTHON_312" = "true" && "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)"] ; then \
-        dnf -y install python3.12 && \
-        ln -sf /bin/python3.12 /bin/python3 && \
-        python3 -m ensurepip && \
-        dnf -y install python3.12-pyyaml ; else \
-        dnf -y install python3-pyyaml ; fi && \
+        dnf update -y --nobest && \
+        if [ "$USE_PYTHON_312" = "true" ] ; then \
+            dnf -y install python3.12 && \
+            ln -sf /bin/python3.12 /bin/python3 && \
+            python3 -m ensurepip && \
+            dnf -y install python3.12-pyyaml ; \
+        else \
+            dnf -y install python3-pyyaml ; \
+        fi && \
         dnf install -y gcc git vim findutils \
-        libffi-devel sudo which openssh-server e2fsprogs \
-        diffstat diffutils debootstrap procps-ng gdisk util-linux \
-        dosfstools lvm2 kpartx systemd-udev bash-completion rsync \
-        python3-libselinux jq ; fi \
-    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
-        dnf install -y python3 python3-pip iproute ; else \
-        dnf install -y python3-virtualenv ; fi && \
-        dnf clean all
+            libffi-devel sudo which openssh-server e2fsprogs \
+            diffstat diffutils debootstrap procps-ng gdisk util-linux \
+            dosfstools lvm2 kpartx systemd-udev bash-completion rsync \
+            python3-libselinux jq python3 python3-pip iproute \
+            python3-virtualenv && \
+        dnf clean all ; \
+    fi
 RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu 24.04.4 LTS" /etc/os-release)" ] ; then \
         apt-get update && \
         apt-get install -y --no-install-recommends \
-        gcc git vim findutils libffi-dev sudo \
-        which openssh-server e2fsprogs diffstat \
-        diffutils debootstrap procps gdisk \
-        util-linux dosfstools lvm2 kpartx udev \
-        bash-completion rsync jq python3 \
-        python3-pip python3-yaml python3-venv \
-        python3-apt libnss-myhostname iproute2 ; fi && \
-    apt-get clean
+            gcc git vim findutils libffi-dev sudo \
+            which openssh-server e2fsprogs diffstat \
+            diffutils debootstrap procps gdisk \
+            util-linux dosfstools lvm2 kpartx udev \
+            bash-completion rsync jq python3 \
+            python3-pip python3-yaml python3-venv \
+            python3-apt libnss-myhostname iproute2 && \
+        apt-get clean ; \
+    fi
 
 # Create the privilege separation directory required by Ubuntu's sshd
 RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu 24.04.4 LTS" /etc/os-release)" ] ; then \

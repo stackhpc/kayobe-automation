@@ -37,7 +37,7 @@ ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
 ARG USE_PYTHON_312="false"
 RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
         dnf install epel-release -y && \
-        dnf update -y --nobest ; fi && \
+        dnf update -y --nobest ; fi
     if [ "$USE_PYTHON_312" = "true" && "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)"] ; then \
         dnf -y install python3.12 && \
         ln -sf /bin/python3.12 /bin/python3 && \
@@ -48,7 +48,7 @@ RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
         libffi-devel sudo which openssh-server e2fsprogs \
         diffstat diffutils debootstrap procps-ng gdisk util-linux \
         dosfstools lvm2 kpartx systemd-udev bash-completion rsync \
-        python3-libselinux jq ; fi && \
+        python3-libselinux jq ; fi
     if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
         dnf install -y python3 python3-pip iproute ; else \
         dnf install -y python3-virtualenv ; fi && \

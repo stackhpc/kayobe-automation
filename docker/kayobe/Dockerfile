@@ -5,8 +5,8 @@
 # quay.io/rockylinux/rockylinux:9
 # docker.io/library/ubuntu:noble
 
-# ARG BASE_IMAGE="ubuntu:noble"
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
+ARG BASE_IMAGE="ubuntu:noble"
+# ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
 
@@ -34,7 +34,7 @@ ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
-ARG USE_PYTHON_312="true"
+ARG USE_PYTHON_312="false"
 RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
         dnf install epel-release -y && \
         dnf update -y --nobest && \

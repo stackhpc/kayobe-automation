@@ -1,7 +1,6 @@
 # syntax=docker/dockerfile:1.2
 
 # NOTE: Currently supported images:
-# quay.io/rockylinux/rockylinux:8
 # quay.io/rockylinux/rockylinux:9
 # docker.io/library/ubuntu:noble
 

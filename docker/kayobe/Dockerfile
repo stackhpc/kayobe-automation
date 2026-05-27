@@ -5,8 +5,8 @@
 # quay.io/rockylinux/rockylinux:9
 # docker.io/library/ubuntu:noble
 
-ARG BASE_IMAGE="ubuntu:noble"
-# ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
+# ARG BASE_IMAGE="ubuntu:noble"
+ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
 FROM ${BASE_IMAGE}
 LABEL maintainer="Will Szumski will@stackhpc.com"
 

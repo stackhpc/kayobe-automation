@@ -35,7 +35,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
 ARG USE_PYTHON_312="false"
-RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
+RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
         dnf install epel-release -y && \
         dnf update -y --nobest && \
         if [ "$USE_PYTHON_312" = "true" ] ; then \
@@ -86,14 +86,14 @@ ARG KAYOBE_USER_UID=1000
 ARG KAYOBE_USER_GID=1000
 
 RUN groupadd -g $KAYOBE_USER_GID -o stack &&  \
-    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
+    if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
         useradd -u $KAYOBE_USER_UID -g $KAYOBE_USER_GID \
         -G wheel -m -d /stack \
         -o -s /bin/bash stack ; else \
         useradd -u $KAYOBE_USER_UID -g $KAYOBE_USER_GID \
         -G sudo -m -d /stack \
         -o -s /bin/bash stack ; fi
-RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux 9" /etc/os-release)" ] ; then \
+RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
     echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers ; else \
     echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers ; fi
 

@@ -52,7 +52,7 @@ RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
             python3-libselinux jq python3 python3-pip iproute && \
         dnf clean all ; \
     fi
-RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu 24.04.4 LTS" /etc/os-release)" ] ; then \
+RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu" /etc/os-release)" ] ; then \
         apt-get update && \
         apt-get install -y --no-install-recommends \
             gcc git vim findutils libffi-dev sudo \
@@ -66,7 +66,7 @@ RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu 24.04.4 LTS" /etc/os-release)" ] ; then 
     fi
 
 # Create the privilege separation directory required by Ubuntu's sshd
-RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu 24.04.4 LTS" /etc/os-release)" ] ; then \
+RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu" /etc/os-release)" ] ; then \
     mkdir -p /run/sshd && chmod 0755 /run/sshd ; fi
 
 # Configure lvm not to use udev for device discovery. This allows you to use

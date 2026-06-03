@@ -2,6 +2,7 @@
 
 # NOTE: Currently supported images:
 # quay.io/rockylinux/rockylinux:9
+# quay.io/rockylinux/rockylinux:10
 # docker.io/library/ubuntu:noble
 
 # ARG BASE_IMAGE="ubuntu:noble"
@@ -32,10 +33,10 @@ ENV container docker
 # Suppress interactive prompts during build
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG BASE_IMAGE="quay.io/rockylinux/rockylinux:9"
 ARG USE_PYTHON_312="false"
 RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
         dnf install epel-release -y && \
+        dnf config-manager --enable crb && \
         dnf update -y --nobest && \
         if [ "$USE_PYTHON_312" = "true" ] ; then \
             dnf -y install python3.12 && \

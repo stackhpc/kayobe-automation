@@ -9,6 +9,7 @@ source "${PARENT}/../functions"
 
 function main {
     kayobe_init
+    export KAYOBE_SKIP_TAGS="${KAYOBE_SKIP_TAGS:+${KAYOBE_SKIP_TAGS},}kayobe-generate-config"
     push_arg=""
     # Validation in kayobe_init guarentees we can use numeric comparison.
     if [ "${KAYOBE_AUTOMATION_PUSH_IMAGE}" -ne 0 ]; then

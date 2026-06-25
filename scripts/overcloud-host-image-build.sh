@@ -9,6 +9,7 @@ source "${PARENT}/../functions"
 
 function main {
     kayobe_init
+    export KAYOBE_SKIP_TAGS="${KAYOBE_SKIP_TAGS:+${KAYOBE_SKIP_TAGS},}kayobe-generate-config"
     run_kayobe overcloud host image build "${@}"
     pull_request "${KAYOBE_AUTOMATION_CONTEXT_ENV_PATH}/src/kayobe-config"
 }

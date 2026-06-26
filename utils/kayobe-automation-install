@@ -7,6 +7,11 @@ PARENT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${PARENT}/../functions"
 
+function post_config_init {
+	# Do not generate kolla config in Docker build
+	export KAYOBE_INSTALL_ONLY="${KAYOBE_INSTALL_ONLY=-True}"
+}
+
 function main {
 	kayobe_install
 }

@@ -34,6 +34,8 @@ ENV container docker
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG USE_PYTHON_312="false"
+RUN --mount=type=secret,id=zsc_ca,target=/etc/pki/ca-trust/source/anchors/ca-bundle.crt \
+    update-ca-trust extract
 RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
         dnf install epel-release -y && \
         dnf config-manager --enable crb && \

@@ -50,7 +50,7 @@ RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
             libffi-devel sudo which openssh-server e2fsprogs \
             diffstat diffutils debootstrap procps-ng gdisk util-linux \
             dosfstools lvm2 kpartx systemd-udev bash-completion rsync \
-            python3-libselinux jq python3 python3-pip iproute && \
+            python3-libselinux jq python3 python3-pip iproute curl && \
         dnf clean all ; \
     fi
 RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu" /etc/os-release)" ] ; then \
@@ -62,7 +62,7 @@ RUN if [ "$(grep "^PRETTY_NAME=\"Ubuntu" /etc/os-release)" ] ; then \
             util-linux dosfstools lvm2 kpartx udev \
             bash-completion rsync jq python3 \
             python3-pip python3-yaml python3-venv \
-            python3-apt libnss-myhostname iproute2 && \
+            python3-apt libnss-myhostname iproute2 curl && \
         apt-get clean ; \
     fi
 

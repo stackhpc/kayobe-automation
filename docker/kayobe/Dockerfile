@@ -79,9 +79,9 @@ RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bi
     bash /tmp/src/.automation/utils/kayobe-automation-install && \
     (rm -f /stack/.ssh/{id_rsa,id_rsa.pub} || true) && \
     mkdir -p /stack/.ansible && \
-    (cp -rfp /stack/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible/roles /stack/.ansible/kayobe-automation-roles || true) && \
-    (cp -rfp /stack/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible/collections /stack/.ansible/kayobe-automation-collections || true) && \
-    rm -rf /stack/kayobe-automation-env/src/kayobe-config
+    (cp -rfp /home/ubuntu/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible/roles /stack/.ansible/kayobe-automation-roles || true) && \
+    (cp -rfp /home/ubuntu/kayobe-automation-env/src/kayobe-config/etc/kayobe/ansible/collections /stack/.ansible/kayobe-automation-collections || true) && \
+    rm -rf /home/ubuntu/kayobe-automation-env/src/kayobe-config
 
 # Symlinking to /src would create a link within the empty directory
 RUN sudo rmdir /src || true

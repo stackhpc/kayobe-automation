@@ -303,7 +303,16 @@ function main {
 
     generate_target_config $1 >/dev/null 2>&1 &
     generate_source_config $1 &
+
+    wait -n < <(jobs -p)
+    if [[ "$?" -gt 0 ]]; then
+        exit $?
+    fi
+
     wait < <(jobs -p)
+    if [[ "$?" -gt 0 ]]; then
+        exit $?
+    fi
 
     # diff gives non-zero exit status if there is a difference
     if sudo_if_available diff -Nur $target_dir $source_dir >/tmp/kayobe-config-diff; then

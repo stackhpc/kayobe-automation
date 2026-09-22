@@ -4,9 +4,29 @@ declare -A virtual_environments=(
 )
 
 declare -A config_directories=(
-  ["kayobe"]="$HOME/src/kayobe-config"
+  ["kayobe"]="$HOME/kayobe-config"
   ["openstack"]="$HOME/src/openstack-config"
 )
+
+function build_kayobe_image() {
+  # Build a Kayobe container image.
+
+  # Set base image for kayobe container. Use rocky 9 by default
+  export BASE_IMAGE=rockylinux:9
+  export USE_PYTHON_312=true
+
+  if [[ "$(sudo docker image ls)" == *"kayobe"* ]]; then
+    echo "Image already exists skipping docker build"
+  else
+    sudo DOCKER_BUILDKIT=1 docker build \
+      --network host \
+      --build-arg BASE_IMAGE=$BASE_IMAGE \
+      --build-arg USE_PYTHON_312=$USE_PYTHON_312 \
+      --file ${config_directories[kayobe]}/.automation/docker/kayobe/Dockerfile \
+      --tag kayobe:latest \
+      ${config_directories[kayobe]}
+  fi
+}
 
 sct_dir="$HOME/sct-results"
 
@@ -25,6 +45,8 @@ if [[ -d $sct_dir ]]; then
     echo "Moving to $sct_backup"
     mv $sct_dir $sct_backup
 fi
+
+mkdir $sct_dir
 
 sudo chmod 0777 $sct_dir 
 

@@ -1,4 +1,4 @@
-declare -A directories=(
+declare -A config_directories=(
   ["kayobe"]="$HOME/kayobe-config"
 )
 

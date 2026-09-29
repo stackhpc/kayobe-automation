@@ -1,3 +1,5 @@
+#!/bin/bash
+
 declare -A config_directories=(
   ["kayobe"]="$HOME/kayobe-config"
 )

@@ -1,33 +1,33 @@
 #!/bin/bash
 
 declare -A config_directories=(
-  ["kayobe"]="$HOME/kayobe-config"
+    ["kayobe"]="$HOME/kayobe-config"
 )
 
 function build_kayobe_image() {
-  # Build a Kayobe container image.
+    # Build a Kayobe container image.
 
-  # Set base image for kayobe container. Use rocky 9 by default
-  export BASE_IMAGE=rockylinux:9
-  export USE_PYTHON_312=true
+    # Set base image for kayobe container. Use rocky 9 by default
+    export BASE_IMAGE=rockylinux:9
+    export USE_PYTHON_312=true
 
-  if [[ "$(sudo docker image ls)" == *"kayobe"* ]]; then
-    echo "Image already exists skipping docker build"
-  else
-    sudo DOCKER_BUILDKIT=1 docker build \
-      --network host \
-      --build-arg BASE_IMAGE=$BASE_IMAGE \
-      --build-arg USE_PYTHON_312=$USE_PYTHON_312 \
-      --file ${config_directories[kayobe]}/.automation/docker/kayobe/Dockerfile \
-      --tag kayobe:latest \
-      ${config_directories[kayobe]}
-  fi
+    if [[ "$(sudo docker image ls)" == *"kayobe"* ]]; then
+        echo "Image already exists skipping docker build"
+    else
+        sudo DOCKER_BUILDKIT=1 docker build \
+            --network host \
+            --build-arg BASE_IMAGE=$BASE_IMAGE \
+            --build-arg USE_PYTHON_312=$USE_PYTHON_312 \
+            --file ${config_directories[kayobe]}/.automation/docker/kayobe/Dockerfile \
+            --tag kayobe:latest \
+            ${config_directories[kayobe]}
+    fi
 }
 
-function activate_kayobe_env () {
-  set +u
-  source "${config_directories[kayobe]}/kayobe-env" --environment ci-multinode
-  set -u
+function activate_kayobe_env() {
+    set +u
+    source "${config_directories[kayobe]}/kayobe-env" --environment ci-multinode
+    set -u
 }
 
 function run_sct() {
@@ -88,7 +88,7 @@ function run_sct() {
         return 1
     fi
 
-    if [[ $(wc -l < $sct_dir/failed-tests) -ne 0 ]]; then
+    if [[ $(wc -l <$sct_dir/failed-tests) -ne 0 ]]; then
         echo "Some SCT tests failed"
         return 1
     fi

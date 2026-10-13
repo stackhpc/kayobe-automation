@@ -119,7 +119,7 @@ RUN chmod 600 /stack/.ssh/config
 COPY .automation/utils/kayobe-automation-activate .automation.conf/docker*/kayobe/bin/* /usr/local/bin/
 
 # Control host bootstrap without leaving kayobe-config in the image
-RUN --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \
+RUN --seccurity=insecure --mount=type=ssh,uid=1000 --mount=type=tmpfs,target=/tmp/src --mount=type=bind,source=.,target=/src sudo cp -rfp /src /tmp/ && \
     sudo chown -Rf stack:stack /tmp/src && \
     # Strip the secrets so that we don't need to pass in a vault-password
     grep -lR "\$ANSIBLE_VAULT" /tmp/src | xargs rm -f && \

@@ -730,6 +730,12 @@ function pull_request {
 }
 
 function kayobe_install {
+    if [[ -n "${KAYOBE_AUTOMATION_PYPI_CACHE_URL:-}" ]]; then
+        local pypi_host=${KAYOBE_AUTOMATION_PYPI_CACHE_URL#*://}
+        pypi_host=${pypi_host%%/*}
+        export PIP_INDEX_URL="$KAYOBE_AUTOMATION_PYPI_CACHE_URL"
+        export PIP_TRUSTED_HOST="${pypi_host%%:*}"
+    fi
     call_with_hooks config_init
     call_with_hooks validate
     call_with_hooks install_dependencies

@@ -97,6 +97,13 @@ RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
     echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers ; else \
     echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers ; fi
 
+# Rocky ships /etc/shadow as mode 0000, so root needs CAP_DAC_OVERRIDE to read
+# it. Ubuntu 24.04 hosts confine unix_chkpwd with an AppArmor profile that
+# denies that capability, which breaks sudo in this container. Giving root the
+# owner read bit avoids needing the capability at all.
+RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
+    chmod 0400 /etc/shadow ; fi
+
 RUN echo export https_proxy=$https_proxy >> /etc/environment && \
     echo export http_proxy=$http_proxy >> /etc/environment
 RUN echo export https_proxy=$https_proxy >> /root/.bashrc && \

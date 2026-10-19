@@ -301,9 +301,11 @@ function main {
         normalise_files_in_folder "$source_dir" "source-kayobe-env"
     }
 
-    generate_target_config $1 >/dev/null 2>&1 &
-    generate_source_config $1 &
-    wait < <(jobs -p)
+    generate_target_config $1
+    # generate_source_config $1 &
+    # wait < <(jobs -p)
+
+    exit 1
 
     # diff gives non-zero exit status if there is a difference
     if sudo_if_available diff -Nur $target_dir $source_dir >/tmp/kayobe-config-diff; then

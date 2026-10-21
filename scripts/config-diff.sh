@@ -211,10 +211,10 @@ function generate_config {
     kayobe control host bootstrap
     log_info "Generating config to $output_dir"
     kayobe playbook run "$kayobe_ansible_path/kayobe-automation-prepare-config-diff.yml"
-    kolla_ansible_cfg=$env_path/src/kayobe-config/etc/kayobe/kolla/ansible.cfg
-    crudini --set $kolla_ansible_cfg defaults gathering smart
-    crudini --set $kolla_ansible_cfg defaults fact_caching jsonfile
-    crudini --set $kolla_ansible_cfg defaults fact_caching_connection $env_path/src/kayobe-config/kayobe-automation-config-diff-kolla-facts
+    # kolla_ansible_cfg=$env_path/src/kayobe-config/etc/kayobe/kolla/ansible.cfg
+    # crudini --set $kolla_ansible_cfg defaults gathering smart
+    # crudini --set $kolla_ansible_cfg defaults fact_caching jsonfile
+    # crudini --set $kolla_ansible_cfg defaults fact_caching_connection $env_path/src/kayobe-config/kayobe-automation-config-diff-kolla-facts
 
     declare -a kolla_limit
     if [ ! -z ${KOLLA_LIMIT:+x} ]; then

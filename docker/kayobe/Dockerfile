@@ -18,10 +18,12 @@ ARG KAYOBE_DOCKER_SSH_CONFIG_PATH=".automation/docker/kayobe/ssh_config"
 # Define ARG after FROM to indicate values coming from build arguments are part of the build stage.
 ARG http_proxy
 ARG https_proxy
+ARG no_proxy
 
 # Create the environment variables and assign the values from the build arguments.
 ENV http_proxy=$http_proxy \
-    https_proxy=$https_proxy
+    https_proxy=$https_proxy \
+    no_proxy=$no_proxy
 
 ENV container docker
 # NOTE: systemd requires privileged container
@@ -107,9 +109,11 @@ RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
     echo "%sudo ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers ; fi
 
 RUN echo export https_proxy=$https_proxy >> /etc/environment && \
-    echo export http_proxy=$http_proxy >> /etc/environment
+    echo export http_proxy=$http_proxy >> /etc/environment && \
+    echo export no_proxy=$no_proxy >> /etc/environment
 RUN echo export https_proxy=$https_proxy >> /root/.bashrc && \
-    echo export http_proxy=$http_proxy >> /root/.bashrc
+    echo export http_proxy=$http_proxy >> /root/.bashrc && \
+    echo export no_proxy=$no_proxy >> /root/.bashrc
 
 RUN python3 -m venv /opt/crudini && /opt/crudini/bin/pip install crudini===0.9.3 && \
     ln -s /opt/crudini/bin/crudini /usr/bin/crudini

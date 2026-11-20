@@ -15,6 +15,14 @@ LABEL maintainer="Will Szumski will@stackhpc.com"
 ARG KAYOBE_ENVIRONMENT=""
 ARG KAYOBE_DOCKER_SSH_CONFIG_PATH=".automation/docker/kayobe/ssh_config"
 
+# Define ARG after FROM to indicate values coming from build arguments are part of the build stage.
+ARG http_proxy
+ARG https_proxy
+
+# Create the environment variables and assign the values from the build arguments.
+ENV http_proxy=$http_proxy \
+    https_proxy=$https_proxy
+
 ENV container docker
 # NOTE: systemd requires privileged container
 # RUN (cd /lib/systemd/system/sysinit.target.wants/; for i in *; do [ $i == \

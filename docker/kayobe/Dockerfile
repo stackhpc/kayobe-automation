@@ -45,6 +45,7 @@ ARG USE_PYTHON_312="false"
 RUN if [ "$(grep "^PRETTY_NAME=\"Rocky Linux" /etc/os-release)" ] ; then \
         dnf install epel-release -y && \
         dnf config-manager --enable crb && \
+        (grep ^proxy= /etc/dnf/dnf.conf || echo proxy=$http_proxy >> /etc/dnf/dnf.conf) && \
         dnf update -y --nobest && \
         if [ "$USE_PYTHON_312" = "true" ] ; then \
             dnf -y install python3.12 && \
